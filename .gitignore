@@ -1,0 +1,35 @@
+# Archivos generados por LaTeX que no sean .pdf ni .tex
+
+# Archivos auxiliares
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+
+# Archivos temporales
+*.tmp
+*.nav
+*.snm
+
+# Archivos de compilación
+*.dvi
+*.bbl
+*.blg
+*.brf
+*.synctex.gz
+
+# Archivos de configuración
+*.acn
+*.acr
+*.alg
+*.glg
+*.glo
+*.gls
+*.ist
+
+# Archivos relacionados con figuras
+*.eps-converted-to.pdf
