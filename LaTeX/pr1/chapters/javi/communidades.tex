@@ -1,6 +1,9 @@
 \section{Primer requisito funcional}
 \textbf{\textcolor{rojo}{\underline{RF1:}}} Crear comunidad. \\[6pt]
 
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario crear una comunidad, dándole un nombre y categoría. 
+Opcionalmente, puede darle a la comunidad una imagen y/o descripción. \\[6pt]
+
 \textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar inserción. 
 Requisito de datos de entrada \textcolor{azul}{RDE2.1}. \\[6pt]
 
@@ -8,90 +11,120 @@ Requisito de datos de entrada \textcolor{azul}{RDE2.1}. \\[6pt]
 
 \textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: confirmación resultado. 
 Requisito de datos de salida: ninguno. \\[12pt]
+\pagebreak
 
-\textcolor{azul}{\textbf{RDE2.1:}} Datos de entrada de alta de contacto \\
+\textcolor{azul}{\textbf{RDE2.1:}} Datos de entrada de crear comunidad \\
 \hspace*{1cm} Nombre de comunidad: Cadena de caracteres (20) \\
 \hspace*{1cm} Imagen: Cadena de caracteres (255) \\
 \hspace*{1cm} Descripción: Cadena de caracteres (80) \\ 
 \hspace*{1cm} Categoría: Cadena de caracteres (20) \\[12pt]
 
-\textcolor{azul}{\textbf{RDW2.1:}} Datos almacenados de contacto. \\
+\textcolor{azul}{\textbf{RDW2.1:}} Datos almacenados de la comunidad. \\
+\hspace*{1cm} Los mismos que RDE2.1 \\
 \hspace*{1cm} ID de comunidad: Cadena de caracteres (40) \\
 \hspace*{1cm} Fecha de creación: Cadena de caracteres (40) \\
-\pagebreak
+\newpage
 
 \section{Segundo requisito funcional}
-\textbf{\textcolor{rojo}{\underline{RF1:}}} Modificar comunidad. \\[6pt]
+\textbf{\textcolor{rojo}{\underline{RF2:}}} Modificar comunidad. \\[6pt]
 
-\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar inserción. 
-Requisito de datos de entrada \textcolor{azul}{RDE1}. \\[6pt]
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario modificar una comunidad, 
+cambiando el nombre, la descripción, la imagen o la categoría a la que pertenece. Posteriormente le 
+muestra al usuario los cambios realizados.\\[6pt]
 
-\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW1}. \\[6pt]
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar modificación. 
+Requisito de datos de entrada \textcolor{azul}{RDE2.2}. \\[6pt]
 
-\textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: confirmación resultado. 
-Requisito de datos de salida: ninguno. \\[12pt]
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW2.2}.\\ 
+\hspace*{1cm}Requisitos de datos de lectura \textcolor{azul}{RDR2.1}\\[6pt]
 
-\textcolor{azul}{\textbf{RDE1:}} Datos de entrada de alta de contacto \\
-\hspace*{1cm} Nombre: Cadena de caracteres (20) \\
-\hspace*{1cm} Apellidos: Cadena de caracteres (40) \\
-\hspace*{1cm} Teléfono: Cadena de caracteres (20) \\[12pt]
+\textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: confirmación resultado y visualización de cambios. 
+Requisito de datos de salida \textcolor{azul}{RDS2.1}. \\[12pt]
 
-\textcolor{azul}{\textbf{RDW1:}} Datos almacenados de contacto. \\
-\hspace*{1cm} Los mismos datos que RDE1.
+\textcolor{azul}{\textbf{RDE2.2:}} Datos de entrada de modificar comunidad \\
+\hspace*{1cm} Nombre de comunidad: Cadena de caracteres (20) \\
+\hspace*{1cm} Imagen: Cadena de caracteres (255) \\
+\hspace*{1cm} Descripción: Cadena de caracteres (80) \\ 
+\hspace*{1cm} Categoría: Cadena de caracteres (20) \\[12pt]
+
+\textcolor{azul}{\textbf{RDW2.2:}} Datos almacenados de la comunidad. \\
+\hspace*{1cm} Los mismos datos que RDE2.2.
+
+\textcolor{azul}{\textbf{RDR2.1:}} Datos almacenados decomunidad. \\
+\hspace*{1cm} Los mismos datos que RDE2.2.
+
+\textcolor{azul}{\textbf{RDS2.1:}} Datos de salida de modificar comunidad \\
+\hspace*{1cm} Los mismos datos que RDR2.1.
+\pagebreak
 
 \section{Tercer requisito funcional}
-\textbf{\textcolor{rojo}{\underline{RF1:}}} Listar comunidades. \\[6pt]
+\textbf{\textcolor{rojo}{\underline{RF3:}}} Listar comunidades. \\[6pt]
 
-\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar inserción. 
-Requisito de datos de entrada \textcolor{azul}{RDE1}. \\[6pt]
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario listar todas las comunidades 
+de la red social, mostrando el nombre, categoría, descripción (si la tuviera) e imagen (si la tuviera). \\[6pt]
 
-\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW1}. \\[6pt]
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: Listar comunidades. 
+Requisito de datos de entrada: ninguno. \\[6pt]
 
-\textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: confirmación resultado. 
-Requisito de datos de salida: ninguno. \\[12pt]
+\textbf{\textcolor{rojo}{BD:}} Requisitos de datos de lectura \textcolor{azul}{RDR2.2}\\[6pt]
 
-\textcolor{azul}{\textbf{RDE1:}} Datos de entrada de alta de contacto \\
-\hspace*{1cm} Nombre: Cadena de caracteres (20) \\
-\hspace*{1cm} Apellidos: Cadena de caracteres (40) \\
-\hspace*{1cm} Teléfono: Cadena de caracteres (20) \\[12pt]
+\textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: Visualización del listado de comunidades. 
+Requisito de datos de salida \textcolor{azul}{RDS2.2}. \\[12pt]
 
-\textcolor{azul}{\textbf{RDW1:}} Datos almacenados de contacto. \\
-\hspace*{1cm} Los mismos datos que RDE1.
+\textcolor{azul}{\textbf{RDR2.2:}} Datos almacenados de la comunidad. \\
+\hspace*{1cm} Los mismos datos que RDE2.1.
+
+\textcolor{azul}{\textbf{RDS2.2:}} Listado de registros, cada uno de ellos, con los mismos datos que RDR2.2 \\
+\pagebreak
 
 \section{Cuarto requisito funcional}
-\textbf{\textcolor{rojo}{\underline{RF1:}}} Añadir publicación. \\[6pt]
+\textbf{\textcolor{rojo}{\underline{RF4:}}} Añadir publicación. \\[6pt]
 
-\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar inserción. 
-Requisito de datos de entrada \textcolor{azul}{RDE1}. \\[6pt]
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario subir una publicación a una comunidades 
+de la red social, dicha publicación deberá tener un nombre, una descripción y, opcionalmente, una imagen. \\[6pt]
 
-\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW1}. \\[6pt]
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: subir una publicación. 
+Requisito de datos de entrada \textcolor{azul}{RDE2.3}. \\[6pt]
 
-\textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: confirmación resultado. 
-Requisito de datos de salida: ninguno. \\[12pt]
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW2.3}.\\ 
+\hspace*{1cm}Requisitos de datos de lectura \textcolor{azul}{RDR2.3}\\[6pt]
 
-\textcolor{azul}{\textbf{RDE1:}} Datos de entrada de alta de contacto \\
-\hspace*{1cm} Nombre: Cadena de caracteres (20) \\
-\hspace*{1cm} Apellidos: Cadena de caracteres (40) \\
-\hspace*{1cm} Teléfono: Cadena de caracteres (20) \\[12pt]
+\textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: confirmación resultado y visualización de publicación. 
+Requisito de datos de salida \textcolor{azul}{RDS2.3}. \\[12pt]
 
-\textcolor{azul}{\textbf{RDW1:}} Datos almacenados de contacto. \\
-\hspace*{1cm} Los mismos datos que RDE1.
+\textcolor{azul}{\textbf{RDE2.3:}} Datos de entrada de añadir publicación \\
+\hspace*{1cm} Nombre de publicación: Cadena de caracteres (20) \\
+\hspace*{1cm} Imagen: Cadena de caracteres (255) \\
+\hspace*{1cm} Descripción: Cadena de caracteres (255) \\ 
+\hspace*{1cm} Comunidad destino: Cadena de caracteres (20) \\[12pt]
+
+\textcolor{azul}{\textbf{RDW2.3:}} Datos almacenados de la publicación. \\
+\hspace*{1cm} Los mismos datos que RDE2.3. \\
+\hspace*{1cm} ID de publicación: Cadena de caracteres (40). \\
+\hspace*{1cm} Fecha de creación: Cadena de caracteres (40). \\
+\hspace*{1cm} ID de comunidad: Cadena de caracteres (40). \\
+\pagebreak
 
 \section{Quinto requisito funcional}
-\textbf{\textcolor{rojo}{\underline{RF1:}}} Expulsar usuario. \\[6pt]
+\textbf{\textcolor{rojo}{\underline{RF5:}}} Expulsar usuario. \\[6pt]
 
-\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar inserción. 
-Requisito de datos de entrada \textcolor{azul}{RDE1}. \\[6pt]
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario expulsar a otro usuario de una comunidad
+en base a su ID. \\[6pt]
 
-\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW1}. \\[6pt]
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: expulsar a un usuario de una comunidad. 
+Requisito de datos de entrada \textcolor{azul}{RDE2.4}. \\[6pt]
+
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW2.4}.\\ [6pt] 
 
 \textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: confirmación resultado. 
 Requisito de datos de salida: ninguno. \\[12pt]
 
-\textcolor{azul}{\textbf{RDE1:}} Datos de entrada de alta de contacto \\
-\hspace*{1cm} Nombre: Cadena de caracteres (20) \\
-\hspace*{1cm} Apellidos: Cadena de caracteres (40) \\
-\hspace*{1cm} Teléfono: Cadena de caracteres (20) \\[12pt]
+\textcolor{azul}{\textbf{RDE2.4:}} Datos de entrada de expulsar usuario \\
+\hspace*{1cm} ID de usuario: Cadena de caracteres (40) \\
+\hspace*{1cm} ID de comunidad: Cadena de caracteres (40) \\
 
-\textcolor{azul}{\textbf{RDW1:}} Datos almacenados de contacto. \\
-\hspace*{1cm} Los mismos datos que RDE1.
+\textcolor{azul}{\textbf{RDW2.4:}} Datos sobre el usuario. \\
+\hspace*{1cm} Los mismos datos que RDE2.2. \\
+\hspace*{1cm} Eliminado: booleano \\
+\pagebreak
+
