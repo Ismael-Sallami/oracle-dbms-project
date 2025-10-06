@@ -1,130 +1,179 @@
 \section{Primer requisito funcional}
-\textbf{\textcolor{rojo}{\underline{RF1:}}} Crear comunidad. \\[6pt]
+\textbf{\textcolor{rojo}{\underline{RF1:}}} Crear publicaciones. \\[6pt]
 
-\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario crear una comunidad, dándole un nombre y categoría. 
-Opcionalmente, puede darle a la comunidad una imagen y/o descripción. \\[6pt]
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario crear una publicación, 
+dándole un nombre, descripción y categoría. Opcionalmente, puede darle a la publicación una imagen. \\[6pt]
 
 \textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar inserción. 
-Requisito de datos de entrada \textcolor{azul}{RDE2.1}. \\[6pt]
+Requisito de datos de entrada \textcolor{azul}{RDE1.1}. \\[6pt]
 
-\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW2.1}. \\[6pt]
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW1.1}. \\[6pt]
 
 \textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: confirmación resultado. 
 Requisito de datos de salida: ninguno. \\[12pt]
 \pagebreak
 
-\textcolor{azul}{\textbf{RDE2.1:}} Datos de entrada de crear comunidad \\
-\hspace*{1cm} Nombre de comunidad: Cadena de caracteres (20) \\
-\hspace*{1cm} Imagen: Cadena de caracteres (255) \\
+\textcolor{azul}{\textbf{RDE1.1:}} Datos de entrada de crear publicaciones \\
+\hspace*{1cm} Nombre de publicación: Cadena de caracteres (20) \\
+\hspace*{1cm} Imagen (opcional): Cadena de caracteres (255) \\
 \hspace*{1cm} Descripción: Cadena de caracteres (80) \\ 
-\hspace*{1cm} Categoría: Cadena de caracteres (20) \\[12pt]
+\hspace*{1cm} Categoría: Cadena de caracteres (32) \\[12pt]
 
-\textcolor{azul}{\textbf{RDW2.1:}} Datos almacenados de la comunidad. \\
+\textcolor{azul}{\textbf{RDW1.1:}} Datos almacenados de la publicación. \\
 \hspace*{1cm} Los mismos que RDE2.1 \\
-\hspace*{1cm} ID de comunidad: Cadena de caracteres (40) \\
-\hspace*{1cm} Fecha de creación: Cadena de caracteres (40) \\
+\hspace*{1cm} ID de usuario: Cadena de caracteres (32) \\
+\hspace*{1cm} ID de publicación: Cadena de caracteres (32) \\
+\hspace*{1cm} Fecha de creación: Cadena de caracteres (20) \\
+\hspace*{1cm} Likes: Entero \\[12pt]
+
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS1.1:}}} El nombre de publicación no puede ser una cadena vacía. \textbf{RF:} RF1.1. \textbf{RD:} RDE1.1. \\
+\hspace*{1cm} \textit{Descripción:} Si el nombre de la publicación es una cadena vacía se devuelve un aviso y se pide al 
+usuario que introduzca un título. \\[12pt]
+
+\textbf{\textcolor{verde}{\underline{RS1.2:}}} La categoría debe existir previamente en el sistema. \textbf{RF:} RF1.1. \textbf{RD:} RDE1.1. \\
+\hspace*{1cm} \textit{Descripción:} Si la categoría no existe, se devuelve un aviso y se pide al 
+usuario que elija una categoría.
 \newpage
 
 \section{Segundo requisito funcional}
-\textbf{\textcolor{rojo}{\underline{RF2:}}} Modificar comunidad. \\[6pt]
+\textbf{\textcolor{rojo}{\underline{RF2:}}} Modificar publicación. \\[6pt]
 
-\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario modificar una comunidad, 
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario modificar una publicación, 
 cambiando el nombre, la descripción, la imagen o la categoría a la que pertenece. Posteriormente le 
 muestra al usuario los cambios realizados.\\[6pt]
 
 \textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar modificación. 
-Requisito de datos de entrada \textcolor{azul}{RDE2.2}. \\[6pt]
+Requisito de datos de entrada \textcolor{azul}{RDE1.2}. \\[6pt]
 
-\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW2.2}.\\ 
-\hspace*{1cm}Requisitos de datos de lectura \textcolor{azul}{RDR2.1}\\[6pt]
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW1.2}.\\ 
+\hspace*{1cm}Requisitos de datos de lectura \textcolor{azul}{RDR1.1}\\[6pt]
 
 \textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: confirmación resultado y visualización de cambios. 
-Requisito de datos de salida \textcolor{azul}{RDS2.1}. \\[12pt]
+Requisito de datos de salida \textcolor{azul}{RDS1.1}. \\[12pt]
 
-\textcolor{azul}{\textbf{RDE2.2:}} Datos de entrada de modificar comunidad \\
-\hspace*{1cm} Nombre de comunidad: Cadena de caracteres (20) \\
-\hspace*{1cm} Imagen: Cadena de caracteres (255) \\
-\hspace*{1cm} Descripción: Cadena de caracteres (80) \\ 
-\hspace*{1cm} Categoría: Cadena de caracteres (20) \\[12pt]
+\textcolor{azul}{\textbf{RDE1.2:}} Datos de entrada de modificar publicación \\
+\hspace*{1cm} Los mismos datos que RDE1.2. \\[12pt]
 
-\textcolor{azul}{\textbf{RDW2.2:}} Datos almacenados de la comunidad. \\
-\hspace*{1cm} Los mismos datos que RDE2.2.
-
-\textcolor{azul}{\textbf{RDR2.1:}} Datos almacenados decomunidad. \\
-\hspace*{1cm} Los mismos datos que RDE2.2.
-
-\textcolor{azul}{\textbf{RDS2.1:}} Datos de salida de modificar comunidad \\
-\hspace*{1cm} Los mismos datos que RDR2.1.
+\textcolor{azul}{\textbf{RDW1.2:}} Datos almacenados de la publicación. \\
+\hspace*{1cm} Los mismos datos que RDE1.2.\\
+\hspace*{1cm} Fecha de modificación: Cadena de caracteres (20)\\[12pt]
 \pagebreak
 
+
+\textcolor{azul}{\textbf{RDR1.1:}} Datos almacenados de la publicación. \\
+\hspace*{1cm} Los mismos datos que RDE1.2.\\
+\hspace*{1cm} Likes: Entero \\[12pt]
+
+\textcolor{azul}{\textbf{RDS1.1:}} Datos de salida de modificar publicación. \\
+\hspace*{1cm} Los mismos datos que RDR1.1.\\[12pt]
+
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS1.3:}}} La publicación debe existir previamente en el sistema y no ha sido eliminada. \textbf{RF:} RF1.2. \textbf{RD:} RDE1.2. \\
+\hspace*{1cm} \textit{Descripción:} Si el identificador de la publicación no corresponde
+a una publicación existente en el sistema, no se realiza la acción y se devuelve un error. \\[12pt]
+
+\textbf{\textcolor{verde}{\underline{RS1.4:}}} La nueva categoría debe existir previamente en el sistema. \textbf{RF:} RF1.2. \textbf{RD:} RDE1.2. \\
+\hspace*{1cm} \textit{Descripción:} Si la categoría no existe, se devuelve un aviso y se pide al 
+usuario que elija una categoría. \\[12pt]
+
+\textbf{\textcolor{verde}{\underline{RS1.5:}}} El nuevo nombre de publicación no puede ser una cadena vacía. \textbf{RF:} RF1.2. \textbf{RD:} RDE1.2. \\
+\hspace*{1cm} \textit{Descripción:} Si el nombre de la publicación es una cadena vacía se devuelve un aviso y se pide al 
+usuario que introduzca un título. \\[12pt]
+\newpage
+
+
 \section{Tercer requisito funcional}
-\textbf{\textcolor{rojo}{\underline{RF3:}}} Listar comunidades. \\[6pt]
+\textbf{\textcolor{rojo}{\underline{RF3:}}} Listar publicaciones. \\[6pt]
 
-\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario listar todas las comunidades 
-de la red social, mostrando el nombre, categoría, descripción (si la tuviera) e imagen (si la tuviera). \\[6pt]
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario listar todas las publicaciones 
+de los usuarios a los que sigue; mostrando el nombre, categoría, descripción e imagen (si la tuviera). \\[6pt]
 
-\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: Listar comunidades. 
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: Listar publicaciones. 
 Requisito de datos de entrada: ninguno. \\[6pt]
 
-\textbf{\textcolor{rojo}{BD:}} Requisitos de datos de lectura \textcolor{azul}{RDR2.2}\\[6pt]
+\textbf{\textcolor{rojo}{BD:}} Requisitos de datos de lectura \textcolor{azul}{RDR1.2}\\[6pt]
 
-\textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: Visualización del listado de comunidades. 
-Requisito de datos de salida \textcolor{azul}{RDS2.2}. \\[12pt]
+\textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: Visualización 
+del listado de publicaciones. Requisito de datos de salida \textcolor{azul}{RDS1.2}. \\[12pt]
 
-\textcolor{azul}{\textbf{RDR2.2:}} Datos almacenados de la comunidad. \\
-\hspace*{1cm} Los mismos datos que RDE2.1.
+\textcolor{azul}{\textbf{RDR1.2:}} Datos almacenados de la lista de publicaciones. \\
+\hspace*{1cm} Los mismos datos que RDE1.1.\\
+\hspace*{1cm} Likes: Entero. \\[6pt]
 
-\textcolor{azul}{\textbf{RDS2.2:}} Listado de registros, cada uno de ellos, con los mismos datos que RDR2.2 \\
+\textcolor{azul}{\textbf{RDS1.2:}} Listado de registros, cada uno de ellos, con los mismos datos que RDR1.2 \\
 \pagebreak
 
 \section{Cuarto requisito funcional}
-\textbf{\textcolor{rojo}{\underline{RF4:}}} Añadir publicación. \\[6pt]
+\textbf{\textcolor{rojo}{\underline{RF4:}}} Dar me gusta a una publicación. \\[6pt]
 
-\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario subir una publicación a una comunidades 
-de la red social, dicha publicación deberá tener un nombre, una descripción y, opcionalmente, una imagen. \\[6pt]
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario dar un 'me gusta' a 
+una publicación.\\[6pt]
 
-\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: subir una publicación. 
-Requisito de datos de entrada \textcolor{azul}{RDE2.3}. \\[6pt]
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: actualizar estado de una publicación. 
+Requisito de datos de entrada \textcolor{azul}{RDE1.3}. \\[6pt]
 
-\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW2.3}.\\ 
-\hspace*{1cm}Requisitos de datos de lectura \textcolor{azul}{RDR2.3}\\[6pt]
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW1.3}.\\ 
+\hspace*{1cm}Requisitos de datos de lectura \textcolor{azul}{RDR1.3}\\[6pt]
 
 \textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: confirmación resultado y visualización de publicación. 
-Requisito de datos de salida \textcolor{azul}{RDS2.3}. \\[12pt]
+Requisito de datos de salida \textcolor{azul}{RDS1.3}. \\[12pt]
 
-\textcolor{azul}{\textbf{RDE2.3:}} Datos de entrada de añadir publicación \\
-\hspace*{1cm} Nombre de publicación: Cadena de caracteres (20) \\
-\hspace*{1cm} Imagen: Cadena de caracteres (255) \\
-\hspace*{1cm} Descripción: Cadena de caracteres (255) \\ 
-\hspace*{1cm} Comunidad destino: Cadena de caracteres (20) \\[12pt]
+\textcolor{azul}{\textbf{RDE1.3:}} Datos de entrada de dar me gusta a una publicación. \\
+\hspace*{1cm} ID de publicación: Cadena de caracteres (32) \\
+\hspace*{1cm} ID de usuario: Cadena de caracteres (32) \\[12pt]
 
-\textcolor{azul}{\textbf{RDW2.3:}} Datos almacenados de la publicación. \\
-\hspace*{1cm} Los mismos datos que RDE2.3. \\
-\hspace*{1cm} ID de publicación: Cadena de caracteres (40). \\
-\hspace*{1cm} Fecha de creación: Cadena de caracteres (40). \\
-\hspace*{1cm} ID de comunidad: Cadena de caracteres (40). \\
+\textcolor{azul}{\textbf{RDW1.3:}} Datos almacenados de la publicación. \\
+\hspace*{1cm} Los mismos datos que RDE1.3. \\
+\hspace*{1cm} El usuario guarda en una lista un registro con el ID de publicación \\
+\hspace*{1cm} Like: Entero \\[12pt]
 \pagebreak
 
+\textcolor{azul}{\textbf{RDS1.3:}} Datos de entrada de dar me gusta a una publicación. \\
+\hspace*{1cm} Los mismos datos que RDE1.1. \\ 
+\hspace*{1cm} Like: Entero \\ [12pt]
+
+\textcolor{azul}{\textbf{RDR1.3:}} Datos almacenados de la publicación. \\
+\hspace*{1cm} Los mismos datos que RDS1.3. \\
+
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS1.6:}}} La publicación debe existir previamente en el sistema y no ha sido eliminada. \textbf{RF:} RF1.4. \textbf{RD:} RDE1.3. \\
+\hspace*{1cm} \textit{Descripción:} Si el identificador de la publicación no corresponde
+a una publicación existente en el sistema, no se realiza la acción y se devuelve un error. \\[12pt]
+
+\textbf{\textcolor{verde}{\underline{RS1.7:}}} Dar me gusta otra vez sobre un publicación cancela el me gusta 
+\textbf{RF:} RF1.4. \textbf{RD:} RDE1.3. \\
+\hspace*{1cm} \textit{Descripción:} Volver a darle me gusta a una publicación quita el me gusta original.
+\newpage
+
 \section{Quinto requisito funcional}
-\textbf{\textcolor{rojo}{\underline{RF5:}}} Expulsar usuario. \\[6pt]
+\textbf{\textcolor{rojo}{\underline{RF5:}}} Eliminar publicación. \\[6pt]
 
-\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario expulsar a otro usuario de una comunidad
-en base a su ID. \\[6pt]
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario eliminar 
+una de sus publicaciones en base a su ID. Eliminar una publicación no la borrar de la base de datos,
+sino que queda marcada como borrada y se oculta a los usuarios.\\[6pt]
 
-\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: expulsar a un usuario de una comunidad. 
-Requisito de datos de entrada \textcolor{azul}{RDE2.4}. \\[6pt]
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: modificar un registro. 
+Requisito de datos de entrada \textcolor{azul}{RDE1.4}. \\[6pt]
 
-\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW2.4}.\\ [6pt] 
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW1.4}.\\ [6pt] 
 
 \textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: confirmación resultado. 
 Requisito de datos de salida: ninguno. \\[12pt]
 
-\textcolor{azul}{\textbf{RDE2.4:}} Datos de entrada de expulsar usuario \\
-\hspace*{1cm} ID de usuario: Cadena de caracteres (40) \\
-\hspace*{1cm} ID de comunidad: Cadena de caracteres (40) \\
+\textcolor{azul}{\textbf{RDE1.4:}} Datos de entrada de eliminar publicación \\
+\hspace*{1cm} ID de usuario: Cadena de caracteres (32) \\
+\hspace*{1cm} ID de publicación: Cadena de caracteres (32) \\[12pt]
 
-\textcolor{azul}{\textbf{RDW2.4:}} Datos sobre el usuario. \\
-\hspace*{1cm} Los mismos datos que RDE2.2. \\
-\hspace*{1cm} Eliminado: booleano \\
+\textcolor{azul}{\textbf{RDW1.4:}} Datos sobre la publicación. \\
+\hspace*{1cm} Eliminado: Booleano. \\
 \pagebreak
 
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS1.8:}}} La publicación debe existir previamente en el sistema y no ha sido eliminada. \textbf{RF:} RF1.5. \textbf{RD:} RDE1.4. \\
+\hspace*{1cm} \textit{Descripción:} Si el identificador de la publicación no corresponde
+a una publicación existente en el sistema, no se realiza la acción y se devuelve un error. \\[12pt]
+
+\textbf{\textcolor{verde}{\underline{RS1.9:}}} La publicación debe pertenecer al usuario que intenta eliminarla. \textbf{RF:} RF1.5. \textbf{RD:} RDE1.4. \\
+\hspace*{1cm} \textit{Descripción:} Si el identificador de la publicación no corresponde
+a una publicación creada por el usuario correspondiente al identificador de usuario, no se realiza la acción y se devuelve un error. \\[12pt]
