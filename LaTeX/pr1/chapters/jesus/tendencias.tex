@@ -1,0 +1,152 @@
+% Listado de requisitos funcionales, requisitos de datos y restricciones semánticas.
+
+% Funcionales: 
+% \begin{itemize}
+%     \item Crear o mencionar hashtag
+%     \item Listar tendencias
+%     \item Asignar una categoría a un hashtag
+%     \item Mostrar categoría ordenada
+%     \item Eliminar tendencia
+% \end{itemize}
+
+%======================= %
+% REQUISITOS FUNCIONALES %
+% ======================= %
+
+
+\section{Crear o mencionar hashtag}
+\textbf{\textcolor{rojo}{\underline{RF2.1:}}} Crear o mencionar hashtag. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Cada vez que haya una publicación con una cadena que empiece por "\#", almacenarlo de cara a poder ver los temas que son tendencia. En caso de ya existir, se actualiza el contador de veces que ha aparecido ese hashtag. En caso de que no exista, se crea y se pone el contador a uno.
+ \\[6pt]
+
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: realizar una publicación que contenga una cadena que empiece por "\#". 
+Requisito de datos de entrada \textcolor{azul}{RDE2.1}. \\[6pt]
+
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW2.1} y lectura \textcolor{azul}{RDR2.1.} \\[6pt]
+
+\textbf{\textcolor{rojo}{Salida:}} Ninguna \\[6pt]
+
+\textcolor{azul}{\textbf{RDE2.1:}} Datos de entrada de crear o mencionar hashtag \\
+\hspace*{1cm} Hashtag: Cadena de caracteres (32) \\[12pt]
+
+\textcolor{azul}{\textbf{RDR2.1:}} Datos para comprobar si ya existía un hashtag. \\
+\hspace*{1cm} Los mismos que RDE2.1\\
+
+\textcolor{azul}{\textbf{RDW2.1:}} Datos almacenados/actualizados de un hashtag. \\
+\hspace*{1cm} Los mismos que RDE2.1 además de el contador de veces que ha aparecido ese hashtag.\\
+\hspace*{1cm} Contador: Entero \\[12pt]
+
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS2.1:}}} El Hastag debe empezar por "\#". \textbf{RF:} RF2.1. \textbf{RD(s):} RDW2.1. \\
+\hspace*{1cm} \textit{Descripción:} Si el hashtag no había sido creado y no empieza por "\#", no se inserta el nuevo hashtag y se devuelve un error. \\[6pt]
+
+\textbf{\textcolor{verde}{\underline{RS2.2:}}} El Hashtag puede ya existir o ser uno nuevo. \textbf{RF:} RF2.1. \textbf{RD(s):} RDW2.1 y RDR2.1. \\
+\hspace*{1cm} \textit{Descripción:} El hashtag introducido puede que no existiera aún en la base de datos o que si existiera. En caso de ya existir, se actualiza el contador de veces que ha aparecido ese hashtag sumándole uno. En caso de que no exista, se crea y se pone el contador a uno.\\[6pt]
+\pagebreak
+
+\section{Listar tendencias}
+\textbf{\textcolor{rojo}{\underline{RF2.2:}}} Listar tendencias. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Mostrar los 10 hashtags con mayores apariciones.
+ \\[6pt]
+
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar listado de tendencias. 
+Requisito de datos de entrada: ninguno. \\[6pt]
+
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de lectura \textcolor{azul}{RDR2.2}\\[6pt]
+
+\textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: confirmación del resultado.
+Requisitos de datos de salida: \textcolor{azul}{RDS2.2}. \\[6pt] 
+
+\textcolor{azul}{\textbf{RDR2.2:}} Datos para ver cuáles son los hashtags con más apariciones. \\
+\hspace*{1cm} Los mismos que RDW2.1\\
+
+\textcolor{azul}{\textbf{RDS2.1:}} Datos para listar tendencias. \\
+\hspace*{1cm} Los mismos que RDW2.1\\
+
+\pagebreak
+
+\section{Asignar una categoría a un hashtag}
+\textbf{\textcolor{rojo}{\underline{RF2.3:}}} Asignar una categoría a un hashtag. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Asignar una categoría a un hashtag ya existente para poder clasificarlos.\\[6pt]
+
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: administrador. Acción: solicitar actualizar la categoría de un hashtag. 
+Requisito de datos de entrada \textcolor{azul}{RDE2.3} \\[6pt]
+
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de lectura \textcolor{azul}{RDR2.3} y de escritura \textcolor{azul}{RDW2.3}\\[6pt]
+
+\textbf{\textcolor{rojo}{Salida:}} Ninguna\\[6pt] 
+
+\textcolor{azul}{\textbf{RDE2.3:}} El hashtag y la categoría que se le quiere asignar. \\
+\hspace*{1cm} Hashtag: Cadena de caracteres (32)\\[12pt]
+\hspace*{1cm} Categoría: Cadena de caracteres (32)\\[12pt]
+
+\textcolor{azul}{\textbf{RDR2.3:}} Hashtag que hay que comprobar si ya existe en el sistema. \\
+\hspace*{1cm} El mismo que \textcolor{azul}{RDR2.1}\\
+
+\textcolor{azul}{\textbf{RDW2.3:}} Categoría a asignar. \\
+\hspace*{1cm} Categoría: Cadena de caracteres (32)\\[12pt]
+
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS2.3:}}} El hashtag debe existir previamente en el sistema. \textbf{RF:} RF2.3. \textbf{RD(s):} RDW2.3 y RDR2.3. \\
+\hspace*{1cm} \textit{Descripción:} Si el hashtag no se encuentra almacenado en el sistema, no se crea ni se le asigna la categoría, sino que se devuelve un error. \\[6pt]
+
+\pagebreak
+
+\section{Mostrar categoría ordenada}
+\textbf{\textcolor{rojo}{\underline{RF2.4:}}} Mostrar categoría ordenada. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Listar las tendencias de una determinada categoría ordenadas de mayor a menos número de apariciones.\\[6pt]
+
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar mostrar una categoría. 
+Requisito de datos de entrada \textcolor{azul}{RDE2.4} \\[6pt]
+
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de lectura \textcolor{azul}{RDR2.4}\\[6pt]
+
+\textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: confirmación del resultado.
+Requisitos de datos de salida: \textcolor{azul}{RDS2.4}. \\[6pt] 
+
+\textcolor{azul}{\textbf{RDE2.4:}} La categoría que se quiere mostrar. \\
+\hspace*{1cm} El mismo que \textcolor{azul}{RDW2.3}\\
+
+\textcolor{azul}{\textbf{RDR2.4:}} Datos necesarios para ver si un hashtag pertenece a la categoría dada y ordenarlos por su número de apariciones. \\
+\hspace*{1cm} Los mismos que \textcolor{azul}{RDE2.3} +  \textcolor{azul}{RDE2.4}\\
+
+\textcolor{azul}{\textbf{RDS2.4:}} Datos para listar la categoría. \\
+\hspace*{1cm} Los mismos que  \textcolor{azul}{RDR2.4}\\
+
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS2.4:}}} La categoría debe existir previamente en el sistema. \textbf{RF:} RF2.4. \textbf{RD(s):} RDR2.4. \\
+\hspace*{1cm} \textit{Descripción:} Si la categoría no se encuentra almacenada en el sistema se devuelve un error. \\[6pt]
+
+\pagebreak
+
+\section{Eliminar tendencia}
+\textbf{\textcolor{rojo}{\underline{RF2.5:}}} Eliminar tendencia. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Hacer que un hashtag deje de ser tendencia poniendo su contador de apariciones a cero.\\[6pt]
+
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: administrador. Acción: solicitar la eliminación de una tendencia. 
+Requisito de datos de entrada \textcolor{azul}{RDE2.5} \\[6pt]
+
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de lectura \textcolor{azul}{RDR2.5} y de escritura \textcolor{azul}{RDW2.5}\\[6pt]
+
+\textbf{\textcolor{rojo}{Salida:}} Ninguna
+
+\textcolor{azul}{\textbf{RDE2.5:}} Hashtag que se quiere eliminar. \\
+\hspace*{1cm} El mismo que \textcolor{azul}{RDE2.1}\\
+
+\textcolor{azul}{\textbf{RDW2.5:}} Datos que hay que modificar para hacer que el hashtag deje de ser tendencia. \\
+\hspace*{1cm} Contador: Entero\\[12pt]
+
+\textcolor{azul}{\textbf{RDR2.5:}} Hashtag que se quiere eliminar. \\
+\hspace*{1cm} El mismo que \textcolor{azul}{RDE2.1}\\
+
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS2.5:}}} El hashtag debe existir previamente en el sistema. \textbf{RF:} RF2.5. \textbf{RD(s):} RDW2.5 y RDR2.5. \\
+\hspace*{1cm} \textit{Descripción:} Si el hashtag no se encuentra almacenado en el sistema se devuelve un error. \\[6pt]
+
+\pagebreak
+
