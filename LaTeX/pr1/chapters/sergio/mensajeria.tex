@@ -5,15 +5,15 @@
 \newcounter{RF} \setcounter{RF}{1}
 % Descripción del subsistema
 \section*{Descripción}
-El subsistema de Mensajería Privada se encarga de la comunicación privada entre usuarios, consistiendo principalmente en el envío, la eliminación y la visualización de mensajes que se dan entre dos usuarios del sistema, limitandose sólo a aquellos que son amigos. Se incluye la posibilidad de archivar chats o destacar mensajes para personalizar la visualización de los mensajes por parte del usuario. Parte desarrollada por \textbf{Sergio Calvo González}.
+El subsistema de Mensajería Privada se encarga de la comunicación privada entre usuarios amigos en la red social, consistiendo principalmente en el envío, la eliminación y la visualización de mensajes que se dan entre dos usuarios del sistema. Se incluye la posibilidad de archivar chats para personalizar la visualización de los mensajes por parte del usuario. Parte desarrollada por \textbf{Sergio Calvo González}.
 \newpage
 
 % ======================= %
 %     ENVIAR MENSAJE      %
 % ======================= %
 \section{Enviar mensaje}
-\textbf{\textcolor{rojo}{\underline{RF5.\theRF:}}}. Enviar mensaje: Permite que un usuario envíe un mensaje de texto a otro usuario (deben ser amigos)\\[6pt]
-\stepcounter{RF}
+\textbf{\textcolor{rojo}{\underline{RF5.\theRF:}}}. Enviar mensaje: Permite que un usuario envíe un mensaje de un usuario a otro. Se requiere que tanto el emisor como el receptor existan, además de que no sean el mismo usuario. Por otro lado, también se requiere que ambos sean amigos y que el mensaje que va a ser enviado no puede estar vacío.\\[6pt]
+
 
 \textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar envío de un mensaje. 
 Requisito de datos de entrada \textcolor{azul}{RDE5.\theRDE}. \\[6pt]
@@ -26,91 +26,139 @@ Requisito de datos de salida: ninguno. \\[12pt]
 \textcolor{azul}{\textbf{RDE5.\theRDE:}} Mensaje y usuario al que va dirigido \\
 \hspace*{1cm} Usuario: Cadena de caracteres (20) \\
 \hspace*{1cm} Mensaje: Cadena de caracteres (50) \\[12pt]
-\stepcounter{RDE}
 
 \textcolor{azul}{\textbf{RDW5.\theRDW:}} Datos del envío de mensaje. \\
 \hspace*{1cm} Usuario Emisor: Cadena de caracteres (20) \\
 \hspace*{1cm} Usuario Receptor: Cadena de caracteres (20) \\
+\hspace*{1cm} ID mensaje: Cadena de caracteres (50) \\
 \hspace*{1cm} Mensaje: Cadena de caracteres (50) \\[12pt]
+
+\newcounter{RS} \setcounter{RS}{1}
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS5.\theRS:}}} Los mensajes sólo pueden enviarse entre usuarios que son amigos. \\
+\textbf{RF:} RF5.\theRF. \textbf{RD(s):} RDE5.\theRDE. \\
+\hspace*{1cm} \textit{Descripción:} Si se desea enviar un mensaje a un usuario del que no se es amigo, se devolverá un error indicando que se necesita ser amigos para poder enviar un mensaje y no se envía el mensaje. \\[6pt]
+\stepcounter{RS}
+
+\textbf{\textcolor{verde}{\underline{RS5.\theRS:}}} Los mensajes no se pueden enviar al propio usuario. \\
+\textbf{RF:} RF5.\theRF. \textbf{RD(s):} RDE5.\theRDE. \\
+\hspace*{1cm} \textit{Descripción:} Si se desea enviar un mensaje al propio usuario, se devolverá un error indicando que no se puede enviar un mensaje a uno mismo y no se envía el mensaje. \\[6pt]
+\stepcounter{RS}
+
+\textbf{\textcolor{verde}{\underline{RS5.\theRS:}}} Para el envío de mensajes, el mensaje debe tener al menos un carácter. \\
+\textbf{RF:} RF5.\theRF. \textbf{RD(s):} RDE5.\theRDE. \\
+\hspace*{1cm} \textit{Descripción:} Si se desea enviar un mensaje, dicho mensaje no puede estar vacío, de no ser así, se muestra un error y no se envía el mensaje. \\ [6pt]
+\stepcounter{RS}
+
+\textbf{\textcolor{verde}{\underline{RS5.\theRS:}}} Para el envío de mensajes, el usuario receptor debe existir. \\
+\textbf{RF:} RF5.\theRF. \textbf{RD(s):} RDE5.\theRDE. \\
+\hspace*{1cm} \textit{Descripción:} Si se desea enviar un mensaje, el receptor debe existir, de no ser así damos un mensaje de error e indicamos que el usuario no existe. \\ [6pt]
+\stepcounter{RS}
+
+\stepcounter{RF}
+\stepcounter{RDE}
 \stepcounter{RDW}
+
 % ======================= %
 %    ELIMINAR MENSAJE     %
 % ======================= %
 \section{Eliminar mensaje}
-\textbf{\textcolor{rojo}{\underline{RF\theRF:}}}. Eliminar mensaje: Permite que un usuario elimine un mensaje de texto que ha enviado, de forma que ni dicho usuario ni el receptor pueden volver a acceder al mensaje\\[6pt]
-\stepcounter{RF}
+\textbf{\textcolor{rojo}{\underline{RF\theRF:}}}. Eliminar mensaje: Permite que un usuario elimine un mensaje de texto que ha enviado, de forma que ni dicho usuario ni el receptor pueden volver a acceder al mensaje. Para ello, se requiere de que el mensaje exista\\[6pt]
 
 \textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar la eliminación de un mensaje. 
-Requisito de datos de entrada: ninguno. \\[6pt]
+Requisito de datos de entrada: \textcolor{azul}{\textbf{RDE5.\theRDE.}}\\[6pt]
 
-\textbf{\textcolor{rojo}{BD:}} Requisito de datos de lectura \textcolor{azul}{RDR6.1}. \\[6pt]
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW5.\theRDW}. \\[6pt]
 
 \textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: confirmación resultado. 
 Requisito de datos de salida: ninguno. \\[12pt]
 
-\textcolor{azul}{\textbf{RDE6.2:}} Datos del mensaje a borrar\\
-\hspace*{1cm} Usuario: Cadena de caracteres (20) \\
-\hspace*{1cm} Mensaje: Cadena de caracteres (50) \\[12pt]
-
-\textcolor{azul}{\textbf{RDR6.1:}} Lista de mensajes. \\
+\textcolor{azul}{\textbf{RDE5.\theRDE:}} Datos del mensaje a borrar\\
 \hspace*{1cm} Usuario Emisor: Cadena de caracteres (20) \\
-\hspace*{1cm} Usuario Receptor: Cadena de caracteres (20) \\
-\hspace*{1cm} Mensaje: Cadena de caracteres (50) \\[12pt]
+\hspace*{1cm} Usuario Receptor: Cadena de caracteres(20) \\
+\hspace*{1cm} ID Mensaje: Cadena de caracteres (50) \\[12pt]
 
+\textcolor{azul}{\textbf{RDW5.\theRDW:}} Eliminación del mensaje con los mismos datos que \textcolor{azul}{\textbf{RDE5.\theRDE}}. \\[12pt]
+
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS5.\theRS:}}} Para eliminar un mensaje, este debe de existir. \\
+\textbf{RF:} RF5.\theRF. \textbf{RD(s):} RDE5.\theRDE, RDW5.\theRDW \\
+\hspace*{1cm} \textit{Descripción:} Si se desea eliminar un mensaje, este debe de existir, de no ser así, se mostrará un mensaje de error indicando que el mensaje no existe y no se modificará la lista de mensajes. \\ [6pt]
+\stepcounter{RS}
+
+\stepcounter{RF}
+\stepcounter{RDE}
+\stepcounter{RDW}
 % ======================= %
 %  LISTAR CONVERSACIONES  %
 % ======================= %
 \section{Listar conversaciones}
-\textbf{\textcolor{rojo}{\underline{RF\theRF:}}}. Listar conversaciones: Permite que un usuario vea los conversaciones que tiene disponibles\\[6pt]
-\stepcounter{RF}
+\textbf{\textcolor{rojo}{\underline{RF\theRF:}}}. Listar conversaciones: Permite a un usuario ver las conversaciones con otros usuarios, ordenadas temporalmente y por visualización (Primero aquellas con mensajes no visualizados después visualizados, cada una ordenado temporalmente de más a menos reciente). Para que exista una conversación, debe de haber un mensaje recibido o enviado por el usuario. \\[6pt]
+
 \textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar la visualización de sus conversaciones. 
 Requisito de datos de entrada: ninguno\\[6pt]
 
 \textbf{\textcolor{rojo}{BD:}} Requisito de datos de lectura \textcolor{azul}{RDR5.\theRDR}. \\[6pt]
 
-\textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: confirmación resultado. 
+\textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: mostrar las conversaciones. 
 Requisito de datos de salida: \textcolor{azul}{RDS5.\theRDS} \\[12pt]
 
-\textcolor{azul}{\textbf{RDR5.\theRDR:}} Lista de usuarios con los que dispone de una conversación, con el formato:\\
+\textcolor{azul}{\textbf{RDR5.\theRDR:}} Lista de usuarios con los que dispone de una conversación, ordenados según lo especificado, con el formato:\\
 \hspace*{1cm} Usuario: Cadena de caracteres (20) \\[12pt]
-\stepcounter{RDR}
 
-\textcolor{azul}{\textbf{RDS5.\theRDS:}} Lista de usuarios con los que dispone de una conversación. \\
-\hspace*{1cm} Los mismos datos que (20) \\[12pt]
+\textcolor{azul}{\textbf{RDS5.\theRDS:}} Lista de usuarios con los que dispone de una conversación seguidos de los primeros quience caracteres del último mensaje. \\
+\hspace*{1cm} Usuario: Cadena de caracteres (20) \\
+\hspace*{1cm} Último mensaje: Cadena de caracteres (15) \\[12pt]
+
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS5.\theRS:}}} Las conversaciones archivadas no se muestran. \\
+\textbf{RF:} RF5.\theRF. \textbf{RD(s):} RDS5.\theRDS \\
+\hspace*{1cm} \textit{Descripción:} Las conversaciones archivadas no se muestran, de no ser así, se muestra un error indicandolo. \\ [6pt]
+\stepcounter{RS}
+
+\stepcounter{RF}
+\stepcounter{RDR}
 \stepcounter{RDS}
 % ======================= %
 %     VISUALIZAR CHAT     %
 % ======================= %
-\section{Visualizar chat}
-\textbf{\textcolor{rojo}{\underline{RF\theRF:}}}. Visualizar chat: Permite que un usuario vea los mensajes entre otro usuario y él mismo\\[6pt]
-\stepcounter{RF}
+\section{Visualizar conversación}
+\textbf{\textcolor{rojo}{\underline{RF\theRF:}}}. Visualizar conversasción: Permite que a usuario ver los mensajes enviados y recibidos entre un usuario y otro, ordenados de forma temporal, de más a menos reciente\\[6pt]
+
 \textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar la visualización de un chat. 
 Requisito de datos de entrada \textcolor{azul}{RDE5.\theRDE}. \\[6pt]
 
 \textbf{\textcolor{rojo}{BD:}} Requisito de datos de lectura \textcolor{azul}{RDR5.\theRDR}. \\[6pt]
 
 \textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: confirmación resultado. 
-Requisito de datos de salida: \textcolor{azul}{RDS6.2} \\[12pt]
+Requisito de datos de salida: \textcolor{azul}{RDS5.\theRDS} \\[12pt]
 
 \textcolor{azul}{\textbf{RDE5.\theRDE:}} Datos del usuario del chat que se desea ver\\
 \hspace*{1cm} Usuario: Cadena de caracteres (20) \\[12pt]
-\stepcounter{RDE}
 
 \textcolor{azul}{\textbf{RDR5.\theRDR:}} Lista de mensajes entre ambos usuarios, ordenados temporalmente, con el siguiente formato:\\
 \hspace*{1cm} Usuario emisor: Cadena de caracteres (20) \\
 \hspace*{1cm} Mensaje: Cadena de caracteres (50) \\[12pt]
 
-
 \textcolor{azul}{\textbf{RDS5.\theRDS:}} Lista de mensajes entre ambos usuarios.\\
 \hspace*{1cm} Los mismos datos que en RDR5.\theRDR\\[12pt]
+
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS5.\theRS:}}} Para visualizar una conversación debe de existir al menos enviado o recibido entre ambos usuarios. \\
+\textbf{RF:} RF5.\theRF. \textbf{RD(s):} RDE5.\theRDE, RDW5.\theRDS \\
+\hspace*{1cm} \textit{Descripción:} Si se desea ver una conversación, esta debe de existir, implicando la existencia del algún mensaje entre ambos usuarios, de no ser así, se mostrará un error indicando que no existen mensajes con el usuario indicado, y no mostraremos nada. \\ [6pt]
+\stepcounter{RS}
+
+\stepcounter{RF}
+\stepcounter{RDE}
 \stepcounter{RDR}
 \stepcounter{RDS}
 % ======================= %
 %      ARCHIVAR CHAT      %
 % ======================= %
-\section{Des/archivar chat}
-\textbf{\textcolor{rojo}{\underline{RF\theRF:}}}. Des/archivar chat: Permite que un usuario seleccione un chat del que quiere o no visualizar los mensajes, activando o no su visualización\\[6pt]
-\stepcounter{RF}
+\section{Des/archivar conversación}
+\textbf{\textcolor{rojo}{\underline{RF\theRF:}}}. Des/archivar conversación: Permite activar o desactivar la visualización de un chat al ver las conversaciones. Para ello, debe de existir el usuario que se desea archivar, y una conversación entre él y el solicitante de archivar el chat. Cuando un chat esté archivado, no se mostrará en la acción ver conversaciones\\[6pt]
+
 \textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar la des/archivación de un chat. 
 Requisito de datos de entrada \textcolor{azul}{RDE5.\theRDE}. \\[6pt]
 
@@ -124,34 +172,21 @@ Requisito de datos de salida: ninguno \\[12pt]
 
 \textcolor{azul}{\textbf{RDW5.\theRDW:}} Datos del usuario que se desea archivar/desarchivar. \\
 \hspace*{1cm} Usuario a archivar: Cadena de caracteres (20) \\
-\hspace*{1cm} Usuario que archiva: Cadena de caracteres (20) \\
-\hspace*{1cm} Usuario a archivar: Cadena de caracteres (20) \\[12pt]
+\hspace*{1cm} Usuario que archiva: Cadena de caracteres (20) \\[12pt]
 
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS5.\theRS:}}} Para archivar una conversación, debe de existir el usuario con el que se conversa. \\
+\textbf{RF:} RF5.\theRF. \textbf{RD(s):} RDE5.\theRDE, RDW5.\theRDW \\
+\hspace*{1cm} \textit{Descripción:} Si se desea archivar una conversación, el usuario con el que se habla debe de existir, si no, se da un mensaje de error indicando que el usuario no existe y no modificando la base de datos. \\ [6pt]
+\stepcounter{RS}
+
+\textbf{\textcolor{verde}{\underline{RS5.\theRS:}}} Para archivar una conversación, debe de existir algún mensaje entre ambos usuarios. \\
+\textbf{RF:} RF5.\theRF. \textbf{RD(s):} RDE5.\theRDE, RDW5.\theRDW \\
+\hspace*{1cm} \textit{Descripción:} Si se desea archivar una conversación, tiene que haber algún mensaje por parte de alguno de los usuarios, de no ser así, se mostrará un error y se indicará que no existe dicha conversación, no modificando la base de datos. \\ [6pt]
+\stepcounter{RS}
+
+\stepcounter{RF}
 \stepcounter{RDE}
 \stepcounter{RDW}
-% ======================== %
-% RESTRICCIONES SEMÁNTICAS %
-% ======================== %
-\newcounter{RS} \setcounter{RS}{1}
-\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
-\textbf{\textcolor{verde}{\underline{RS5.\theRS:}}} Los mensajes sólo pueden enviarse entre usuarios que son amigos. \\
-\textbf{RF:} RF. \textbf{RD(s):} . \\
-\hspace*{1cm} \textit{Descripción:} Si se desea enviar un mensaje a un usuario del que no se es amigo, se devolverá un error indicando que se necesita ser amigos para poder enviar un mensaje. \\[6pt]
-\stepcounter{RS}
-
-\textbf{\textcolor{verde}{\underline{RS5.\theRS:}}} Los mensajes no se pueden enviar al propio usuario. \\
-\textbf{RF:} RF. \textbf{RD(s):} . \\
-\hspace*{1cm} \textit{Descripción:} Si se desea enviar un mensaje al propio usuario, se devolverá un error indicando que no se puede enviar un mensaje a uno mismo. \\[6pt]
-\stepcounter{RS}
-
-\textbf{\textcolor{verde}{\underline{RS5.\theRS:}}} Para el envío de mensajes, el mensaje debe tener al menos un carácter. \\
-\textbf{RF:} RF. \textbf{RD(s):} . \\
-\hspace*{1cm} \textit{Descripción:} Si se desea enviar un mensaje, dicho mensaje no puede estar vacío. \\ [6pt]
-\stepcounter{RS}
-
-\textbf{\textcolor{verde}{\underline{RS5.\theRS:}}} Para el envío de mensajes, el usuario receptor debe existir. \\
-\textbf{RF:} RF. \textbf{RD(s):} . \\
-\hspace*{1cm} \textit{Descripción:} Si se desea enviar un mensaje, el receptor debe existir. \\ [6pt]
-\stepcounter{RS}
 
 
