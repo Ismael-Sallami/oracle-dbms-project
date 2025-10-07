@@ -1,28 +1,146 @@
 \PassOptionsToPackage{table,dvipsnames}{xcolor}
 
 \section{Primer requisito funcional}
-\textbf{\textcolor{rojo}{\underline{RF1-U:}}} Crear usuario. 
+\textbf{\textcolor{rojo}{\underline{RF5.1:}}} Crear usuario. \\
 
 \textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un visitante crear un usuario en el sistema, asignándole un nombre de usuario y una contraseña.
-Opcionalmente, puede añadir una imagen de perfil y/o una breve biografía. 
+Opcionalmente, puede añadir una imagen de perfil y/o una breve biografía. \\
 
 \textbf{\textcolor{rojo}{Entrada:}} Agente externo: visitante. Acción: solicitar inserción.
-Requisito de datos de entrada \textcolor{azul}{RDE1.1}. 
-\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW1.1}. 
+Requisito de datos de entrada \textcolor{azul}{RDE5.1}.\\ 
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW5.1}. \\
 
 \textbf{\textcolor{rojo}{Salida:}} Agente externo: visitante. Acción: confirmación resultado.
 Requisito de datos de salida: ninguno.
 \pagebreak
 
-\textcolor{azul}{\textbf{RDE1.1:}} Datos de entrada de crear usuario. 
-\hspace*{1cm} Nombre de usuario: Cadena de caracteres (20)
-\hspace*{1cm} Correo electrónico: Cadena de caracteres (50)
-\hspace*{1cm} Contraseña: Cadena de caracteres (20)
-\hspace*{1cm} Imagen de perfil: Cadena de caracteres (255)
-\hspace*{1cm} Biografía: Cadena de caracteres (100) 
+\textcolor{azul}{\textbf{RDE5.1:}} Datos de entrada de crear usuario. \\
+\hspace*{1cm} Nombre de usuario: Cadena de caracteres (20)\\
+\hspace*{1cm} Correo electrónico: Cadena de caracteres (50)\\
+\hspace*{1cm} Contraseña: Cadena de caracteres (20)\\
+\hspace*{1cm} Imagen de perfil: Cadena de caracteres (255)\\
+\hspace*{1cm} Biografía: Cadena de caracteres (100) \\
 
-\textcolor{azul}{\textbf{RDW1.1:}} Datos almacenados del usuario. 
-\hspace*{1cm} Los mismos que RDE1.1 
-\hspace*{1cm} ID de usuario: Cadena de caracteres (40) 
-\hspace*{1cm} Fecha de creación: Cadena de caracteres (40) 
+\textcolor{azul}{\textbf{RDW5.1:}} Datos almacenados del usuario. \\
+\hspace*{1cm} Los mismos que RDE5.1 \\
+\hspace*{1cm} ID de usuario: Cadena de caracteres (40) \\
+\hspace*{1cm} Fecha de creación: Cadena de caracteres (40) \\
+\newpage
+
+
+\section{Segundo requisito funcional}
+\textbf{\textcolor{rojo}{\underline{RF5.2:}}} Modificar usuario. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario modificar sus datos en el sistema, incluyendo nombre de usuario, correo electrónico, contraseña, imagen de perfil y biografía. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{Entrada:}}} Agente externo: usuario. Acción: solicitar modificación. 
+Requisito de datos de entrada \textcolor{azul}{RDE5.2}. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{BD:}}} Requisito de datos de escritura \textcolor{azul}{RDW5.2}. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{Salida:}}} Agente externo: usuario. Acción: confirmación resultado. 
+Requisito de datos de salida: ninguno. \\[12pt]
+\pagebreak
+
+\textcolor{azul}{\textbf{RDE5.2:}} Datos de entrada de modificar usuario. \\[4pt]
+\hspace*{1cm} ID de usuario: Cadena de caracteres (40)\\
+\hspace*{1cm} Nombre de usuario: Cadena de caracteres (20)\\
+\hspace*{1cm} Correo electrónico: Cadena de caracteres (50)\\
+\hspace*{1cm} Contraseña: Cadena de caracteres (20)\\
+\hspace*{1cm} Imagen de perfil: Cadena de caracteres (255)\\
+\hspace*{1cm} Biografía: Cadena de caracteres (100)\\[8pt]
+
+\textcolor{azul}{\textbf{RDW5.2:}} Datos modificados del usuario. \\[4pt]
+\hspace*{1cm} Los mismos que RDE5.2\\
+\hspace*{1cm} Fecha de modificación: Cadena de caracteres (40)\\
+\newpage
+
+\section{Tercer requisito funcional}
+\textbf{\textcolor{rojo}{\underline{RF5.2:}}} Eliminar usuario. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario eliminar su cuenta del sistema, eliminando a su vez todos los datos personales asociados con la misma, como la contraseña, foto, etc. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{Entrada:}}} Agente externo: usuario. Acción: solicitar eliminación  de usuario. 
+Requisito de datos de entrada \textcolor{azul}{RDE5.2}. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{BD:}}} Requisito de datos de escritura \textcolor{azul}{RDW5.2}. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{Salida:}}} Agente externo: usuario. Acción: confirmación de eliminación. 
+Requisito de datos de salida: ninguno. \\[12pt]
+\pagebreak
+
+\textcolor{azul}{\textbf{RDE5.3:}} Datos de entrada de eliminar usuario. \\[4pt]
+\hspace*{1cm} ID de usuario: Cadena de caracteres (40)\\
+\hspace*{1cm} Contraseña: Cadena de caracteres (20)\\[8pt]
+
+\textcolor{azul}{\textbf{RDW5.3:}} Datos eliminados del usuario. \\[4pt]
+\hspace*{1cm} ID de usuario: Cadena de caracteres (40)\\
+\hspace*{1cm} Demas datos del RDW5.1\\
+\hspace*{1cm} Fecha de eliminación: Cadena de caracteres (40)\
+
+\newpage
+
+\section{Cuarto requisito funcional}
+\textbf{\textcolor{rojo}{\underline{RF5.4:}}} Bloquear usuario. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario bloquear a otro usuario en base a su ID. Bloquear a un usuario implica que ninguno de los dos podrá interactuar con las publicaciones, comentarios o mensajes del otro dentro del sistema. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{Entrada:}}} Agente externo: usuario. Acción: bloquear a un usuario.
+Requisito de datos de entrada \textcolor{azul}{RDE5.4}. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{BD:}}} Requisito de datos de escritura \textcolor{azul}{RDW5.4}.\\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{Salida:}}} Agente externo: usuario. Acción: confirmación resultado.
+Requisito de datos de salida: ninguno.\\[12pt]
+\pagebreak
+
+\textcolor{azul}{\textbf{RDE5.4:}} Datos de entrada de bloquear usuario. \\[4pt]
+\hspace*{1cm} ID de usuario emisor: Cadena de caracteres (32)\\
+\hspace*{1cm} ID de usuario a bloquear: Cadena de caracteres (32)\\
+\hspace*{1cm} Fecha de bloqueo: Cadena de caracteres (40)\\[8pt]
+
+\textcolor{azul}{\textbf{RDW5.4:}} Datos sobre el usuario bloqueado. \\[4pt]
+\hspace*{1cm} Se añade el ID del usuario bloqueado a la lista de usuarios bloqueados del \hspace*{1cm} emisor.\\
+\hspace*{1cm} Estado de relación: Cadena de caracteres (15) — (“bloqueado”)\\
+\hspace*{1cm} Fecha de bloqueo: Cadena de caracteres (40)\\[8pt]
+
+\textcolor{purple}{\textbf{Restricciones semánticas:}} \\[4pt]
+\hspace*{1cm} Un usuario no puede bloquearse a sí mismo.\\
+\hspace*{1cm} No se puede bloquear a un usuario inexistente o eliminado.\\
+\hspace*{1cm} Si un usuario ya está bloqueado, no se permite volverlo a bloquear.\\
+\hspace*{1cm} El bloqueo impide la visualización, comentario o interacción con las  publicaciones del usuario bloqueado.\\
+\hspace*{1cm} El desbloqueo solo puede realizarlo el usuario que realizó el bloqueo.\\
+\hspace*{1cm} En caso de eliminación de cuenta, los bloqueos asociados se eliminan automáticamente, asimismo si el usuario bloqueado elimina su cuenta, se elimina el bloqueo asociado con la misma puesto que esta ya no existe.\\
+\newpage
+
+\section{Quinto requisito funcional}
+\textbf{\textcolor{rojo}{\underline{RF5.5:}}} Añadir Amigo \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario añadir a otro usuario como amigo vía búsqueda con el nombre de dicho usuario y su id. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{Entrada:}}} Agente externo: usuario. Acción: Añadir como amigo a un usuario.
+Requisito de datos de entrada \textcolor{azul}{RDE5.5}. \\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{BD:}}} Requisito de datos de escritura \textcolor{azul}{RDW5.5}.\\[6pt]
+
+\textbf{\textcolor{rojo}{\underline{Salida:}}} Agente externo: usuario. Acción: confirmación resultado.
+Requisito de datos de salida: ninguno.\\[12pt]
+\pagebreak
+
+\textcolor{azul}{\textbf{RDE5.5:}} Datos de entrada de añadir amigo. \\[4pt]
+\hspace*{1cm} ID de usuario emisor: Cadena de caracteres (32)\\
+\hspace*{1cm} ID de usuario a añadir como amigo: Cadena de caracteres (32)\\
+\hspace*{1cm} Fecha de amistad: Cadena de caracteres (40)\\[8pt]
+
+textcolor{azul}{\textbf{RDW5.5:}} Datos sobre el usuario añadido como amigo. \\[4pt]
+\hspace*{1cm} Se añade el ID del usuario añadido a la lista de amigos del emisor.\\
+\hspace*{1cm} Estado de relación: Cadena de caracteres (15) — (“amigo”)\\
+\hspace*{1cm} Fecha de añadido: Cadena de caracteres (40)\\[8pt]
+
+\textcolor{purple}{\textbf{Restricciones semánticas:}} \\[4pt]
+\hspace*{1cm} Un usuario no puede añadirse a sí mismo como amigo.\\
+\hspace*{1cm} No se puede añadir a un usuario inexistente o eliminado.\\
+\hspace*{1cm} Si un usuario ya es amigo, no se permite volverlo a añadir.\\
+
+\hspace*{1cm} En caso de eliminación de cuenta, las amistades asociadas se eliminan automáticamente.\\
 \newpage
