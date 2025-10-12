@@ -225,20 +225,33 @@ manychapters,pdfspacing]{classicthesis}
     font=\bfseries\small
 ] % Proceso
 
-\tikzstyle{almacen} = [
-    rectangle, draw, thick, 
-    minimum width=3cm, minimum height=1cm, 
-    fill=yellow!20, 
-    text centered, inner sep=5pt,
-    font=\bfseries\small,
-    % Comando para dibujar las líneas laterales que simulan el rectángulo abierto
-    append after command={
-        \pgfextra{
-            \draw[thick] (\tikzlastnode.north west) -- (\tikzlastnode.south west);
-            \draw[thick] (\tikzlastnode.north east) -- (\tikzlastnode.south east);
+\tikzset{
+    almacen/.style={
+        rectangle,
+        minimum width=3cm,
+        minimum height=1cm,
+        fill=yellow!20,
+        text centered,
+        inner sep=5pt,
+        font=\bfseries\small,
+        draw=none, % no dibuja borde automático
+        append after command={
+            \pgfextra{
+                % Dibuja todos los lados excepto el derecho
+                \draw[thick]
+                    (\tikzlastnode.north west) --
+                    (\tikzlastnode.north east) --
+                    (\tikzlastnode.south east) --
+                    (\tikzlastnode.south west) -- cycle;
+                % Borra (no dibujamos) el lado derecho
+                \draw[white, line width=3pt]
+                    (\tikzlastnode.north east) --
+                    (\tikzlastnode.south east);
+            }
         }
     }
-] % Almacén de datos (Base de Datos)
+}
+
 
 \tikzstyle{flujo} = [
   ->, very thick, >=stealth, 

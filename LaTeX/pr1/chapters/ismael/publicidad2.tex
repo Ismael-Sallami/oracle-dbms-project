@@ -43,7 +43,7 @@ Se puede observar en la figura \ref{fig:dfd1_pub} el Diagrama de Flujo de Datos 
 
         % % RF3.4: Modificar Anuncio
         \draw[flujo] (Admin.east) -- node[pos=0.3, right, xshift=-1pt, yshift=-30pt] {RDE3.4} (RF34.west);
-        \draw[flujo] (RF34.south) |- ++(4,-1) -| node[pos=0.3, right, xshift=8pt] {RDW3.4} (BD.east);
+        \draw[flujo] (RF34.south) |- ++(0,-1) -| node[pos=0.3, above, xshift=8pt] {RDW3.4} (BD.north);
 
         % % RF3.5: Consultar Anuncio
         \draw[flujo] (BD.south east) |- ++(1,-1) -| node[pos=0.7, right, xshift=8pt] {RDR3.5} (RF35.south);
