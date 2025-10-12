@@ -41,10 +41,10 @@ Requisito de datos de salida: ninguno. \\[12pt]
 \hspace*{1cm} Los mismos datos que RDE3.1. \\[12pt]
 
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
-\textbf{\textcolor{verde}{\underline{RS3.1:}}} El Identificador del Anuncio debe ser único. \textbf{RF:} RF3.1. \textbf{RD(s):} RDW3.1. \\
+\textbf{\textcolor{verde}{\underline{RS3.1.1:}}} El Identificador del Anuncio debe ser único. \textbf{RF:} RF3.1. \textbf{RD(s):} RDW3.1. \\
 \hspace*{1cm} \textit{Descripción:} Si ya existe un anuncio con el mismo identificador, no se inserta el nuevo anuncio y se devuelve un error. \\[6pt]
 
-\textbf{\textcolor{verde}{\underline{RS3.2:}}} La fecha de fin debe ser posterior a la fecha de inicio. \textbf{RF:} RF3. \textbf{RD(s):} RDE3.1. \\
+\textbf{\textcolor{verde}{\underline{RS3.1.2:}}} La fecha de fin debe ser posterior a la fecha de inicio. \textbf{RF:} RF3.1 \textbf{RD(s):} RDE3.1. \\
 \hspace*{1cm} \textit{Descripción:} Si la fecha de fin no es posterior a la fecha de inicio, la inserción es rechazada y se devuelve un mensaje de error.
 
 \section{Añadir característica a un anuncio del público objetivo}
@@ -98,7 +98,7 @@ Requisito de datos de salida: ninguno. \\[12pt]
 \textbf{\textcolor{rojo}{Entrada:}} Agente externo: administrador. Acción: solicitar modificación de un anuncio existente. 
 Requisito de datos de entrada \textcolor{azul}{RDE3.4}. \\[6pt]
 
-\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RD3.4}. \\[6pt]
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW3.4}. \\[6pt]
 
 \textbf{\textcolor{rojo}{Salida:}} Agente externo: administrador. Acción: confirmación del resultado de la modificación. 
 Requisito de datos de salida: ninguno. \\[12pt]
