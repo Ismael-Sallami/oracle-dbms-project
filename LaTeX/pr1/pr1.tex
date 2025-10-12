@@ -201,6 +201,72 @@ manychapters,pdfspacing]{classicthesis}
 \theoremstyle{plain}
 \newtheorem{problemth}{Problema}
 
+%Tikz styles para la práctica 2 de ddsi
+\usepackage{tikz}
+\usetikzlibrary{
+    calc,           % Para cálculos de coordenadas
+    positioning,    % Para colocar nodos de manera relativa (ej: below of)
+    shapes,         % Para formas avanzadas (diamantes, elipses, etc.)
+    arrows,         % Para estilos de flechas
+    fit             % Para ajustar un nodo a un conjunto de nodos
+}
+
+\tikzstyle{agente} = [
+    rectangle, draw, thick, 
+    minimum width=2.5cm, minimum height=1cm, 
+    fill=blue!15, text centered, 
+    font=\bfseries\small
+] % Agente Externo
+
+\tikzstyle{proceso} = [
+    rectangle, rounded corners=5pt, draw, thick, 
+    minimum width=2.5cm, minimum height=1cm, 
+    fill=green!20, text centered, 
+    font=\bfseries\small
+] % Proceso
+
+\tikzstyle{almacen} = [
+    rectangle, draw, thick, 
+    minimum width=3cm, minimum height=1cm, 
+    fill=yellow!20, 
+    text centered, inner sep=5pt,
+    font=\bfseries\small,
+    % Comando para dibujar las líneas laterales que simulan el rectángulo abierto
+    append after command={
+        \pgfextra{
+            \draw[thick] (\tikzlastnode.north west) -- (\tikzlastnode.south west);
+            \draw[thick] (\tikzlastnode.north east) -- (\tikzlastnode.south east);
+        }
+    }
+] % Almacén de datos (Base de Datos)
+
+\tikzstyle{flujo} = [
+  ->, very thick, >=stealth, 
+  font=\small
+] % Flujo de datos
+
+\tikzset{
+  flujo/.style={->, thick, shorten >=6pt, shorten <=6pt, to path={-| (\tikztotarget)}}
+}
+
+\tikzset{
+  flujo/.style={
+    ->, thick,
+    shorten >=6pt, shorten <=6pt,
+    rounded corners=8pt, % esquinas redondeadas para rodear nodos
+  },
+  autoavoid/.style={
+    to path={
+      % Intenta evitar otras flechas usando out/in y bend
+      [rounded corners=12pt]
+      |- (\tikztotarget)
+      \tikztonodes
+    }
+  }
+}
+
+
+
 
 \begin{document}
 
@@ -285,7 +351,22 @@ manychapters,pdfspacing]{classicthesis}
 % chapter{parte de cada uno}
 % \input{chapters/nombre/parte.tex}
 
+\part{Práctica 2}
 
+\chapter{Publicaciones}
+\input{chapters/javi/comunidades2.tex}
+
+\chapter{Tendencias}
+\input{chapters/jesus/tendencias2.tex}
+
+\chapter{Publicidad}
+\input{chapters/ismael/publicidad2.tex}
+
+\chapter{Usuarios}
+\input{chapters/fer/usuarios2.tex}
+
+\chapter{Mensajería Privada}
+\input{chapters/sergio/mensajeria2.tex}
 
 % ----------------------- %
 % BIBLIOGRAFÍA

@@ -1,0 +1,55 @@
+\chapter{Publicidad}
+
+En este apartado abordaremos la parte correspondiente a la práctica 2 de la asginatura.
+
+Se puede observar en la figura \ref{fig:dfd1_pub} el Diagrama de Flujo de Datos (DFD) de nivel 1 del subsistema de publicidad. En este diagrama se representan los diferentes procesos, almacenes de datos, agentes externos y flujos de datos que componen el subsistema.
+
+\begin{figure}[h!]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[node distance=6cm, auto]
+
+        % ==== 1. Agentes Externos ====
+        \node[agente, minimum width=4cm, minimum height=1.2cm, inner sep=8pt] (Admin) {Administrador};
+        \node[agente, right of=Admin, node distance=14cm, minimum width=4cm, minimum height=1.2cm, inner sep=8pt] (Sistema) {Sistema};
+
+        % ==== 2. Almacén de Datos (BD) ====
+        \node[almacen, below of=Admin, node distance=12cm, xshift=7cm, minimum width=6cm, inner sep=10pt] (BD) {BD EKIS (Publicidad)};
+
+        % ==== 3. Procesos (RFs) ====
+        \node[proceso, below of=Admin, node distance=5cm, xshift=-3cm, minimum width=4.5cm, inner sep=8pt] (RF31) {RF3.1: Añadir Anuncio};
+        \node[proceso, below of=RF31, node distance=4cm, minimum width=4.5cm, inner sep=8pt] (RF32) {RF3.2: Añadir Característica};
+        \node[proceso, right of=RF31, node distance=8cm, minimum width=4.5cm, inner sep=8pt] (RF33) {RF3.3: Eliminar Anuncio};
+        \node[proceso, below of=RF33, node distance=4cm, minimum width=4.5cm, inner sep=8pt] (RF34) {RF3.4: Modificar Anuncio};
+        \node[proceso, right of=RF34, node distance=8cm, minimum width=4.5cm, inner sep=8pt] (RF35) {RF3.5: Consultar Anuncio};
+
+        % ==== 4. Flujos ====
+
+        % % RF3.5 <-> Sistema
+        \draw[flujo] (Sistema.south) -- node[midway, right, yshift=8pt] {RDE3.5} (RF35.north);
+        \draw[flujo] (RF35.east) -- ++(1,0) |- node[pos=0.25, right, xshift=8pt] {RDS3.5} (Sistema.south east);
+
+        % % RF3.1: Añadir Anuncio
+        \draw[flujo] (Admin.south) |- ++(0,-2) -| node[pos=0.3, right, yshift=6pt] {RDE3.1} (RF31.north);
+        \draw[flujo, autoavoid] (RF31.east) to[out=0, in=180, looseness=1.2] node[midway, left, yshift=6pt] {RDW3.1} (BD.west);
+
+        % % RF3.2: Añadir Característica
+        \draw[flujo, autoavoid] (Admin.south west) |- ++(-1,-1) -| node[pos=0.2, above, xshift=-8pt] {RDE3.2} (RF32.west);
+        \draw[flujo] (RF32.south) |- ++(0,-5) -| node[pos=0.4, above, xshift=-8pt] {RDW3.2} (BD.south);
+
+        % % RF3.3: Eliminar Anuncio
+        \draw[flujo] (Admin.south) |- ++(0,-2) -| node[pos=0.3, above, yshift=6pt] {RDE3.3} (RF33.north);
+        \draw[flujo] (RF33.east) to[out=0, in=0] node[pos=0.3, left, xshift=-6pt] {RDW3.3 / RDR3.3} (BD.north);
+
+        % % RF3.4: Modificar Anuncio
+        \draw[flujo] (Admin.east) -- node[pos=0.3, right, xshift=-1pt, yshift=-30pt] {RDE3.4} (RF34.west);
+        \draw[flujo] (RF34.south) |- ++(4,-1) -| node[pos=0.3, right, xshift=8pt] {RDW3.4} (BD.east);
+
+        % % RF3.5: Consultar Anuncio
+        \draw[flujo] (BD.south east) |- ++(1,-1) -| node[pos=0.7, right, xshift=8pt] {RDR3.5} (RF35.south);
+
+    \end{tikzpicture}
+    } % Fin del resizebox
+    \caption{DFD1 - Subsistema de Publicidad }
+    \label{fig:dfd1_pub}
+\end{figure}

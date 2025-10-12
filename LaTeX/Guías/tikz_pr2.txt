@@ -1,0 +1,94 @@
+\begin{figure}[h!]
+    \centering
+    % Ajusta el tamaño del diagrama al ancho del documento (opcional)
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[node distance=5cm, auto]
+
+        % ======================================================
+        % === 1. AGENTES EXTERNOS ===============================
+        % ======================================================
+        % Los "agentes" representan entidades externas al sistema
+        % Ejemplo: usuarios, sistemas externos, administradores, etc.
+
+        \node[agente, minimum width=4cm, minimum height=1.2cm] (Agente1) {Usuario};
+        \node[agente, right of=Agente1, node distance=14cm] (Agente2) {Sistema Externo};
+
+        % ======================================================
+        % === 2. ALMACÉN DE DATOS ===============================
+        % ======================================================
+        % Representan bases de datos o repositorios.
+        % Suelen ser cilindros o rectángulos especiales.
+
+        \node[almacen, below of=Agente1, node distance=10cm, xshift=7cm, minimum width=6cm] (BD1) {BD Principal};
+
+        % ======================================================
+        % === 3. PROCESOS (FUNCIONES O RFs) =====================
+        % ======================================================
+        % Cada proceso es una función, requisito funcional (RFx.x) o tarea.
+        % Se ubican entre los agentes y los datos.
+
+        \node[proceso, below of=Agente1, node distance=4cm, xshift=-3cm, minimum width=4.5cm] (P1) {RF1.1: Registrar Usuario};
+        \node[proceso, below of=P1, node distance=4cm, minimum width=4.5cm] (P2) {RF1.2: Consultar Información};
+        \node[proceso, right of=P1, node distance=8cm, minimum width=4.5cm] (P3) {RF1.3: Actualizar Datos};
+        \node[proceso, below of=P3, node distance=4cm, minimum width=4.5cm] (P4) {RF1.4: Generar Reporte};
+
+        % ======================================================
+        % === 4. FLUJOS DE DATOS ================================
+        % ======================================================
+        % Usa \draw[flujo] para representar conexiones.
+        % Puedes añadir etiquetas con node[pos=..., ...]{Texto}.
+        % Ejemplos:
+        %   RDE = Requisito de entrada (data entrada)
+        %   RDS = Requisito de salida (data salida)
+        %   RDW = Escritura a BD
+        %   RDR = Lectura desde BD
+
+        % ------------------------------------------------------
+        % Ejemplo de flujo entre Agente y Proceso
+        % ------------------------------------------------------
+        \draw[flujo, ->] (Agente1.south) |- ++(0,-1) -| node[pos=0.4, right] {RDE 1.1} (P1.north);
+
+        % ------------------------------------------------------
+        % Ejemplo de flujo entre Proceso y Almacén de Datos
+        % ------------------------------------------------------
+        \draw[flujo, ->] (P1.east) to[out=0, in=180, looseness=1.1] node[midway, above] {RDW 1.1} (BD1.west);
+
+        % ------------------------------------------------------
+        % Ejemplo de flujo desde Almacén a Proceso
+        % ------------------------------------------------------
+        \draw[flujo, ->] (BD1.south west) |- ++(-2,-1) -| node[pos=0.6, above] {RDR 1.2} (P2.south);
+
+        % ------------------------------------------------------
+        % Ejemplo de flujo entre Procesos
+        % ------------------------------------------------------
+        \draw[flujo, ->] (P1.south) -- node[midway, right] {RDF interno} (P2.north);
+
+        % ------------------------------------------------------
+        % Ejemplo de flujo entre Proceso y Agente externo
+        % ------------------------------------------------------
+        \draw[flujo, ->] (P4.east) -- ++(2,0) |- node[pos=0.3, right] {RDS 1.4} (Agente2.south);
+
+    \end{tikzpicture}
+    } % Fin del resizebox
+    \caption{DFD genérico — Ejemplo de estructura con agentes, procesos y almacenes de datos}
+    \label{fig:dfd_generico}
+\end{figure}
+
+- En el caso de que pongamos \draw la sintaxis va en este orden:
+    1. estilo, simbolo (en este caso ->)
+    2. inicio
+    3. -- (que indica flecha) (además podemos añadir desplazamientos y demás para cuadrar las uniones)
+    4. Añadimos node para que el contenido del punto 5 se ponga donde queremos, podemos usar como punto de referencia la línea en sí
+    5. entre llaves el contenido de donde queremos en la línea
+    6. destino
+    7. añadir ;
+
+- En el caso de poner \node :
+    1. indicamos el estilo
+    2. posicion relativa, añadir desplazamientos en el eje cartesiano,...
+    3. entre paréntesis el nombre del nodo para hacer referencia de manera interna
+    4. entre llaves el texto que se verá en el pdf
+
+
+El resto se supone que ya sabemos hacerlo como definir entornos, añadir caption, resizebox y demás.
+
