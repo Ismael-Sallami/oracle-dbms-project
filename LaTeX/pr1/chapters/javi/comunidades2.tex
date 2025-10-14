@@ -1,0 +1,102 @@
+
+En este apartado abordaremos la parte correspondiente a la práctica 2 de la asginatura.
+Se puede observar en la figura \ref{fig:dfd_publi} el Diagrama de Flujo de Datos (DFD) 
+de nivel 1 del subsistema de publicidad. En este diagrama se representan los diferentes 
+procesos, almacenes de datos, agentes externos y flujos de datos que componen el subsistema.
+
+\begin{figure}[h!]
+    \centering
+    % Ajusta el tamaño del diagrama al ancho del documento (opcional)
+    \shorthandoff{<>}
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[node distance=5cm, auto]
+
+        % ======================================================
+        % === 1. AGENTES EXTERNOS ===============================
+        % ======================================================
+        % Los "agentes" representan entidades externas al sistema
+        % Ejemplo: usuarios, sistemas externos, administradores, etc.
+
+        \node[agente, minimum width=4cm, minimum height=1.2cm] (Agente1) {Usuario};
+        %\node[agente, right of=Agente1, node distance=14cm] (Agente2) {Sistema Externo};
+
+        % ======================================================
+        % === 2. ALMACÉN DE DATOS ===============================
+        % ======================================================
+        % Representan bases de datos o repositorios.
+        % Suelen ser cilindros o rectángulos especiales.
+
+        \node[almacen, below of=Agente1, node distance=10cm, xshift=7cm, minimum width=6cm] (BD1) {BD EKIS};
+
+        % ======================================================
+        % === 3. PROCESOS (FUNCIONES O RFs) =====================
+        % ======================================================
+        % Cada proceso es una función, requisito funcional (RFx.x) o tarea.
+        % Se ubican entre los agentes y los datos.
+
+        \node[proceso, below of=Agente1, node distance=3cm, xshift=-3cm, minimum width=4.5cm] (P1) {RF1.1: Crear publicación};
+        \node[proceso, below of=P1, node distance=4cm, minimum width=4.5cm] (P2) {RF1.2: Modificar publicación};
+        \node[proceso, right of=P1, node distance=8cm, minimum width=4.5cm] (P4) {RF1.4: Dar me gusta a una publicación};
+        \node[proceso, right of=Agente1, node distance=6cm, xshift=3cm, minimum width=4.5cm] (P5) {RF1.5: Eliminar publicación};
+        \node[proceso, below of=P4, node distance=2cm, minimum width=4.5cm] (P3) {RF1.3: Listar publicaciones};
+
+        % ======================================================
+        % === 4. FLUJOS DE DATOS ================================
+        % ======================================================
+        % Usa \draw[flujo] para representar conexiones.
+        % Puedes añadir etiquetas con node[pos=..., ...]{Texto}.
+        % Ejemplos:
+        %   RDE = Requisito de entrada (data entrada)
+        %   RDS = Requisito de salida (data salida)
+        %   RDW = Escritura a BD
+        %   RDR = Lectura desde BD
+
+        % ------------------------------------------------------
+        % Ejemplo de flujo entre Agente y Proceso (RDE)
+        % ------------------------------------------------------
+        \draw[flujo, ->] (Agente1.south west) ++(0.2,0) |- ++(0,-1) -| node[pos=0.7, right] {RDE 1.1} (P1.north);
+        \draw[flujo, ->] (Agente1.west) |- ++(0,-1) -| node[pos=0.53, top] {RDE 1.2} (P2.north west);
+        %RF1.3 no tiene RDE
+        \draw[flujo, ->] (Agente1.south east) -| node[pos=0.6, left] {RDE 1.3} (P4.north);
+        \draw[flujo, ->] (Agente1.east) -- node[pos=0.4, top] {RDE 1.4} (P5.west);
+        
+        % Proceso a Agente (RDS)
+        %RF1.1 no tiene RDS
+        \draw[flujo, ->] (P2.west) -- ++(-0.8,0) -| ++(-0.8,7) -- node[pos=0.4, top] {RDS 1.1} (Agente1.west);
+        \draw[flujo, ->] (P3.west) -- node[pos=0.55, bottom] {RDS 1.2} ++(-1.5,0) |- ++(-0.97,2.5) -- (Agente1.south);
+        \coordinate (elbow) at ($(P4.north west)+(0,1.875)$); 
+        \draw[flujo, ->] (P4.north west) -- (elbow) node[pos=0.2, right] {RDS 1.3};
+
+        % ------------------------------------------------------
+        % Ejemplo de flujo entre Proceso y Almacén de Datos (RDW)
+        % ------------------------------------------------------
+        \draw[flujo, ->] (P1.east) -- ++(1.0,0) |- ++(1.0,-7) node[pos = 0.25, top] {RDW 1.1} -- (BD1.west);
+        \draw[flujo, ->] (P2.south east) -- node[post = 0.1, left] {RDW 1.2} ++(0, -3) -- (BD1.south west);
+        %RF1.3 no genera ningún RDW
+        \draw[flujo, ->] (P4.east) |- ++(-1.6, -3) -- node[pos = 0.1, bottom] {RDW 1.3} (BD1.north);
+        \draw[flujo, ->] (P5.east) -- ++(0.5, 0) |- node[pos=0.68, bottom] {RDW 1.4} (BD1.east);
+        %\draw[flujo, ->] (P5) -- (BD1); %ESTA LINEA
+
+        % ------------------------------------------------------
+        % Ejemplo de flujo desde Almacén a Proceso (RDR)
+        % ------------------------------------------------------
+        %RF1.1 no genera ningún RDR
+        \draw[flujo, ->] (BD1.west) |- ++(-2,-1) -| node[pos=0.6, left] {RDR 1.1} (P2.south);
+        \draw[flujo, ->] (BD1.north west) ++(0,-0.2) -- ++(0,2) node[pos=0.8, right] {RDR 1.2} -| (P3.south);
+        \draw[flujo, ->] (BD1.north east) -- node[pos=0.2, left] {RDR 1.3} ++(0,6.49) -- (P4.east);
+
+        % ------------------------------------------------------
+        % Ejemplo de flujo entre Procesos
+        % ------------------------------------------------------
+        %\draw[flujo, ->] (P1.south) -- node[midway, right] {RDF interno} (P2.north);
+
+        % ------------------------------------------------------
+        % Ejemplo de flujo entre Proceso y Agente externo
+        % ------------------------------------------------------
+        %\draw[flujo, ->] (P4.east) -- ++(2,0) |- node[pos=0.3, right] {RDS 1.4} (Agente2.south);
+
+    \end{tikzpicture}
+    } % Fin del resizebox
+    \caption{DFD1 — Subsistema de publicaciones}
+    \label{fig:dfd_publi}
+\end{figure}
