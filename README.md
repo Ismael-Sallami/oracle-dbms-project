@@ -1,6 +1,6 @@
 # Info Pibes S.A
 Contenido de las prácticas:
-## [Práctica 1](LaTeX/pr1/pr1.pdf)
+## Práctica 1 :gear:
 _**Diseño y desarrollo de un Sistema de Información sobre una temática (Red social).**_
 
 - Nombre del sistema
