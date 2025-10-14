@@ -9,7 +9,8 @@ _**Diseño y desarrollo de un Sistema de Información sobre una temática (Red s
     - Requisitos funcionales con sus requisitos de datos
     - Restricciones semánticas.
 
-> [!WARNING] Falta los requisitos semánticos de la parte de usuarios
+> [!WARNING] 
+Falta los requisitos semánticos de la parte de usuarios
 
 ## Práctica 2 :gear:
 _**Diseño de diagramas de flujo de datos y de esquemas externos para cada subsistema.**_
