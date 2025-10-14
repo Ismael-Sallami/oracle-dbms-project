@@ -103,14 +103,26 @@ Requisito de datos de salida: ninguno.\\[12pt]
 \hspace*{1cm} Estado de relación: Cadena de caracteres (15) — (“bloqueado”)\\
 \hspace*{1cm} Fecha de bloqueo: Fecha\\[8pt]
 
-\textcolor{purple}{\textbf{Restricciones semánticas:}} \\[4pt]
-\hspace*{1cm} Un usuario no puede bloquearse a sí mismo.\\
-\hspace*{1cm} No se puede bloquear a un usuario inexistente o eliminado.\\
-\hspace*{1cm} Si un usuario ya está bloqueado, no se permite volverlo a bloquear.\\
-\hspace*{1cm} El bloqueo impide la visualización, comentario o interacción con las  publicaciones del usuario bloqueado.\\
-\hspace*{1cm} El desbloqueo solo puede realizarlo el usuario que realizó el bloqueo.\\
-\hspace*{1cm} En caso de eliminación de cuenta, los bloqueos asociados se eliminan automáticamente, asimismo si el usuario bloqueado elimina su cuenta, se elimina el bloqueo asociado con la misma puesto que esta ya no existe.\\
-\newpage
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+
+\textbf{\textcolor{verde}{\underline{RS4.1:}}} Un usuario no puede bloquearse a sí mismo. \textbf{RF:} RF4. \textbf{RD(s):} RDE4.1. \\ 
+\hspace*{1cm} \textit{Descripción:} El sistema debe impedir que un usuario intente bloquear su propia cuenta, mostrando un mensaje de error si lo intenta. \\[4pt]
+
+\textbf{\textcolor{verde}{\underline{RS4.2:}}} No se puede bloquear a un usuario inexistente o eliminado. \textbf{RF:} RF4. \textbf{RD(s):} RDE4.1. \\ 
+\hspace*{1cm} \textit{Descripción:} Si el usuario objetivo no existe o su cuenta fue eliminada, la acción de bloqueo es rechazada. \\[4pt]
+
+\textbf{\textcolor{verde}{\underline{RS4.3:}}} No se puede volver a bloquear un usuario ya bloqueado. \textbf{RF:} RF4. \textbf{RD(s):} RDE4.1. \\ 
+\hspace*{1cm} \textit{Descripción:} El sistema verifica si el usuario ya se encuentra bloqueado y, de ser así, impide duplicar el bloqueo. \\[4pt]
+
+\textbf{\textcolor{verde}{\underline{RS4.4:}}} El bloqueo impide la interacción con las publicaciones del usuario bloqueado. \textbf{RF:} RF4. \textbf{RD(s):} RDE4.1. \\ 
+\hspace*{1cm} \textit{Descripción:} Una vez bloqueado un usuario, no se permite visualizar, comentar ni reaccionar a sus publicaciones. \\[4pt]
+
+\textbf{\textcolor{verde}{\underline{RS4.5:}}} Solo quien realizó el bloqueo puede desbloquear. \textbf{RF:} RF4. \textbf{RD(s):} RDE4.1. \\ 
+\hspace*{1cm} \textit{Descripción:} El desbloqueo solo puede ejecutarse por el usuario que originó el bloqueo. \\[4pt]
+
+\textbf{\textcolor{verde}{\underline{RS4.6:}}} Los bloqueos se eliminan si la cuenta asociada deja de existir. \textbf{RF:} RF4. \textbf{RD(s):} RDE4.1. \\ 
+\hspace*{1cm} \textit{Descripción:} Cuando un usuario elimina su cuenta o es eliminado, los bloqueos asociados se eliminan automáticamente, al igual que si el usuario bloqueado borra*
+
 
 \section{Quinto requisito funcional}
 \textbf{\textcolor{rojo}{\underline{RF4.5:}}} Añadir Amigo \\[6pt]
@@ -136,10 +148,17 @@ textcolor{azul}{\textbf{RDW4.5:}} Datos sobre el usuario añadido como amigo. \\
 \hspace*{1cm} Estado de relación: Cadena de caracteres (15) — (“amigo”)\\
 \hspace*{1cm} Fecha de añadido: Fecha\\[8pt]
 
-\textcolor{purple}{\textbf{Restricciones semánticas:}} \\[4pt]
-\hspace*{1cm} Un usuario no puede añadirse a sí mismo como amigo.\\
-\hspace*{1cm} No se puede añadir a un usuario inexistente o eliminado.\\
-\hspace*{1cm} Si un usuario ya es amigo, no se permite volverlo a añadir.\\
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
 
-\hspace*{1cm} En caso de eliminación de cuenta, las amistades asociadas se eliminan automáticamente.\\
+\textbf{\textcolor{verde}{\underline{RS4.1:}}} Un usuario no puede añadirse a sí mismo como amigo. \textbf{RF:} RF4. \textbf{RD(s):} RDE4.1. \\ 
+\hspace*{1cm} \textit{Descripción:} El sistema debe impedir que un usuario intente agregarse a sí mismo como amigo, mostrando un mensaje de error si lo hace. \\[4pt]
+
+\textbf{\textcolor{verde}{\underline{RS4.2:}}} No se puede añadir a un usuario inexistente o eliminado. \textbf{RF:} RF4. \textbf{RD(s):} RDE4.1. \\ 
+\hspace*{1cm} \textit{Descripción:} Si el usuario objetivo no existe o su cuenta fue eliminada, la solicitud de amistad es rechazada. \\[4pt]
+
+\textbf{\textcolor{verde}{\underline{RS4.3:}}} No se puede volver a añadir a un usuario que ya es amigo. \textbf{RF:} RF4. \textbf{RD(s):} RDE4.1. \\ 
+\hspace*{1cm} \textit{Descripción:} El sistema verifica si el usuario ya se encuentra en la lista de amigos y, de ser así, impide duplicar la solicitud. \\[4pt]
+
+\textbf{\textcolor{verde}{\underline{RS4.4:}}} Las amistades se eliminan si la cuenta asociada deja de existir. \textbf{RF:} RF4. \textbf{RD(s):} RDE4.1. \\ 
+\hspace*{1cm} \textit{Descripción:} Cuando un usuario elimina su cuenta o es eliminado, las relaciones de amistad asociadas se eliminan automáticamente.
 \newpage
