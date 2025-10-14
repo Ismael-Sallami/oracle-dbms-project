@@ -19,11 +19,14 @@ _**Diseño de diagramas de flujo de datos y de esquemas externos para cada subsi
 - Tablas del esquema E/R
 - Dependencias funcionales, proceso de Normalización realizado yconjunto de tablas obtenido de dicho proceso, junto con las claves primarias y externas correspondientes.
 
-> [!NOTE] Caja negra: Se concibe el SI como un solo proceso, conectado con todos los agentes externos y flujos de datos
+> [!NOTE] 
+Caja negra: Se concibe el SI como un solo proceso, conectado con todos los agentes externos y flujos de datos
 
-> [!NOTE] Esquema armazón o DFD0: Cada subsistema representado como un sólo proceso, con flujos de datos con la/s base/s de datos
+> [!NOTE] 
+Esquema armazón o DFD0: Cada subsistema representado como un sólo proceso, con flujos de datos con la/s base/s de datos
 
-> [!IMPORTANT] Se hacen de más distendido a menos (DFD1, DFD0 y caja negra)
+> [!IMPORTANT] 
+Se hacen de más distendido a menos (DFD1, DFD0 y caja negra)
 
 - [ ] Caja negra
 - [ ] Armazón
