@@ -30,19 +30,24 @@ Se puede observar en la figura \ref{fig:dfd1_pub} el Diagrama de Flujo de Datos 
         \draw[flujo] (RF35.east) -- ++(1,0) |- node[pos=0.25, right, xshift=8pt] {RDS3.5} (Sistema.south east);
 
         % % RF3.1: Añadir Anuncio
-        \draw[flujo] (Admin.south) |- ++(0,-2) -| node[pos=0.3, right, yshift=6pt] {RDE3.1} (RF31.north);
-        \draw[flujo, autoavoid] (RF31.east) to[out=0, in=180, looseness=1.2] node[midway, left, yshift=6pt] {RDW3.1} (BD.west);
+        \draw[flujo] (Admin.south) -| ++(0,-2) -| node[pos=0.3, right, yshift=6pt] {RDE3.1} (RF31.north);
+        % \draw[flujo, autoavoid] (RF31.east) to[out=0, in=180, looseness=1.2] node[midway, left, yshift=6pt] {RDW3.1} (BD.west);
+        \draw[flujo, autoavoid] (RF31.east) -- ++(2,0) |- node[midway, left, yshift=6pt] {RDW3.1} (BD.west);
 
         % % RF3.2: Añadir Característica
-        \draw[flujo, autoavoid] (Admin.south west) |- ++(-1,-1) -| node[pos=0.2, above, xshift=-8pt] {RDE3.2} (RF32.west);
+        \draw[flujo, autoavoid] (Admin.south west) |- ++(-1,-1) -| node[pos=0.2, above, xshift=-8pt] {RDE3.2} (RF32.north west);
         \draw[flujo] (RF32.south) |- ++(0,-5) -| node[pos=0.4, above, xshift=-8pt] {RDW3.2} (BD.south);
 
         % % RF3.3: Eliminar Anuncio
         \draw[flujo] (Admin.south) |- ++(0,-2) -| node[pos=0.3, above, yshift=6pt] {RDE3.3} (RF33.north);
-        \draw[flujo] (RF33.east) to[out=0, in=0] node[pos=0.3, left, xshift=-6pt] {RDW3.3 / RDR3.3} (BD.north);
+        % \draw[flujo] (RF33.east) to[out=0, in=0] node[pos=0.3, left, xshift=-6pt] {RDW3.3 / RDR3.3} (BD.north);
+        \draw[flujo] (RF33.east)  -- ++(1,0) -- ++(0,-4)  -- node[pos=0.3, left, xshift=15pt, yshift=60pt] {RDW3.3 / RDR3.3} (BD.north);
 
         % % RF3.4: Modificar Anuncio
-        \draw[flujo] (Admin.east) -- node[pos=0.3, right, xshift=-1pt, yshift=-30pt] {RDE3.4} (RF34.west);
+        %\draw[flujo] (Admin.south) |- ++(0,-2) -| node[pos=0.3, right, xshift=-1pt, yshift=-30pt] {RDE3.4} (RF34.west);
+        \draw[flujo] (Admin.south) |- ++(0,-4) -| node[pos=0.6, above, xshift=-30pt, yshift=20pt] {RDE3.4} (RF34.north west);
+
+
         \draw[flujo] (RF34.south) |- ++(0,-1) -| node[pos=0.3, above, xshift=8pt] {RDW3.4} (BD.north);
 
         % % RF3.5: Consultar Anuncio
@@ -52,4 +57,111 @@ Se puede observar en la figura \ref{fig:dfd1_pub} el Diagrama de Flujo de Datos 
     } % Fin del resizebox
     \caption{DFD1 - Subsistema de Publicidad }
     \label{fig:dfd1_pub}
+\end{figure}
+
+
+\begin{figure}[h!]
+    \centering
+    \caption{DFD Esquema Armazón (DFD0) del Sistema EKIS}
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[node distance=4cm, auto, thick]
+
+        % ==== 1. Agentes Externos ====
+        \node[agente, minimum width=3cm] (Admin) {Administrador};
+        \node[agente, right of=Admin, node distance=5cm, yshift=2cm] (Usuario) {Usuario};
+        \node[agente, right of=Usuario, node distance=5cm, yshift=0cm] (Visitante) {Visitante};
+        \node[agente, below of=Usuario, node distance=9cm] (Sistema) {Sistema}; % Agente interno/disparador
+
+        % ==== 2. Almacén de Datos (BD) ====
+        \node[almacen, below of=Admin, node distance=12cm, xshift=7cm, minimum width=7cm, inner sep=10pt] (BD) {BD EKIS (Datos Centrales)};
+
+        % % ==== 3. Procesos (Subsistemas - P0) ====
+        % % Colocación de los subsistemas en el centro
+        % \node[proceso, below of=Admin, node distance=3cm] (P3) {P3: Publicidad}; % RF3.X
+        % \node[proceso, below of=P3, node distance=2.5cm, xshift=-1cm] (P2) {P2: Tendencias}; % RF2.X
+        % \node[proceso, below of=P2, node distance=2.5cm, xshift=-1cm] (P1) {P1: Publicaciones}; % RF1.X
+        % \node[proceso, right of=P1, node distance=6cm] (P4) {P4: Usuarios}; % RF4.X / RF5.X
+        % \node[proceso, right of=P4, node distance=4.5cm] (P5) {P5: Mensajería Privada}; % RF5.X / RF5.X
+
+        % % Reorganizar la posición de la BD para centrar los flujos
+        % \node[almacen, below of=P1, node distance=4.5cm, xshift=5cm, minimum width=8cm, inner sep=10pt] (BD_EKIS) {BD EKIS (Datos Centrales)};
+
+        % % Reposicionamiento final para un layout claro
+        % \node[proceso, above of=P3, node distance=1.5cm, yshift=0cm] (P4_User) {P4: Usuarios};
+        % \node[proceso, below of=P3, node distance=2.5cm] (P1_Pub) {P1: Publicaciones};
+        % \node[proceso, right of=P1_Pub, node distance=4cm] (P2_Trend) {P2: Tendencias};
+        % \node[proceso, below of=P1_Pub, node distance=2.5cm] (P5_Msg) {P5: Mensajería Privada};
+
+        % % Ajuste final de posiciones de los agentes
+        % \node[agente] (Admin_new) at (P3.north west) [anchor=south east, xshift=-0.5cm, yshift=2.5cm] {Administrador};
+        % \node[agente] (Usuario_new) at (P2_Trend.north east) [anchor=south west, xshift=0.5cm, yshift=2.5cm] {Usuario};
+        % \node[agente, below of=Usuario_new, node distance=2.5cm, xshift=1.5cm] (Visitante_new) {Visitante};
+        % \node[agente, below of=P2_Trend, node distance=4.5cm, xshift=2cm] (Sistema_new) {Sistema};
+        
+        % % Colocación central de procesos
+        % \node[proceso] (P4) at (0, 0) {P4: Usuarios};
+        % \node[proceso] (P1) at (-4, -2) {P1: Publicaciones};
+        % \node[proceso] (P3) at (4, -2) {P3: Publicidad};
+        % \node[proceso] (P5) at (-4, -5) {P5: Mensajería Privada};
+        % \node[proceso] (P2) at (4, -5) {P2: Tendencias};
+        
+        % \node[almacen] (BD_EKIS) at (0, -8) {BD EKIS (Datos Centrales)};
+
+        % % Agentes externos
+        % \node[agente] (Usuario) at (0, 3) {Usuario};
+        % \node[agente] (Admin) at (4, 3) {Administrador};
+        % \node[agente] (Visitante) at (-4, 3) {Visitante};
+        % \node[agente] (Sistema) at (7, 0) {Sistema};
+
+        % % ==== 4. Flujos: Agentes Externos <-> Procesos ====
+
+        % % P4: Usuarios (Usuario, Visitante)
+        % \draw[flujo] (Visitante.south) |- (P4.north west) node[midway, left] {RDE5.1 (Registro)}; [3]
+        % \draw[flujo] (P4.north) -- (Usuario.south) node[midway, left] {RDS (Conf. Mod/Elim/Bloq/Amistad)}; [4-7]
+        % \draw[flujo] (Usuario.south) -- (P4.north) node[midway, right] {RDE5.X (Gestión Usuario)}; [4-7]
+
+        % % P1: Publicaciones (Usuario)
+        % \draw[flujo] (Usuario.south west) -- (P1.north) node[midway, right] {RDE1.X (Crear/Mod/Like/Elim)}; [8-11]
+        % \draw[flujo] (P1.north) -- (Usuario.south west) node[midway, left] {RDS1.X (Listado/Conf.)}; [8-10, 12, 13]
+
+        % % P5: Mensajería Privada (Usuario)
+        % \draw[flujo] (P5.north) -- (Usuario.south west) node[midway, left, xshift=-25pt] {RDS5.1 (Mensajes/Listado)}; [14, 15]
+        % \draw[flujo] (Usuario.south west) |- (P5.north) node[midway, right, xshift=-25pt] {RDE5.X (Enviar/Eliminar)}; [14, 16]
+
+        % % P3: Publicidad (Admin, Sistema)
+        % \draw[flujo] (Admin.south) -- (P3.north) node[midway, left] {RDE3.X (Gestión Anuncios)}; [17-20]
+        % \draw[flujo] (P3.north) -- (Admin.south) node[midway, right] {RDS3.X (Conf. Gestión)}; [17-20]
+        % \draw[flujo] (Sistema.west) |- (P3.east) node[midway, above] {RDS3.5 (Datos Anuncio)}; [21]
+        % \draw[flujo] (P3.east) -- (Sistema.west) node[midway, below] {RDE3.5 (Consulta)}; [21]
+
+        % % P2: Tendencias (Admin, Usuario, Sistema)
+        % \draw[flujo] (Usuario.south east) -- (P2.north) node[midway, left] {RDE2.4 (Consulta Listado)}; [22]
+        % \draw[flujo] (P2.north) -- (Usuario.south east) node[midway, right] {RDS2.X (Tendencias Listadas)}; [22, 23]
+        % \draw[flujo] (Admin.south) |- (P2.north east) node[midway, above] {RDE2.X (Asignar/Eliminar T.)}; [24, 25]
+        % \draw[flujo] (Sistema.west) -- (P2.east) node[midway, above] {RDE2.1 (Notificación Hashtag)}; [26]
+
+        % % ==== 5. Flujos: Procesos <-> BD (R/W) ====
+
+        % P4 <-> BD
+        % \draw[flujo] (P4.south) -- (BD_EKIS.north west) node[midway, left] {Datos Usuario (W5.X)}; [6, 7, 27-29]
+        % \draw[flujo] (BD_EKIS.north west) -- (P4.south) node[midway, left, yshift=-10pt] {Datos Usuario (R)};
+
+        % % P1 <-> BD
+        % \draw[flujo] (P1.south) -- (BD_EKIS.north west) node[midway, left] {Datos Publicación (W1.X)}; [8-10, 13]
+        % \draw[flujo] (BD_EKIS.north west) -- (P1.south) node[midway, right, xshift=-15pt] {Datos Publicación (R1.X)}; [9, 10, 12]
+
+        % % P5 <-> BD
+        % \draw[flujo] (P5.south) -- (BD_EKIS.west) node[midway, left] {Datos Mensajería (W5.X)}; [16, 30]
+        % \draw[flujo] (BD_EKIS.west) -- (P5.south) node[midway, right, yshift=-10pt] {Datos Mensajería (R5.1)}; [15]
+
+        % % P3 <-> BD
+        % \draw[flujo] (P3.south) -- (BD_EKIS.north east) node[midway, right] {Datos Publicidad (W3.X)}; [17-19, 31]
+        % \draw[flujo] (BD_EKIS.north east) -- (P3.south) node[midway, left, xshift=15pt] {Datos Publicidad (R3.5)}; [21]
+
+        % % P2 <-> BD
+        % \draw[flujo] (P2.south) -- (BD_EKIS.east) node[midway, right] {Datos Tendencias (W2.X)}; [24-26]
+        % \draw[flujo] (BD_EKIS.east) -- (P2.south) node[midway, left, yshift=-10pt] {Datos Tendencias (R2.X)}; [22-24, 26, 32]
+
+    \end{tikzpicture}
+    }
 \end{figure}
