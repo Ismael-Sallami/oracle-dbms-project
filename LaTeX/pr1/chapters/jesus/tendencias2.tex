@@ -1,0 +1,75 @@
+
+En este apartado abordaremos la parte correspondiente a la práctica 2 de la asginatura.
+Se puede observar en la figura \ref{fig:dfd_tendencias} el Diagrama de Flujo de Datos (DFD) 
+de nivel 1 del subsistema de tendencias. En este diagrama se representan los diferentes 
+procesos, almacenes de datos, agentes externos y flujos de datos que componen el subsistema.
+
+\begin{figure}[h!]
+    \centering
+    \shorthandoff{<>}
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[node distance=1.8cm and 4cm, auto]
+
+        % === Agentes ===
+        \node[agente, minimum width=4cm] (Usuario) {Usuario};
+        \node[agente, below=of Usuario, yshift=-11cm] (Admin) {Admin};
+
+        % === Almacén de datos ===
+        \node[almacen, right=of Usuario, xshift=11.5cm, minimum width=5.5cm] (Hashtag) {Hashtag};
+
+        % === Procesos ===
+        \node[proceso, right=of Usuario, xshift=3cm] (RF21) {RF2.1: Crear o mencionar hashtag};
+        \node[proceso, below=of RF21, yshift=-0.5cm] (RF22) {RF2.2: Listar tendencias};
+        \node[proceso, below=of RF22, yshift=-0.5cm] (RF24) {RF2.4: Mostrar categoría ordenada};
+        \node[proceso, below=of RF24, yshift=-0.5cm] (RF23) {RF2.3: Asignar categoría a un hashtag};
+        \node[proceso, below=of RF23, yshift=-0.5cm] (RF25) {RF2.5: Eliminar tendencia};
+
+        % === Flujo de datos ===
+
+        % Usuario → RF2.1
+        \draw[flujo, ->] (Usuario.east) -- node[above] {RDE 2.1} (RF21.west);
+
+        % RF2.1 → Hashtag
+        \draw[flujo, ->] (RF21.east) -- node[above] {RDW 2.1} (Hashtag.west);
+
+        % Usuario → RF2.2
+        \draw[flujo, ->] (Usuario.south) ++(1.2,0) |- node[pos=0.8, above left] {Consulta tendencias} (RF22.west);
+
+        % RF2.2 → Usuario
+        \draw[flujo, ->] (RF22.north) -- node[left] {RDS 2.2} (Usuario.south east);
+
+        % Hashtag → RF2.2
+        \draw[flujo, ->] (Hashtag.west) -- node[left] {RDR 2.2} (RF22.east);
+
+        % Admin → RF2.3
+        \draw[flujo, ->] (Admin.east) -- node[left] {RDE 2.3} (RF23.west);
+
+        % RF2.3 → Hashtag
+        \draw[flujo, ->] (RF23.east) -- node[right] {RDW 2.3} (Hashtag.south);
+
+        % Hashtag → RF2.3
+        \draw[flujo, ->] (Hashtag.south) ++(1,0) |- node[above left] {RDR 2.3} (RF23.south east);
+
+        % Usuario → RF2.4
+        \draw[flujo, ->] (Usuario.south) ++(0,-1.2) |- node[pos=0.8, above left] {RDE 2.4} (RF24.west);
+
+        % Hashtag → RF2.4
+        \draw[flujo, ->] (Hashtag.south) -- node[left] {RDR 2.4} (RF24.east);
+
+        % Admin → RF2.5
+        \draw[flujo, ->] (Admin.east) -- node[above] {RDE 2.5} (RF25.west);
+
+        % RF2.5 → Hashtag
+        \draw[flujo, ->] (RF25.east) |- ++(1.5,0) -| node[pos=0.8, above left] {RDW 2.5} (Hashtag.south east);
+
+        % Hashtag → RF2.5
+        \draw[flujo, ->] (Hashtag.south east) ++(1.5,0) |- node[right] {RDR 2.5} (RF25.south east);
+
+        % RF2.4 → Usuario
+        \draw[flujo, ->] (RF24.west) |- ++(-2,-1) -| node[pos=0.6, left] {RDS 2.4} (Usuario.south west);
+
+    \end{tikzpicture}
+    }
+    \caption{DFD1 — Subsistema de tendencias}
+    \label{fig:dfd_tendencias}
+\end{figure}
