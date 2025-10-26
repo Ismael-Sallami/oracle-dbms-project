@@ -20,18 +20,20 @@ Requisito de datos de salida: ninguno. \\[12pt]
 \hspace*{1cm} Categoría: Cadena de caracteres (32) \\[12pt]
 
 \textcolor{azul}{\textbf{RDW1.1:}} Datos almacenados de la publicación. \\
-\hspace*{1cm} Los mismos que RDE2.1 \\
+\hspace*{1cm} Los mismos que RDE1.1 \\
 \hspace*{1cm} ID de usuario: Cadena de caracteres (40) \\
 \hspace*{1cm} ID de publicación: Cadena de caracteres (40) \\
 \hspace*{1cm} Fecha de creación: Fecha \\
-\hspace*{1cm} Likes: Entero \\[12pt]
+\hspace*{1cm} Fecha de modificación: Fecha \\
+\hspace*{1cm} Likes: Entero \\ 
+\hspace*{1cm} Eliminado: Booleano. \\[12pt]
 
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
 \textbf{\textcolor{verde}{\underline{RS1.1:}}} El nombre de publicación no puede ser una cadena vacía. \textbf{RF:} RF1.1. \textbf{RD:} RDE1.1. \\
 \hspace*{1cm} \textit{Descripción:} Si el nombre de la publicación es una cadena vacía se devuelve un aviso y se pide al 
 usuario que introduzca un título. \\[12pt]
 
-\textbf{\textcolor{verde}{\underline{RS1.2:}}} La categoría debe existir previamente en el sistema. \textbf{RF:} RF1.1. \textbf{RD:} RDE1.1. \\
+\textbf{\textcolor{verde}{\underline{RS1.2:}}} La categoría debe existir previamente en el sistema. \textbf{RF:} RF1.1. \textbf{RD:} RDW1.1. \\
 \hspace*{1cm} \textit{Descripción:} Si la categoría no existe, se devuelve un aviso y se pide al 
 usuario que elija una categoría.
 \newpage
@@ -53,27 +55,38 @@ Requisito de datos de entrada \textcolor{azul}{RDE1.2}. \\[6pt]
 Requisito de datos de salida \textcolor{azul}{RDS1.1}. \\[12pt]
 
 \textcolor{azul}{\textbf{RDE1.2:}} Datos de entrada de modificar publicación \\
-\hspace*{1cm} Los mismos datos que RDE1.2. \\[12pt]
+\hspace*{1cm} Nombre de publicación: Cadena de caracteres (20) \\
+\hspace*{1cm} Imagen (opcional): Cadena de caracteres (255) \\
+\hspace*{1cm} Descripción: Cadena de caracteres (80) \\ 
+\hspace*{1cm} Categoría: Cadena de caracteres (32) \\[12pt]
 
 \textcolor{azul}{\textbf{RDW1.2:}} Datos almacenados de la publicación. \\
 \hspace*{1cm} Los mismos datos que RDE1.2.\\
-\hspace*{1cm} Fecha de modificación: Fecha\\[12pt]
+\hspace*{1cm} ID de usuario: Cadena de caracteres (40) \\
+\hspace*{1cm} ID de publicación: Cadena de caracteres (40) \\
+\hspace*{1cm} Fecha de modificación: Fecha \\
+\hspace*{1cm} Likes: Entero \\[12pt]
 \pagebreak
 
 
 \textcolor{azul}{\textbf{RDR1.1:}} Datos almacenados de la publicación. \\
-\hspace*{1cm} Los mismos datos que RDE1.2.\\
+\hspace*{1cm} Nombre de publicación: Cadena de caracteres (20) \\
+\hspace*{1cm} Imagen (opcional): Cadena de caracteres (255) \\
+\hspace*{1cm} Descripción: Cadena de caracteres (80) \\ 
+\hspace*{1cm} Categoría: Cadena de caracteres (32) \\
+\hspace*{1cm} Fecha de creación: Fecha \\
+\hspace*{1cm} Fecha de modificación: Fecha \\
 \hspace*{1cm} Likes: Entero \\[12pt]
 
 \textcolor{azul}{\textbf{RDS1.1:}} Datos de salida de modificar publicación. \\
 \hspace*{1cm} Los mismos datos que RDR1.1.\\[12pt]
 
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
-\textbf{\textcolor{verde}{\underline{RS1.3:}}} La publicación debe existir previamente en el sistema y no ha sido eliminada. \textbf{RF:} RF1.2. \textbf{RD:} RDE1.2. \\
+\textbf{\textcolor{verde}{\underline{RS1.3:}}} La publicación debe existir previamente en el sistema y no ha sido eliminada. \textbf{RF:} RF1.2. \textbf{RD:} RDW1.2. \\
 \hspace*{1cm} \textit{Descripción:} Si el identificador de la publicación no corresponde
 a una publicación existente en el sistema, no se realiza la acción y se devuelve un error. \\[12pt]
 
-\textbf{\textcolor{verde}{\underline{RS1.4:}}} La nueva categoría debe existir previamente en el sistema. \textbf{RF:} RF1.2. \textbf{RD:} RDE1.2. \\
+\textbf{\textcolor{verde}{\underline{RS1.4:}}} La nueva categoría debe existir previamente en el sistema. \textbf{RF:} RF1.2. \textbf{RD:} RDW1.2. \\
 \hspace*{1cm} \textit{Descripción:} Si la categoría no existe, se devuelve un aviso y se pide al 
 usuario que elija una categoría. \\[12pt]
 
@@ -95,11 +108,18 @@ Requisito de datos de entrada: ninguno. \\[6pt]
 \textbf{\textcolor{rojo}{BD:}} Requisitos de datos de lectura \textcolor{azul}{RDR1.2}\\[6pt]
 
 \textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: Visualización 
-del listado de publicaciones. Requisito de datos de salida \textcolor{azul}{RDS1.2}. \\[12pt]
+del listado de publicaciones. Requisito de datos de salida \textcolor{azul}{RDS1.2}. \\[6pt]
 
 \textcolor{azul}{\textbf{RDR1.2:}} Datos almacenados de la lista de publicaciones. \\
-\hspace*{1cm} Los mismos datos que RDE1.1.\\
-\hspace*{1cm} Likes: Entero. \\[6pt]
+\hspace*{1cm} Nombre de publicación: Cadena de caracteres (20) \\
+\hspace*{1cm} Imagen (opcional): Cadena de caracteres (255) \\
+\hspace*{1cm} Descripción: Cadena de caracteres (80) \\ 
+\hspace*{1cm} Categoría: Cadena de caracteres (32) \\
+\hspace*{1cm} Fecha de creación: Fecha \\
+\hspace*{1cm} Fecha de modificación: Fecha \\
+\hspace*{1cm} ID de usuario: Cadena de caracteres (40) \\
+\hspace*{1cm} ID de publicación: Cadena de caracteres (40) \\
+\hspace*{1cm} Likes: Entero \\[12pt]
 
 \textcolor{azul}{\textbf{RDS1.2:}} Listado de registros, cada uno de ellos, con los mismos datos que RDR1.2 \\
 \pagebreak
@@ -130,19 +150,22 @@ Requisito de datos de salida \textcolor{azul}{RDS1.3}. \\[12pt]
 \pagebreak
 
 \textcolor{azul}{\textbf{RDS1.3:}} Datos de entrada de dar me gusta a una publicación. \\
-\hspace*{1cm} Los mismos datos que RDE1.1. \\ 
+\hspace*{1cm} Nombre de publicación: Cadena de caracteres (20) \\
+\hspace*{1cm} Imagen (opcional): Cadena de caracteres (255) \\
+\hspace*{1cm} Descripción: Cadena de caracteres (80) \\ 
+\hspace*{1cm} Categoría: Cadena de caracteres (32) \\
 \hspace*{1cm} Like: Entero \\ [12pt]
 
 \textcolor{azul}{\textbf{RDR1.3:}} Datos almacenados de la publicación. \\
 \hspace*{1cm} Los mismos datos que RDS1.3. \\
 
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
-\textbf{\textcolor{verde}{\underline{RS1.6:}}} La publicación debe existir previamente en el sistema y no ha sido eliminada. \textbf{RF:} RF1.4. \textbf{RD:} RDE1.3. \\
+\textbf{\textcolor{verde}{\underline{RS1.6:}}} La publicación debe existir previamente en el sistema y no ha sido eliminada. \textbf{RF:} RF1.4. \textbf{RD:} RDW1.3. \\
 \hspace*{1cm} \textit{Descripción:} Si el identificador de la publicación no corresponde
 a una publicación existente en el sistema, no se realiza la acción y se devuelve un error. \\[12pt]
 
 \textbf{\textcolor{verde}{\underline{RS1.7:}}} Dar me gusta otra vez sobre un publicación cancela el me gusta 
-\textbf{RF:} RF1.4. \textbf{RD:} RDE1.3. \\
+\textbf{RF:} RF1.4. \textbf{RD:} RDW1.3. \\
 \hspace*{1cm} \textit{Descripción:} Volver a darle me gusta a una publicación quita el me gusta original.
 \newpage
 
@@ -170,10 +193,10 @@ Requisito de datos de salida: ninguno. \\[12pt]
 \pagebreak
 
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
-\textbf{\textcolor{verde}{\underline{RS1.8:}}} La publicación debe existir previamente en el sistema y no ha sido eliminada. \textbf{RF:} RF1.5. \textbf{RD:} RDE1.4. \\
+\textbf{\textcolor{verde}{\underline{RS1.8:}}} La publicación debe existir previamente en el sistema y no ha sido eliminada. \textbf{RF:} RF1.5. \textbf{RD:} RDW1.4. \\
 \hspace*{1cm} \textit{Descripción:} Si el identificador de la publicación no corresponde
 a una publicación existente en el sistema, no se realiza la acción y se devuelve un error. \\[12pt]
 
-\textbf{\textcolor{verde}{\underline{RS1.9:}}} La publicación debe pertenecer al usuario que intenta eliminarla. \textbf{RF:} RF1.5. \textbf{RD:} RDE1.4. \\
+\textbf{\textcolor{verde}{\underline{RS1.9:}}} La publicación debe pertenecer al usuario que intenta eliminarla. \textbf{RF:} RF1.5. \textbf{RD:} RDW1.4. \\
 \hspace*{1cm} \textit{Descripción:} Si el identificador de la publicación no corresponde
 a una publicación creada por el usuario correspondiente al identificador de usuario, no se realiza la acción y se devuelve un error. \\[12pt]
