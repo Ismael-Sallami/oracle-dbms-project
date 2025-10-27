@@ -23,26 +23,24 @@
 \textbf{\textcolor{rojo}{Entrada:}} Agente externo: Sistema. Acción: solicitud de un disparador del Sistema. 
 Requisito de datos de entrada \textcolor{azul}{RDE2.1}. \\[6pt]
 
-\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW2.1} y lectura \textcolor{azul}{RDR2.1.} \\[6pt]
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW2.1}\\[6pt]
 
 \textbf{\textcolor{rojo}{Salida:}} Ninguna \\[6pt]
 
 \textcolor{azul}{\textbf{RDE2.1:}} Datos de entrada de crear o mencionar hashtag \\
 \hspace*{1cm} Hashtag: Cadena de caracteres (32) \\[12pt]
 
-\textcolor{azul}{\textbf{RDR2.1:}} Datos para comprobar si ya existía un hashtag. \\
-\hspace*{1cm} Los mismos que RDE2.1\\
-
 \textcolor{azul}{\textbf{RDW2.1:}} Datos almacenados/actualizados de un hashtag. \\
-\hspace*{1cm} Los mismos que RDE2.1 además de el contador de veces que ha aparecido ese hashtag.\\
+\hspace*{1cm} Los mismos que RDE2.1 además del contador de veces que ha aparecido ese hashtag.\\
 \hspace*{1cm} Contador: Entero \\[12pt]
 
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
-\textbf{\textcolor{verde}{\underline{RS2.1:}}} El Hastag debe empezar por "\#". \textbf{RF:} RF2.1. \textbf{RD(s):} RDW2.1. \\
-\hspace*{1cm} \textit{Descripción:} Si el hashtag no había sido creado y no empieza por "\#", no se inserta el nuevo hashtag y se devuelve un error. \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS2.1:}}} El Hastag debe empezar por "\#". \textbf{RF:} RF2.1. \textbf{RD(s):} RDE2.1. \\
+\hspace*{1cm} \textit{Descripción:} Si el hashtag que se quiere almacenar (o actualizar su contador) no empieza por "\#", no se inserta ni actualiza el hashtag y se devuelve un error. \\[6pt]
 
-\textbf{\textcolor{verde}{\underline{RS2.2:}}} El Hashtag puede ya existir o ser uno nuevo. \textbf{RF:} RF2.1. \textbf{RD(s):} RDW2.1 y RDR2.1. \\
+\textbf{\textcolor{verde}{\underline{RS2.2:}}} El Hashtag puede ya existir o ser uno nuevo. \textbf{RF:} RF2.1. \textbf{RD(s):} RDW2.1. \\
 \hspace*{1cm} \textit{Descripción:} El hashtag introducido puede que no existiera aún en la base de datos o que si existiera. En caso de ya existir, se actualiza el contador de veces que ha aparecido ese hashtag sumándole uno; si no, se crea y se pone el contador a uno.\\[6pt]
+
 \pagebreak
 
 \section{Listar tendencias}
@@ -84,14 +82,14 @@ Requisito de datos de entrada \textcolor{azul}{RDE2.3} \\[6pt]
 \hspace*{1cm} Categoría: Cadena de caracteres (32)\\[12pt]
 
 \textcolor{azul}{\textbf{RDR2.3:}} Hashtag que hay que comprobar si ya existe en el sistema. \\
-\hspace*{1cm} El mismo que \textcolor{azul}{RDR2.1}\\
+\hspace*{1cm} Hashtag: Cadena de caracteres (32) \\[12pt]
 
 \textcolor{azul}{\textbf{RDW2.3:}} Categoría a asignar. \\
 \hspace*{1cm} Categoría: Cadena de caracteres (32)\\[12pt]
 
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
-\textbf{\textcolor{verde}{\underline{RS2.3:}}} El hashtag debe existir previamente en el sistema. \textbf{RF:} RF2.3. \textbf{RD(s):} RDW2.3 y RDR2.3. \\
-\hspace*{1cm} \textit{Descripción:} Si el hashtag no se encuentra almacenado en el sistema, no se crea ni se le asigna la categoría, sino que se devuelve un error. \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS2.3:}}} El hashtag debe existir previamente en el sistema. \textbf{RF:} RF2.3. \textbf{RD(s):} RDE2.3 y RDR2.3. \\
+\hspace*{1cm} \textit{Descripción:} Si el hashtag dado como entrada no se encuentra almacenado en el sistema, se devuelve error. \\[6pt]
 
 \pagebreak
 
@@ -112,13 +110,15 @@ Requisitos de datos de salida: \textcolor{azul}{RDS2.4}. \\[6pt]
 \hspace*{1cm} El mismo que \textcolor{azul}{RDW2.3}\\
 
 \textcolor{azul}{\textbf{RDR2.4:}} Datos necesarios para ver si un hashtag pertenece a la categoría dada y ordenarlos por su número de apariciones. \\
-\hspace*{1cm} Los mismos que \textcolor{azul}{RDE2.3} +  \textcolor{azul}{RDE2.4}\\
+\hspace*{1cm} Hashtag: Cadena de caracteres (32)\\[12pt]
+\hspace*{1cm} Categoría: Cadena de caracteres (32)\\[12pt]
+\hspace*{1cm} Contador: Entero \\[12pt]
 
 \textcolor{azul}{\textbf{RDS2.4:}} Datos para listar la categoría. \\
 \hspace*{1cm} Los mismos que  \textcolor{azul}{RDR2.4}\\
 
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
-\textbf{\textcolor{verde}{\underline{RS2.4:}}} La categoría debe existir previamente en el sistema. \textbf{RF:} RF2.4. \textbf{RD(s):} RDR2.4. \\
+\textbf{\textcolor{verde}{\underline{RS2.4:}}} La categoría debe existir previamente en el sistema. \textbf{RF:} RF2.4. \textbf{RD(s):} RDR2.4. y RDE2.4.\\
 \hspace*{1cm} \textit{Descripción:} Si la categoría no se encuentra almacenada en el sistema se devuelve un error. \\[6pt]
 
 \pagebreak
@@ -131,7 +131,7 @@ Requisitos de datos de salida: \textcolor{azul}{RDS2.4}. \\[6pt]
 \textbf{\textcolor{rojo}{Entrada:}} Agente externo: administrador. Acción: solicitar la eliminación de una tendencia. 
 Requisito de datos de entrada \textcolor{azul}{RDE2.5} \\[6pt]
 
-\textbf{\textcolor{rojo}{BD:}} Requisito de datos de lectura \textcolor{azul}{RDR2.5} y de escritura \textcolor{azul}{RDW2.5}\\[6pt]
+\textbf{\textcolor{rojo}{BD:}} Requisito de escritura \textcolor{azul}{RDW2.5}\\[6pt]
 
 \textbf{\textcolor{rojo}{Salida:}} Ninguna
 
@@ -141,12 +141,9 @@ Requisito de datos de entrada \textcolor{azul}{RDE2.5} \\[6pt]
 \textcolor{azul}{\textbf{RDW2.5:}} Datos que hay que modificar para hacer que el hashtag deje de ser tendencia. \\
 \hspace*{1cm} Contador: Entero\\[12pt]
 
-\textcolor{azul}{\textbf{RDR2.5:}} Hashtag que se quiere eliminar. \\
-\hspace*{1cm} El mismo que \textcolor{azul}{RDE2.1}\\
-
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
-\textbf{\textcolor{verde}{\underline{RS2.5:}}} El hashtag debe existir previamente en el sistema. \textbf{RF:} RF2.5. \textbf{RD(s):} RDW2.5 y RDR2.5. \\
-\hspace*{1cm} \textit{Descripción:} Si el hashtag no se encuentra almacenado en el sistema se devuelve un error. \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS2.5:}}} El hashtag dado como entrada debe existir previamente en el sistema. \textbf{RF:} RF2.5. \textbf{RD(s):} RDW2.5. \\
+\hspace*{1cm} \textit{Descripción:} Si el hashtag no se encuentra almacenado en el sistema, no se actualiza su contador y se devuelve un error. \\[6pt]
 
 \pagebreak
 
