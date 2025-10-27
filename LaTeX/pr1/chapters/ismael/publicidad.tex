@@ -68,8 +68,11 @@ Requisito de datos de salida: ninguno. \\[12pt]
 
 
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
-\textbf{\textcolor{verde}{\underline{RS3.2.1:}}} El anuncio debe existir. \textbf{RF:} RF3.2. \textbf{RD(s):} RDE3.2. \\
-\hspace*{1cm} \textit{Descripción:} Si el `Identificador Anuncio` no corresponde a un anuncio existente en la base de datos, no se realiza la inserción y se devuelve un aviso.
+\textbf{\textcolor{verde}{\underline{RS3.2.1:}}} El anuncio debe existir. \textbf{RF:} RF3.2. \textbf{RD(s):} RDW3.2. \\
+\hspace*{1cm} \textit{Descripción:} Si el `Identificador Anuncio` no corresponde a un anuncio existente en la base de datos, no se realiza la inserción y se devuelve un aviso. \\
+\textbf{\textcolor{verde}{\underline{RS3.2.2:}}} La característica debe estar predefinida. \textbf{RF:} RF3.2. \textbf{RD(s):} RDE3.2. \\
+\hspace*{1cm} \textit{Descripción:} El `Nombre Característica` debe corresponder a una de las características predefinidas válidas (ej. mediante una entidad/catálogo de características en la base de datos). Si la característica no es reconocida, no se realiza la asignación y se devuelve un error.
+
 
 \section{Eliminar anuncio}
 \textbf{\textcolor{rojo}{\underline{RF3.3:}}} Eliminar anuncio: Permite a un administrador eliminar un anuncio existente del sistema utilizando su identificador único. \\[6pt]
@@ -85,11 +88,14 @@ Requisito de datos de salida: ninguno. \\[12pt]
 \textcolor{azul}{\textbf{RDE3.3:}} Datos de entrada de baja de anuncio \\
 \hspace*{1cm} Identificador Anuncio: Cadena de caracteres (10) \\[12pt]
 
-\textcolor{azul}{\textbf{RDW3.3:}} Identificador del anuncio a eliminar. \\
-\hspace*{1cm} Los mismos datos que RDE3.3. \\[12pt] 
+% \textcolor{azul}{\textbf{RDW3.3:}} Identificador del anuncio a eliminar. \\
+% \hspace*{1cm} Los mismos datos que RDE3.3. \\[12pt] 
+
+\textcolor{azul}{\textbf{RDW3.3:}} Datos utilizados para la eliminación del anuncio. \\
+\hspace*{1cm} Los mismos datos que RDW3.1. \\[12pt] 
 
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
-\textbf{\textcolor{verde}{\underline{RS3.3.1:}}} No se puede eliminar un anuncio activo. \textbf{RF:} RF3.3. \textbf{RD(s):} RDE3.3. \\
+\textbf{\textcolor{verde}{\underline{RS3.3.1:}}} No se puede eliminar un anuncio activo. \textbf{RF:} RF3.3. \textbf{RD(s):} RDE3.3 y RDR3.3. \\
 \hspace*{1cm} \textit{Descripción:} Si la fecha actual está dentro del período de vigencia del anuncio (entre Fecha de Inicio y Fecha de Fin), no se permite el borrado y se devuelve un error.
 
 \section{Modificar anuncio}
@@ -116,7 +122,7 @@ Requisito de datos de salida: ninguno. \\[12pt]
 
 
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
-\textbf{\textcolor{verde}{\underline{RS3.4.1:}}} La fecha de fin debe ser posterior a la fecha de inicio. \textbf{RF:} RF4. \textbf{RD(s):} RDE3.4. \\
+\textbf{\textcolor{verde}{\underline{RS3.4.1:}}} La fecha de fin debe ser posterior a la fecha de inicio. \textbf{RF:} RF4. \textbf{RD(s):} RDE3.4 y RDR3.4 \\
 \hspace*{1cm} \textit{Descripción:} Si se modifican las fechas y la nueva fecha de fin no es posterior a la nueva fecha de inicio, la modificación es rechazada y se devuelve un mensaje de error.
 
 \section{Consultar anuncio}
@@ -140,7 +146,7 @@ Requisito de datos de salida: \textcolor{azul}{RDS3.5}. \\[12pt]
 \hspace*{1cm} Los mismos datos que RDR3.5. \\[12pt]
  
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
-\textbf{\textcolor{verde}{\underline{RS3.5.1:}}} El anuncio debe existir. \textbf{RF:} RF3.5. \textbf{RD(s):} RDE3.5. \\
+\textbf{\textcolor{verde}{\underline{RS3.5.1:}}} El anuncio debe existir. \textbf{RF:} RF3.5. \textbf{RD(s):} RDE3.5 y RDR3.5. \\
 \hspace*{1cm} \textit{Descripción:} Si el `Identificador Anuncio` no existe, la consulta devuelve un resultado vacío o un mensaje de error.
 
 % \section{Redirigir a enlace externo}
