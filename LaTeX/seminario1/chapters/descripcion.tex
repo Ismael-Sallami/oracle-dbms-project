@@ -1,0 +1,128 @@
+\chapter{Seminario 1}
+
+\section{Lenguaje y SGBD Utilizados}
+
+Para la realización de esta práctica, se han empleado las siguientes herramientas:
+
+\begin{itemize}
+    \item \textbf{Lenguaje de Programación:} Se ha utilizado \textbf{Python 3}.
+    \item \textbf{SGBD Relacional:} Se ha utilizado \textbf{Oracle}, conectando con el servidor proporcionado por la ETSIIT (`oracle0.ugr.es`).
+    \item \textbf{Biblioteca de Conexión:} La conexión con la base de datos se realiza mediante \textbf{ODBC (Open DataBase Connectivity)}. Específicamente, se ha usado la biblioteca de Python \textbf{`pyodbc`}, tal como se sugería en la documentación del seminario.
+\end{itemize}
+
+Hemos usado Python ya que es uno de los lenguajes que más se usa en ciencia de datos, además de su facilidad para trabajar con bases de datos mediante bibliotecas como `pyodbc`. 
+
+\section{Tareas de Instalación Realizadas}
+
+La configuración del entorno en \textbf{Ubuntu 24.04 (Noble)} fue compleja, ya que requirió una instalación mixta (combinando `.zip` y `.rpm`) y la resolución de dependencias específicas de esta versión del sistema operativo.
+
+\subsection{Paquetes de Python}
+La instalación de la biblioteca de conexión de Python se realizó mediante `pip`:
+\begin{lstlisting}
+pip install pyodbc
+\end{lstlisting}
+También se verificó la presencia del gestor de drivers ODBC de Linux:
+\begin{lstlisting}
+sudo apt-get install unixodbc
+\end{lstlisting}
+
+\subsection{Configuración del Driver Oracle ODBC (Mixta)}
+Se optó por una instalación mixta: el paquete \textbf{Basic de Oracle (`.zip`)} y el paquete \textbf{ODBC (`.rpm`)}.
+
+% \subsubsection{Paso 1: Instalación de 'alien'}
+% Para poder convertir el paquete `.rpm` (de Red Hat) a un `.deb` (de Debian/Ubuntu), se instaló la herramienta `alien`.
+% \begin{lstlisting}
+% sudo apt-get update
+% sudo apt-get install alien
+% \end{lstlisting}
+Los pasos seguidos para la instalación y configuración del driver ODBC de Oracle fueron los siguientes:
+\begin{enumerate}
+    % \renewcommand{\labelenumi}{Paso \arabic{enumi}:}
+    \item \textbf{Instalación de Oracle Instant Client (Basic .zip)}: 
+    Primero, se descargó el paquete \textbf{Basic} desde la página oficial de Oracle en formato `.zip` y descomprimimos.
+
+    \item \textbf{Conversión e Instalación del Driver (ODBC .rpm)}: 
+    El driver ODBC se convirtió e instaló usando `alien` y `dpkg`:
+    \begin{lstlisting}
+    # Convertir de .rpm a .deb
+    sudo alien oracle-instantclient12.2-odbc-*.rpm
+
+    # Instalar el .deb generado
+    sudo dpkg -i oracle-instantclient12.2-odbc-*.deb
+
+    # Arreglar dependencias de la instalación
+    sudo apt-get -f install
+    \end{lstlisting}
+
+    \item \textbf{Resolución de Dependencias (libaio1t64)}: 
+    La instalación fallaba porque el driver de Oracle busca la librería `libaio.so.1`. En Ubuntu 24.04, esta librería ha sido renombrada a `libaio1t64`. Se solucionó instalando la nueva versión y creando un enlace simbólico:
+    \begin{lstlisting}
+    # Instalar el paquete renombrado
+    sudo apt-get install libaio1t64
+
+    # Crear el enlace para compatibilidad
+    sudo ln -s /usr/lib/x86_64-linux-gnu/libaio.so.1t64 /usr/lib/x86_64-linux-gnu/libaio.so.1
+    \end{lstlisting}
+
+    \item \textbf{Configuración de unixODBC (odbcinst.ini)}: 
+    Se editó el fichero de configuración de drivers de ODBC para que el sistema reconozca el driver instalado:
+    \begin{lstlisting}
+    sudo nano /etc/odbcinst.ini
+    \end{lstlisting}
+    El contenido del fichero se estableció a:
+    \begin{lstlisting}
+    [Oracle12ODBC]
+    Description = Oracle 12c ODBC Driver
+    Driver      = /usr/lib/oracle/12.2/client64/lib/libsqora.so.12.1
+    \end{lstlisting}
+
+    \item \textbf{Configuración del Entorno de Librerías}: 
+    Finalmente, para que el driver ODBC (del `.deb`) pudiera encontrar las librerías básicas (del `.zip`), fue necesario establecer la variable de entorno `LD\_LIBRARY\_PATH` antes de ejecutar el script:
+    \begin{lstlisting}
+    export LD_LIBRARY_PATH=/opt/oracle/instantclient_zip/instantclient_12_2:$LD_LIBRARY_PATH
+    python3 script.py
+    \end{lstlisting}
+\end{enumerate}
+
+\section{Reparto de Trabajo}
+
+El trabajo del seminario se ha distribuido de la siguiente manera entre los miembros del grupo:
+
+\begin{itemize}
+    % \item \textbf{Ismael:} Tareas de instalación, configuración del entorno en Ubuntu, depuración de la conexión ODBC y gestión de los drivers (`.ini`, `LD\_LIBRARY\_PATH`).
+    % \item \textbf{Javier y Sergio:} Implementación de la estructura principal del script (`db.py`), el menú principal, y las funciones auxiliares de conexión (`get\_db\_connection`) y visualización (`print\_table`, `show\_tables`).
+    % \item \textbf{Jesus y Fer:} Diseño e implementación de la lógica transaccional (`create\_new\_order`), asegurando el correcto funcionamiento de `COMMIT`, `ROLLBACK` y `SAVEPOINT` según los requisitos del guion.
+    % \item \textbf{Todos:} Pruebas conjuntas de la aplicación (casos de éxito, errores de stock, cancelación de pedidos) y redacción y revisión de este documento.
+    \item Para la elaboración del script, hemos trabajado todos los miembros del grupo de manera colaborativa. Destacando:
+    \begin{itemize}
+
+        \item \textbf{Sergio Calvo González e Ismael Sallami Moreno}: Instalación y configuración del driver ODBC de Oracle en Ubuntu 24.04, resolviendo problemas relacionados con dependencias y variables de entorno.
+                
+        \item \textbf{Javier Niño Sánchez y Fernando José Gracia Choin:} Implementaron la función \texttt{get\_db\_connection}, que gestiona la conexión a la base de datos mediante \texttt{pyodbc}, y configuraron los parámetros de conexión al servidor de Oracle proporcionado por la ETSIIT.
+
+        \item \textbf{Sergio Calvo González:} Desarrolló la función \texttt{print\_table}, que permite visualizar de forma ordenada el contenido de las tablas, y colaboró en la implementación de \texttt{show\_tables} para mostrar todas las tablas relevantes.
+
+        \item \textbf{Jesús Rodríguez González e Ismael Sallami Moreno:} Diseñaron la estructura principal del programa, incluyendo el menú principal y la función \texttt{main}, que coordina las diferentes funcionalidades del sistema. También implementaron la lógica para gestionar la creación y eliminación de tablas en \texttt{delete\_and\_create\_tables}.
+
+        \item \textbf{Todos los integrantes del grupo:} Colaboraron en la implementación de la función \texttt{create\_new\_order}, que incluye la lógica transaccional para dar de alta pedidos, gestionar \texttt{COMMIT}, \texttt{ROLLBACK} y \texttt{SAVEPOINT}, y manejar el stock de productos. Además, participaron en las pruebas y depuración del sistema.
+        
+        \item \textbf{Javier Niño Sánchez, Jesús Rodríguez González y Fernando José Gracia Choin: }Se encargaron de la redacción y revisión de este documento, asegurando que reflejara adecuadamente el trabajo realizado y las herramientas utilizadas.
+    \end{itemize}
+\end{itemize}
+
+\section{Fuentes de Código y Documentación}
+
+No se ha utilizado código de entregas de años anteriores. El desarrollo se ha basado en las especificaciones del guion del seminario y en la documentación técnica oficial:
+
+\begin{itemize}
+    \item \textbf{Seminario1\_DDSI\_2025\_2026.pdf}: Documento base para todos los requisitos de la aplicación, el esquema de las tablas (`Stock`, `Pedido`, `Detalle-Pedido`), y la lógica de transacciones (`COMMIT`, `ROLLBACK`, `SAVEPOINT`).
+
+    \item \textbf{\href{https://www.oracle.com/database/technologies/releasenote-odbc-ic.html}{Oracle Instant Client ODBC Installation Guide (Linux)}}: Guía oficial de Oracle consultada para entender la necesidad de los paquetes `basic` y `odbc`, y la ubicación del driver `libsqora.so`.
+
+    \item \textbf{\href{https://github.com/mkleehammer/pyodbc/wiki}{pyodbc GitHub Wiki}}: Documentación oficial de la biblioteca `pyodbc` usada para la sintaxis de la cadena de conexión (`DRIVER=...;UID=...;PWD=...`) y el manejo de la conexión (`.connect`, `.commit`, `.rollback`).
+
+    \item \textbf{\href{https://askubuntu.com/questions/1512196/libaio1-on-noble}{Ask Ubuntu}}: Buscamos en un foro online el problema específico que nos surgía con la librería `libaio1` en Ubuntu 24.04, y encontramos la solución de instalar `libaio1t64` y crear un enlace simbólico.
+\end{itemize}
+
+
+
