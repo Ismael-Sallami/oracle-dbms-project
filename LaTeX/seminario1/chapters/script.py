@@ -105,7 +105,7 @@ def create_new_order(cursor, connection):
         # --- INICIO DE LA TRANSACCIÓN ---
         # pyodbc usa '?' como marcador de parámetros
         cursor.execute(
-            "INSERT INTO Pedido (CPedido, CCliente, FechaPedido) VALUES (?, ?, SYSDATE)",
+            "INSERT INTO Pedido (CPedido, CCliente, FechaPedido) VALUES (?, ?, SYSDATE)", # Cuando se añade un pedido con el mismo código, se produce un error, notificándolo la base de datos.
             (c_pedido, c_cliente)
         )
         print(f"Pedido {c_pedido} creado en la transacción. Añada detalles.")
@@ -245,7 +245,7 @@ def delete_and_create_tables(cursor, connection):
         stock_rows = [(i, 10 + i * 5) for i in range(1, 11)]  # ejemplos de cantidades
         cursor.executemany("INSERT INTO Stock (CProducto, Cantidad) VALUES (?, ?)", stock_rows)
         connection.commit()
-        print("Insertadas 10 tuplas en Stock. Commit realizado.")
+        print("Insertadas 10 tuplas en Stock. Commit realizado.") 
 
     except pyodbc.Error as e:
         print(f"Error al (re)crear tablas: {e}")
@@ -284,7 +284,7 @@ def main():
                 print("Saliendo del programa...") 
                 break
             else:
-                print("Opción no válida. Por favor, elige de 1 a 3.")
+                print("Opción no válida. Por favor, elige de 0 a 3.")
 
     except pyodbc.Error as e:
         print(f"Error inesperado de base de datos: {e}")
