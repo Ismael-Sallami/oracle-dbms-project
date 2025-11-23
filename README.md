@@ -36,7 +36,7 @@ Se hacen de más distendido a menos (DFD1, DFD0 y caja negra)
     - [ ] Publicidad
     - [ ] Usuarios
     - [ ] Mensajería
-- [ ] DFD0
+- [ ] DFD1
     - [X] Publicaciones
     - [ ] Tendecias
     - [X] Publicidad
