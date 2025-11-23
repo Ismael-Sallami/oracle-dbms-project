@@ -1,6 +1,6 @@
 
 En este apartado abordaremos la parte correspondiente a la práctica 2 de la asginatura.
-Se puede observar en la figura \ref{fig:dfd_tendencias} el Diagrama de Flujo de Datos (DFD) 
+Se puede observar en la siguiente figura el Diagrama de Flujo de Datos (DFD) 
 de nivel 1 del subsistema de tendencias. En este diagrama se representan los diferentes 
 procesos, almacenes de datos, agentes externos y flujos de datos que componen el subsistema.
 
@@ -62,8 +62,6 @@ procesos, almacenes de datos, agentes externos y flujos de datos que componen el
         % RF2.5 → Hashtag
         \draw[flujo, ->] (RF25.east) |- ++(1.5,0) -| node[pos=0.8, above left] {RDW 2.5} (Hashtag.south east);
 
-        % Hashtag → RF2.5
-        \draw[flujo, ->] (Hashtag.south east) ++(1.5,0) |- node[right] {RDR 2.5} (RF25.south east);
 
         % RF2.4 → Usuario
         \draw[flujo, ->] (RF24.west) |- ++(-2,-1) -| node[pos=0.6, left] {RDS 2.4} (Usuario.south west);
