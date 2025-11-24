@@ -20,10 +20,10 @@
         \node[proceso, below of=P3,      node distance = 3cm,minimum width=5cm] (P5) {RF5.5: Des/Archivar conversación};
     
         % ======================================================
-        % === COLUMNA DERECHA: BASES DE DATOS ==================
+        % === COLUMNA DERECHA: ALMACENES ==================
         % ======================================================
-        \node[almacen, right of=P2, node distance=10cm, minimum width=5cm] (BDMensajes) {BD Mensajes};
-        \node[almacen, right of=P3, node distance=10cm, minimum width=5cm] (BDConvers) {BD Conversaciones};
+        \node[almacen, right of=P2, node distance=10cm, minimum width=5cm] (Mensajes) {Mensajes};
+        \node[almacen, right of=P3, node distance=10cm, minimum width=5cm] (Convers) {Conversaciones};
     
         % ======================================================
         % === FLUJOS DE DATOS ==================================
@@ -40,18 +40,18 @@
         \draw[->] (P3) to[out=175, in=-20] node[midway, above] {RDS5.1} (Usuario);
         \draw[->] (P4) to[out=185, in=-10] node[midway, above] {RDS5.1} (Usuario);
 
-        % -- Procesos -> BD --
-        \draw[->] (P1) to[out=5, in=80] node[midway, above] {RDW5.1} (BDMensajes);
-        \draw[->] (P2) to[out=5, in=170] node[midway, above] {RDW5.2} (BDMensajes);
-        \draw[->] (P4) to[out=5, in=-100] node[midway, above] {RDW5.4} (BDMensajes);
-        \draw[->] (P5) to[out=5, in=-100] node[midway, above] {RDW5.5} (BDConvers);
+        % -- Procesos -> Almacenes --
+        \draw[->] (P1) to[out=5, in=80] node[midway, above] {RDW5.1} (Mensajes);
+        \draw[->] (P2) to[out=5, in=170] node[midway, above] {RDW5.2} (Mensajes);
+        \draw[->] (P4) to[out=5, in=-100] node[midway, above] {RDW5.4} (Mensajes);
+        \draw[->] (P5) to[out=5, in=-100] node[midway, above] {RDW5.5} (Convers);
 
-        % -- Procesos <- BD --
-        \draw[->] (BDMensajes) to[out=100, in=-5] node[midway, above] {RDR5.1} (P1);
-        \draw[->] (BDMensajes) to[out=190, in=-5] node[midway, above]{RDR5.2} (P2);
-        \draw[->] (BDMensajes) to[out=-80, in=-5] node[midway, above] {RDR5.4} (P4);
-        \draw[->] (BDConvers)  to[out=180, in=-5] node[midway, above] {RDR5.2} (P3);
-        \draw[->] (BDConvers)  to[out=-80, in=-5] node[midway, above] {RDR5.4} (P5);
+        % -- Procesos <- Almacenes --
+        \draw[->] (Mensajes) to[out=100, in=-5] node[midway, above] {RDR5.1} (P1);
+        \draw[->] (Mensajes) to[out=190, in=-5] node[midway, above]{RDR5.2} (P2);
+        \draw[->] (Mensajes) to[out=-80, in=-5] node[midway, above] {RDR5.4} (P4);
+        \draw[->] (Convers)  to[out=180, in=-5] node[midway, above] {RDR5.2} (P3);
+        \draw[->] (Convers)  to[out=-80, in=-5] node[midway, above] {RDR5.4} (P5);
 
     \end{tikzpicture}
     }

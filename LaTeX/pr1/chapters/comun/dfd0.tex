@@ -1,0 +1,60 @@
+A continuación, abordaremos el DFD0 de nuestra aplicación en la figura \ref{fig:dfd0} :
+
+\begin{figure}[h!]
+    \centering
+    \shorthandoff{<>}
+    \resizebox{\textwidth}{!}{
+    \begin{tikzpicture}[node distance=2.2cm, auto]
+    
+        % ======================================================
+        % ===================  AGENTES  ========================
+        % ======================================================
+        \node[agente, minimum width=1cm, minimum height=1.2cm] (Visitante) {Visitante};
+        \node[agente, below of= Visitante    , node distance = 4cm, minimum width=1cm, minimum height=1.2cm] (Usuario) {Usuario};
+        \node[agente, below of= Usuario      , node distance = 4cm, minimum width=1cm, minimum height=1.2cm] (Administrador) {Administrador};
+        \node[agente, below of= Administrador, node distance = 4cm, minimum width=1cm, minimum height=1.2cm] (Sistema) {Sistema};
+        
+        % ======================================================
+        % =================== PROCESOS ========================
+        % ======================================================
+        
+        \node[proceso, right of=Visitante,     node distance = 8cm, minimum width=5cm] (S1) {Usuarios};
+        \node[proceso, below of=S1,            node distance = 3cm, minimum width=5cm] (S2) {Publicaciones};
+        \node[proceso, below of=S2,            node distance = 3cm, minimum width=5cm] (S3) {Tendencias};
+        \node[proceso, below of=S3,            node distance = 3cm, minimum width=5cm] (S4) {Publicidad};
+        \node[proceso, below of=S4,            node distance = 3cm, minimum width=5cm] (S5) {Mensajería privada};
+    
+        % ======================================================
+        % ================== ALMACENES =========================
+        % ======================================================
+        \node[almacen, right of=S3, node distance=10cm, minimum height=4cm, minimum width=7cm] (EKIS) {EKIS};
+    
+        % ======================================================
+        % === FLUJOS DE DATOS ==================================
+        % ======================================================
+    
+        % -- Usuario → Procesos --
+            
+        % -- Procesos → Usuario --
+        
+
+        % -- Procesos -> Almacenes--
+        
+        \draw[->] (S1.east) -| ($(EKIS.north)+(1.5cm,0)$) node[pos=0.5, above] {Escritura usuarios};
+        \draw[->] (S2.north east) -| ($(EKIS.north)+(-1cm,0)$) node[pos=0.5, above] {Escritura publicaciones};
+        \draw[->] (S3.north east) -- ($(EKIS.west)+(0,0.5cm)$) node[pos=0.5, above] {Escritura Tendencias};
+        \draw[->] (S4.north east) -| ($(EKIS.south)+(-2cm,0)$) node[pos=0.5, below] {Escritura Publicidad};
+        \draw[->] (S5.north east) -| ($(EKIS.south)+(1cm,0)$) node[pos=0.5, below] {Escritura Mensajes};
+        
+        % -- Procesos <- Almacenes --
+        \draw[<-] (S2.south east) -| ($(EKIS.north)+(-2cm,0)$) node[pos=0.5, above] {Escritura publicaciones};
+        \draw[<-] (S3.south east) -- ($(EKIS.west)+(0,-0.5cm)$) node[pos=0.5, above] {Escritura Tendencias};
+        \draw[<-] (S4.south east) -| ($(EKIS.south)+(-1cm,0)$) node[pos=0.5, below] {Escritura Publicidad};
+        \draw[<-] (S5.south east) -| ($(EKIS.south)+(2cm,0)$) node[pos=0.5, below] {Escritura Mensajes};
+
+    \end{tikzpicture}
+    }
+    \caption{DFD0 — Sistema EKIS}
+    \label{fig:dfd0}
+    \end{figure}
+    
