@@ -1,0 +1,52 @@
+\begin{figure}[h!]
+    \centering
+    \shorthandoff{<>}
+    \resizebox{\textwidth}{!}{
+    \begin{tikzpicture}[node distance=2.2cm, auto]
+    
+        % ======================================================
+        % ===================  AGENTES  ========================
+        % ======================================================
+        \node[agente, minimum width=1cm, minimum height=1.2cm] (Visitante) {Visitante};
+        \node[agente, below of= Visitante    , node distance = 3cm, minimum width=1cm, minimum height=2.4cm] (Usuario) {Usuario};
+        \node[agente, below of= Usuario      , node distance = 3cm, minimum width=1cm, minimum height=1.2cm] (Administrador) {Administrador};
+        \node[agente, below of= Administrador, node distance = 3cm, minimum width=1cm, minimum height=1.2cm] (Sistema) {Sistema};
+        
+        % ======================================================
+        % =================== PROCESOS ========================
+        % ======================================================
+        
+        \node[proceso, minimum width=5cm, minimum height=10.2cm] (EKIS) at ($(Visitante) + (10cm,-4.5cm)$) {Sistema EKIS};
+    
+        % ======================================================
+        % === FLUJOS DE DATOS ==================================
+        % ======================================================
+    
+        % -- Usuario → Procesos --
+        \draw[->] (Visitante.east) -- node[pos=0.5, above, sloped]{Crear Usuario} ($(EKIS.west)+(0,4.71cm)$);
+
+        \draw[->] ($(Usuario.east)+(0,1.2cm)$) -- node[pos=0.65, above, sloped]{Gestionar Usuarios} ($(EKIS.west)+(0,3.925cm)$);
+        \draw[->] ($(Usuario.east)+(0,0.8cm)$) -- node[pos=0.65, above, sloped]{Gestionar Publicaciones} ($(EKIS.west)+(0,3.14cm)$);
+        \draw[->] ($(Usuario.east)+(0,0.0cm)$) -- node[pos=0.65, above, sloped]{Gestionar Mensajes} ($(EKIS.west)+(0,1.57cm)$);
+        \draw[->] ($(Usuario.east)+(0,-0.8cm)$) -- node[pos=0.65, above, sloped]{Peticion hashtag} ($(EKIS.west)+(0,-0.785cm)$);
+
+        \draw[->] ($(Administrador.east)+(0,0.4cm)$) -- node[pos=0.5, above, sloped]{Gestionar Tendencias} ($(EKIS.west)+(0,-2.355cm)$);
+        \draw[->] ($(Administrador.east)+(0,-0.4cm)$) -- node[pos=0.5, above, sloped]{Gestionar Publicidad} ($(EKIS.west)+(0,-3.14cm)$);
+
+        \draw[->] ($(Sistema.east)+(0,0.4cm)$) -- node[pos=0.5, above, sloped]{Consultar Anuncio} ($(EKIS.west)+(0,-3.925cm)$);
+
+        % -- Procesos → Usuario --
+        \draw[<-] ($(Usuario.east)+(0,0.4cm)$) -- node[pos=0.65, above, sloped]{Salida Publicaciones} ($(EKIS.west)+(0,2.355cm)$);
+        \draw[<-] ($(Usuario.east)+(0,-0.4cm)$) -- node[pos=0.65, above, sloped]{Salida Mensajes} ($(EKIS.west)+(0,0.785cm)$);
+        \draw[<-] ($(Usuario.east)+(0,-1.2cm)$) -- node[pos=0.65, above, sloped]{Salida Tendencias} ($(EKIS.west)+(0,-1.57cm)$);
+
+        \draw[<-] ($(Sistema.east)+(0,-0.4cm)$) -- node[pos=0.5, above, sloped]{Salida Anuncio} ($(EKIS.west)+(0,-4.71cm)$);
+
+
+    \end{tikzpicture}
+    }
+    \caption{DFD0 — Sistema EKIS}
+    \label{fig:caja_negra}
+    \end{figure}
+    En este apartado, especificamos el esquema de caja negra de nuestra aplicación, que se puede observar en la figura \ref{fig:caja_negra}. 
+    Al igual que en la figura \ref{fig:dfd0}, los flujos de datos se han renombrado de igual manera para la simplicidad y mejor legebilidad del código.
