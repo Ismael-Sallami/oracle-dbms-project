@@ -29,6 +29,8 @@ Esquema armazón o DFD0: Cada subsistema representado como un sólo proceso, con
 > [!IMPORTANT] 
 Se hacen de más distendido a menos (DFD1, DFD0 y caja negra)
 
+> [!WARNING]
+Comprobar que no haya almacenes que ponga BD y arreglar diagrama usuarios para que no se superpongan las flechas de los flujos
 ### Primera parte
 - [X] Caja negra
 - [X] Armazón
