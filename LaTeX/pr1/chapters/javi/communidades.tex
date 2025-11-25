@@ -100,7 +100,8 @@ usuario que introduzca un título. \\[12pt]
 \textbf{\textcolor{rojo}{\underline{RF1.3:}}} Listar publicaciones. \\[6pt]
 
 \textbf{\textcolor{rojo}{\underline{Descripción:}}} Permite a un usuario listar todas las publicaciones 
-de los usuarios a los que sigue; mostrando el nombre, categoría, descripción e imagen (si la tuviera). \\[6pt]
+de los usuarios a los que sigue; mostrando el nombre, categoría, descripción e imagen (si la tuviera). 
+Una de cada 5 publicaciones tendrá un anuncio en ella.\\[6pt]
 
 \textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: Listar publicaciones. 
 Requisito de datos de entrada: ninguno. \\[6pt]
@@ -119,7 +120,11 @@ del listado de publicaciones. Requisito de datos de salida \textcolor{azul}{RDS1
 \hspace*{1cm} Fecha de modificación: Fecha \\
 \hspace*{1cm} ID de usuario: Cadena de caracteres (40) \\
 \hspace*{1cm} ID de publicación: Cadena de caracteres (40) \\
-\hspace*{1cm} Likes: Entero \\[12pt]
+\hspace*{1cm} Likes: Entero \\
+\hspace*{1cm} Identificador Anuncio: Cadena de caracteres (10) \\
+\hspace*{1cm} Título: Cadena de caracteres (100) \\
+\hspace*{1cm} Cuerpo del Anuncio: Cadena de caracteres (500) \\
+\hspace*{1cm} Enlace Destino: Cadena de caracteres (255) \\[12pt]
 
 \textcolor{azul}{\textbf{RDS1.2:}} Listado de registros, cada uno de ellos, con los mismos datos que RDR1.2 \\
 \pagebreak

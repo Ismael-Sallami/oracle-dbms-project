@@ -55,7 +55,7 @@ procesos, almacenes de datos, agentes externos y flujos de datos que componen el
         % Ejemplo de flujo entre Agente y Proceso (RDE)
         % ------------------------------------------------------
         \draw[flujo, ->] (Agente1.south west) ++(0.2,0) |- ++(0,-1) -| node[pos=0.7, right] {RDE 1.1} (P1.north);
-        \draw[flujo, ->] (Agente1.west) |- ++(0,-1) -| node[pos=0.53, above] {RDE 1.2} (P2.north west);
+        \draw[flujo, ->] (Agente1.west) |- ++(0,-1) -| node[pos=0.53] {RDE 1.2} (P2.north west);
         %RF1.3 no tiene RDE
         \draw[flujo, ->] (Agente1.south east) -| node[pos=0.6, left] {RDE 1.3} (P4.north);
         \draw[flujo, ->] (Agente1.east) -- node[pos=0.4, above] {RDE 1.4} (P5.west);
@@ -70,10 +70,10 @@ procesos, almacenes de datos, agentes externos y flujos de datos que componen el
         % ------------------------------------------------------
         % Ejemplo de flujo entre Proceso y Almacén de Datos (RDW)
         % ------------------------------------------------------
-        \draw[flujo, ->] (P1.east) -- ++(1.0,0) |- ++(1.0,-7) node[pos = 0.25, above] {RDW 1.1} -- (BD1.west);
-        \draw[flujo, ->] (P2.south east) -- node[pos = 0.1, left] {RDW 1.2} ++(0, -3) -- (BD1.south west);
+        \draw[flujo, ->] (P1.east) -- ++(1.0,0) |- ++(1.0,-7) node[pos = 0.465] {RDW 1.1} -- (BD1.west);
+        \draw[flujo, ->] (P2.south east) -- node[pos = 0.15, left] {RDW 1.2} ++(0, -3) -- (BD1.south west);
         %RF1.3 no genera ningún RDW
-        \draw[flujo, ->] (P4.east) |- ++(-1.6, -3) -- node[pos = 0.1, below] {RDW 1.3} (BD1.north);
+        \draw[flujo, ->] (P4.east) |- ++(-1.6, -3) -- node[pos = 0.1] {RDW 1.3} (BD1.north);
         \draw[flujo, ->] (P5.east) -- ++(0.5, 0) |- node[pos=0.68, below] {RDW 1.4} (BD1.east);
         %\draw[flujo, ->] (P5) -- (BD1); %ESTA LINEA
 
