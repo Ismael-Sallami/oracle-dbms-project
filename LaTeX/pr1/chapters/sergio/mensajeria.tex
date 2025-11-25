@@ -111,36 +111,35 @@ Requisito de datos de salida: ninguno. \\[12pt]
 % ======================= %
 %  LISTAR CONVERSACIONES  %
 % ======================= %
-\section{Listar conversaciones}
-\textbf{\textcolor{rojo}{\underline{RF5.\theRF:}}}. Listar conversaciones: Permite a un usuario ver las conversaciones con otros usuarios, ordenadas temporalmente 
-y por visualización (Primero aquellas con mensajes no visualizados después visualizados, cada una ordenado temporalmente de más a menos reciente). Para que exista 
-una conversación, debe de haber un mensaje recibido o enviado por el usuario. Se puede solicitar ver las conversaciones archivadas como las que no, para poder 
+\section{Listar usuarios}
+\textbf{\textcolor{rojo}{\underline{RF5.\theRF:}}}. Listar usuarios: Permite a un usuario ver los usuarios con los que tiene mensajes, ordenados temporalmente 
+y por visualización (Primero aquellos con mensajes no visualizados después visualizados, cada uno ordenado temporalmente de más a menos reciente). Se puede solicitar ver los usuarios archivados como los que no, para poder 
 gestionar ambos grupos.\\[6pt]
 
-\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar la visualización de sus conversaciones. 
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar la visualización de los usuarios con los que se tiene mensajes. 
 Requisito de datos de entrada \textcolor{azul}{RDE5.\theRDE}. \\[6pt]
 
 \textbf{\textcolor{rojo}{BD:}} Requisito de datos de lectura \textcolor{azul}{RDR5.\theRDR}. \\[6pt]
 
-\textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: mostrar las conversaciones. 
+\textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: mostrar los usuarios con los que tiene mensajes. 
 Requisito de datos de salida: \textcolor{azul}{RDS5.\theRDS} \\[12pt]
 
-\textcolor{azul}{\textbf{RDE5.\theRDE:}} Grupo de conversaciones que se quiere mostrar archivados/no archivados\\
+\textcolor{azul}{\textbf{RDE5.\theRDE:}} Grupo de usuarios que se quiere mostrar archivados/no archivados\\
 \hspace*{1cm} Bit elección (indica si se quiere ver el grupo de conversaciones archivadas o las no archivadas True/False): Booleano (1) \\[12pt]
 
-\textcolor{azul}{\textbf{RDR5.\theRDR:}} Lista de usuarios archivados o no archivados, con los que dispone de una conversación,ordenados según lo especificado, con el formato:\\
+\textcolor{azul}{\textbf{RDR5.\theRDR:}} Lista de usuarios archivados o no archivados, con los que dispone de una conversación, ordenados según lo especificado, con el formato:\\
 \hspace*{1cm} ID Usuario: Cadena de caracteres (40) 
 \hspace*{1cm} Bit elección (indica si se quiere ver el grupo de conversaciones archivadas o las no archivadas True/False): Booleano (1) \\[12pt]
 
-\textcolor{azul}{\textbf{RDS5.\theRDS:}} Lista de usuarios archivados o no con los que dispone de una conversación seguidos de los primeros quince caracteres del último mensaje. \\
+\textcolor{azul}{\textbf{RDS5.\theRDS:}} Lista de usuarios archivados o no con los que dispone algún mensaje, seguidos de los primeros quince caracteres del último mensaje. \\
 \hspace*{1cm} ID Usuario: Cadena de caracteres (40) \\
 \hspace*{1cm} Último mensaje: Cadena de caracteres (15) \\[12pt]
 
 \setcounter{RS}{1}
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
-\textbf{\textcolor{verde}{\underline{RS5.\theRF.\theRS:}}} Sólo se muestran las conversaciones archivadas o no archivadas. \\
+\textbf{\textcolor{verde}{\underline{RS5.\theRF.\theRS:}}} Sólo se muestran los usuarios archivados o no archivados. \\
 \textbf{RF:} RF5.\theRF. \textbf{RD(s):} RDR5.\theRDR \\
-\hspace*{1cm} \textit{Descripción:} Las conversaciones de la opción no escogida no se muestran, de no ser así, se muestra un error indicandolo. \\ [6pt]
+\hspace*{1cm} \textit{Descripción:} Los usaurios de la opción no escogida no se muestran, de no ser así, se muestra un error indicandolo. \\ [6pt]
 \stepcounter{RS}
 
 \stepcounter{RF}
@@ -150,12 +149,12 @@ Requisito de datos de salida: \textcolor{azul}{RDS5.\theRDS} \\[12pt]
 % ======================= %
 %     VISUALIZAR CHAT     %
 % ======================= %
-\section{Visualizar conversación}
-\textbf{\textcolor{rojo}{\underline{RF5.\theRF:}}}. Visualizar conversación: Permite que a usuario ver los mensajes enviados y recibidos entre un usuario y otro, 
+\section{Visualizar mensajes}
+\textbf{\textcolor{rojo}{\underline{RF5.\theRF:}}}. Visualizar mensajes: Permite que a usuario ver los mensajes enviados y recibidos entre un usuario y otro, 
 ordenados de forma temporal, de más a menos reciente. Se requiere del id del usuario del que se desea ver la conversación, además del propio usuario (Cadenas 
 de 40 caracteres). Actualizamos el bit de visualización a "Visto" tras esta acción en la conversación correspondiente.\\[6pt]
 
-\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar la visualización de un chat. 
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar la visualización de un chat(mensajes entre un usuario y otro). 
 Requisito de datos de entrada \textcolor{azul}{RDE5.\theRDE}. \\[6pt]
 
 \textbf{\textcolor{rojo}{BD:}} Requisito de datos de lectura \textcolor{azul}{RDR5.\theRDR} y de escritura \textcolor{azul}{RDW5.\theRDW}. \\[6pt]
@@ -163,7 +162,7 @@ Requisito de datos de entrada \textcolor{azul}{RDE5.\theRDE}. \\[6pt]
 \textbf{\textcolor{rojo}{Salida:}} Agente externo: usuario. Acción: confirmación resultado. 
 Requisito de datos de salida: \textcolor{azul}{RDS5.\theRDS} \\[12pt]
 
-\textcolor{azul}{\textbf{RDE5.\theRDE:}} Datos del usuario del chat que se desea ver\\
+\textcolor{azul}{\textbf{RDE5.\theRDE:}} Datos del usuario del que se desea ver los mensajes entre ambos\\
 \hspace*{1cm} ID Usuario solicitado: Cadena de caracteres (40) \\[12pt]
 
 \textcolor{azul}{\textbf{RDR5.\theRDR:}} Lista de mensajes entre ambos usuarios\\
@@ -194,8 +193,8 @@ Requisito de datos de salida: \textcolor{azul}{RDS5.\theRDS} \\[12pt]
 % ======================= %
 %      ARCHIVAR CHAT      %
 % ======================= %
-\section{Des/archivar conversación}
-\textbf{\textcolor{rojo}{\underline{RF5.\theRF:}}}. Des/archivar conversación: Permite activar o desactivar la visualización de un chat al ver las conversaciones. 
+\section{Des/archivar usuario}
+\textbf{\textcolor{rojo}{\underline{RF5.\theRF:}}}. Des/archivar usuario: Permite activar o desactivar la visualización de un usario al listar usuarios. 
 Se requiere del ID de ambos usuarios implicados en la conversación (Cadenas de 40 caracteres) y un bit que muestre si está o no archivado. Para ello, debe de existir 
 el usuario que se desea archivar, y una conversación entre él y el solicitante de archivar el chat. Cuando un chat esté archivado, no se mostrará en la acción ver 
 conversaciones\\[6pt]
