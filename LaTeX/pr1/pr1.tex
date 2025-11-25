@@ -278,6 +278,31 @@ manychapters,pdfspacing]{classicthesis}
   }
 }
 
+\tikzstyle{iflujo} = [
+  <-, very thick, >=stealth, 
+  font=\small
+] % Flujo de datos inverso
+
+\tikzset{
+  iflujo/.style={<-, thick, shorten >=6pt, shorten <=6pt, to path={-| (\tikztotarget)}}
+}
+
+\tikzset{
+  iflujo/.style={
+    <-, thick,
+    shorten >=6pt, shorten <=6pt,
+    rounded corners=8pt, % esquinas redondeadas para rodear nodos
+  },
+  autoavoid/.style={
+    to path={
+      % Intenta evitar otras flechas usando out/in y bend
+      [rounded corners=12pt]
+      |- (\tikztotarget)
+      \tikztonodes
+    }
+  }
+}
+
 \makeatletter
 \@addtoreset{chapter}{part}
 \makeatother
@@ -385,6 +410,16 @@ manychapters,pdfspacing]{classicthesis}
 
  \chapter{Mensajería Privada}
  \input{chapters/sergio/mensajeria2.tex}
+
+ \chapter{DFD0}
+ \input{chapters/comun/dfd0.tex}
+
+ \chapter{Caja Negra}
+ \input{chapters/comun/cajanegra.tex}
+
+ \chapter{Esquema externo}
+ \input{chapters/sergio/mensajeria2.2.tex}
+
 
 % ----------------------- %
 % BIBLIOGRAFÍA
