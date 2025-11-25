@@ -252,6 +252,21 @@ manychapters,pdfspacing]{classicthesis}
     }
 }
 
+\tikzset{
+  hexnode/.style={
+      draw,
+      shape=regular polygon,
+      regular polygon sides=6,
+      minimum size=3cm,
+      inner sep=10pt,
+  },
+  smallbox/.style={
+      draw,
+      rectangle,
+      minimum size=1cm,
+      fill=gray!20
+  }
+}
 
 \tikzstyle{flujo} = [
   ->, very thick, >=stealth, 
@@ -419,8 +434,7 @@ manychapters,pdfspacing]{classicthesis}
 
  \chapter{Esquema externo}
  \input{chapters/sergio/mensajeria2.2.tex}
-
-
+ 
 % ----------------------- %
 % BIBLIOGRAFÍA
 % ----------------------- %

@@ -18,7 +18,7 @@ _**Diseño de diagramas de flujo de datos y de esquemas externos para cada subsi
 -  Esquemas externos de todos los procesos y almacenes de DFD0 y DFD1
 - Esquema E/R del sistema
 - Tablas del esquema E/R
-- Dependencias funcionales, proceso de Normalización realizado yconjunto de tablas obtenido de dicho proceso, junto con las claves primarias y externas correspondientes.
+- Dependencias funcionales, proceso de Normalización realizado y conjunto de tablas obtenido de dicho proceso, junto con las claves primarias y externas correspondientes.
 
 > [!NOTE] 
 Caja negra: Se concibe el SI como un solo proceso, conectado con todos los agentes externos y flujos de datos
@@ -29,18 +29,34 @@ Esquema armazón o DFD0: Cada subsistema representado como un sólo proceso, con
 > [!IMPORTANT] 
 Se hacen de más distendido a menos (DFD1, DFD0 y caja negra)
 
-- [ ] Caja negra
-- [ ] Armazón
+> [!WARNING]
+Comprobar que no haya almacenes que ponga BD y arreglar diagrama usuarios para que no se superpongan las flechas de los flujos
+### Primera parte
+- [X] Caja negra
+- [X] Armazón
+- [X] DFD1
+    - [X] Publicaciones
+    - [X] Tendecias
+    - [X] Publicidad
+    - [X] Usuarios
+    - [X] Mensajería
+### Segunda parte
+- [ ] Paso a tabla
     - [ ] Publicaciones
     - [ ] Tendecias
     - [ ] Publicidad
     - [ ] Usuarios
     - [ ] Mensajería
-- [ ] DFD1
-    - [X] Publicaciones
+- [ ] Identificar las dependencias funcionales
+    - [ ] Publicaciones
     - [ ] Tendecias
-    - [X] Publicidad
+    - [ ] Publicidad
     - [ ] Usuarios
     - [ ] Mensajería
-
+- [ ] Aplicar normalización del tema 3
+    - [ ] Publicaciones
+    - [ ] Tendecias
+    - [ ] Publicidad
+    - [ ] Usuarios
+    - [ ] Mensajería
 
