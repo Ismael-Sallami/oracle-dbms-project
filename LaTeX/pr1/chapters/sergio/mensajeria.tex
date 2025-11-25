@@ -132,7 +132,7 @@ Requisito de datos de salida: \textcolor{azul}{RDS5.\theRDS} \\[12pt]
 \hspace*{1cm} Bit elección (indica si se quiere ver el grupo de conversaciones archivadas o las no archivadas True/False): Booleano (1) \\[12pt]
 
 \textcolor{azul}{\textbf{RDS5.\theRDS:}} Lista de usuarios archivados o no con los que dispone algún mensaje, seguidos de los primeros quince caracteres del último mensaje. \\
-\hspace*{1cm} ID Usuario: Cadena de caracteres (40) \\
+\hspace*{1cm} Nombre Usuario con ID usuario: Cadena de caracteres (20) \\
 \hspace*{1cm} Último mensaje: Cadena de caracteres (15) \\[12pt]
 
 \setcounter{RS}{1}
@@ -180,9 +180,9 @@ Requisito de datos de salida: \textcolor{azul}{RDS5.\theRDS} \\[12pt]
 
 \setcounter{RS}{1}
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
-\textbf{\textcolor{verde}{\underline{RS5.\theRF.\theRS:}}} Para visualizar una conversación debe de existir al menos enviado o recibido entre ambos usuarios. \\
+\textbf{\textcolor{verde}{\underline{RS5.\theRF.\theRS:}}} Para visualizar los mensajes debe de existir al menos uno enviado o recibido entre ambos usuarios. \\
 \textbf{RF:} RF5.\theRF. \textbf{RD(s):} RDE5.\theRDE, RDR5.\theRDR \\
-\hspace*{1cm} \textit{Descripción:} Si se desea ver una conversación, esta debe de existir, implicando la existencia del algún mensaje entre ambos usuarios, de no ser así, se mostrará un error indicando que no existen mensajes con el usuario indicado, y no mostraremos nada. \\ [6pt]
+\hspace*{1cm} \textit{Descripción:} Si se desea ver mensajes, debe de haber al menos uno, de no ser así, se mostrará un error indicando que no existen mensajes con el usuario indicado, y no mostraremos nada. \\ [6pt]
 \stepcounter{RS}
 
 \stepcounter{RF}
@@ -195,11 +195,11 @@ Requisito de datos de salida: \textcolor{azul}{RDS5.\theRDS} \\[12pt]
 % ======================= %
 \section{Des/archivar usuario}
 \textbf{\textcolor{rojo}{\underline{RF5.\theRF:}}}. Des/archivar usuario: Permite activar o desactivar la visualización de un usario al listar usuarios. 
-Se requiere del ID de ambos usuarios implicados en la conversación (Cadenas de 40 caracteres) y un bit que muestre si está o no archivado. Para ello, debe de existir 
+Se requiere del ID de ambos usuarios implicados en la conversación (Cadenas de 40 caracteres). Para ello, debe de existir 
 el usuario que se desea archivar, y una conversación entre él y el solicitante de archivar el chat. Cuando un chat esté archivado, no se mostrará en la acción ver 
-conversaciones\\[6pt]
+conversaciones. Si se solicita la acción de archivar, se almacena el ID del usuario que archiva y el archivado, \\[6pt]
 
-\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar la des/archivación de un chat. 
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario. Acción: solicitar la des/archivación de un usuario. 
 Requisito de datos de entrada \textcolor{azul}{RDE5.\theRDE}. \\[6pt]
 
 \textbf{\textcolor{rojo}{BD:}} Requisito de datos de lectura \textcolor{azul}{RDR5.\theRDR} y de escritura \textcolor{azul}{RDW5.\theRDW}. \\[6pt]
@@ -210,25 +210,24 @@ Requisito de datos de salida: ninguno \\[12pt]
 \textcolor{azul}{\textbf{RDE5.\theRDE:}} Usuario que deseamos des/archivar   \\
 \hspace*{1cm} ID Usuario: Cadena de caracteres (40) \\[12pt]
 
-\textcolor{azul}{\textbf{RDR5.\theRDR:}} Comprobación de que existe el usuario a archivar y un mensaje entre ambos usuarios\\
+\textcolor{azul}{\textbf{RDR5.\theRDR:}} Comprobación de que existe el usuario a archivar y un mensaje entre ambos usuarios, además de si el usuario está ya archivado\\
 \hspace*{1cm} ID Usuario a archivar: Cadena de caracteres (40) 
 \hspace*{1cm} ID Usuario que archiva: Cadena de caracteres (40) \\[12pt]
 
-\textcolor{azul}{\textbf{RDW5.\theRDW:}} Datos del usuario que se desea archivar/desarchivar y la negación del bit de archivado. \\
+\textcolor{azul}{\textbf{RDW5.\theRDW:}} Datos del usuario que se desea archivar/desarchivar, si el ya está archivado, se borra la tupla, si no, se añade. \\
 \hspace*{1cm} ID Usuario a archivar: Cadena de caracteres (40) \\
-\hspace*{1cm} ID Usuario que archiva: Cadena de caracteres (40) \\
-\hspace*{1cm} Bit de archivado: booleano \\[12pt]
+\hspace*{1cm} ID Usuario que archiva: Cadena de caracteres (40) \\[12pt]
 
 \setcounter{RS}{1}
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
-\textbf{\textcolor{verde}{\underline{RS5.\theRF.\theRS:}}} Para archivar una conversación, debe de existir el usuario con el que se conversa. \\
+\textbf{\textcolor{verde}{\underline{RS5.\theRF.\theRS:}}} Para archivar un usuario, debe de existir. \\
 \textbf{RF:} RF5.\theRF. \textbf{RD(s):} RDE5.\theRDE, RDR5.\theRDR \\
-\hspace*{1cm} \textit{Descripción:} Si se desea archivar una conversación, el usuario con el que se habla debe de existir, si no, se da un mensaje de error indicando que el usuario no existe y no modificando la base de datos. \\ [6pt]
+\hspace*{1cm} \textit{Descripción:} Si se desea des/archivar una usuario, el usuario con el que se habla debe de existir, si no, se da un mensaje de error indicando que el usuario no existe y no modificando la base de datos. \\ [6pt]
 \stepcounter{RS}
 
-\textbf{\textcolor{verde}{\underline{RS5.\theRF.\theRS:}}} Para archivar una conversación, debe de existir algún mensaje entre ambos usuarios. \\
+\textbf{\textcolor{verde}{\underline{RS5.\theRF.\theRS:}}} Para archivar un usuario, debe de existir algún mensaje entre ambos usuarios. \\
 \textbf{RF:} RF5.\theRF. \textbf{RD(s):} RDE5.\theRDE, RDR5.\theRDR \\
-\hspace*{1cm} \textit{Descripción:} Si se desea archivar una conversación, tiene que haber algún mensaje por parte de alguno de los usuarios, de no ser así, se mostrará un error y se indicará que no existe dicha conversación, no modificando la base de datos. \\ [6pt]
+\hspace*{1cm} \textit{Descripción:} Si se desea des/archivar un usuario, tiene que haber algún mensaje por parte de alguno de los usuarios, de no ser así, se mostrará un error y se indicará que no existe dicha conversación, no modificando la base de datos. \\ [6pt]
 \stepcounter{RS}
 
 \stepcounter{RF}
