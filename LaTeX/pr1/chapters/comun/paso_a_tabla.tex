@@ -1,34 +1,64 @@
+% !TEX root = ../../pr1.tex
+% Macro: muestra una "brace" encima del texto y una etiqueta sobre la brace
+\newcommand{\overwithlabel}[2]{%
+  \ensuremath{%
+    \overset{\scriptstyle\text{\normalfont #2}}%
+            {\overbrace{\text{\normalfont #1}}}%
+  }%
+}
+
 % -----------------------------------------------------------------------
 % TABLA DE DISEÑO LÓGICO (PASO A TABLAS) - SISTEMA EKIS
 % -----------------------------------------------------------------------
 \begin{table}[h!]
-    \centering
-    \caption{Diseño Lógico: Esquema Relacional del Sistema EKIS}
-    \label{tab:diseno_logico}
-    \renewcommand{\arraystretch}{1.4} % Aumenta el espacio entre filas para legibilidad
-    \resizebox{\textwidth}{!}{%
+  \centering
+  \caption{Diseño Lógico: Esquema Relacional del Sistema EKIS}
+  \label{tab:diseno_logico}
+  \renewcommand{\arraystretch}{1.4} % Aumenta el espacio entre filas para legibilidad
+  \resizebox{\textwidth}{!}{%
     \begin{tabular}{|l|p{12cm}|}
-        \hline
-        \rowcolor{gray!20} \textbf{Tabla} & \textbf{Esquema Relacional (Atributos)} \\ \hline
-        
-        % ENTIDADES 
-        \textbf{USUARIO} & \underline{idUsuario}, nombreUsuario, email, contraseña, imagenDePerfil, biografía, fechaModificacion, fechaEliminacion \\ \hline
-        
-        \textbf{HASHTAG} & \underline{hashtag}, contador, categoria \\ \hline
-        
-        \textbf{PUBLICACION} & \underline{idPublicacion}, nombre, descripcion, categoria, imagen \\ \hline
-        
-        \textbf{ANUNCIO} & \underline{idAnuncio}, titulo, cuerpo, enlace, fechaFin, nombreCaracteristica, valorCaracteristica\\ \hline
-        
-        \textbf{MENSAJE} & \underline{idMensaje}, mensaje, fechaEnvio, horaEnvio, bitAviso\\ \hline
+      \hline
+      \rowcolor{gray!20} \textbf{Tabla} & \textbf{Esquema Relacional (Atributos)} \\ \hline
 
-        \textbf{CONTIENE_PUBLICIDAD} & \underline{idPublicidad}, \overbrace{contenido}^{idPub\ arriba}, idAnuncio, idPublicidad\\ \hline
+      % ENTIDADES 
+      \textbf{1.USUARIO} & \underline{idUsuario}, nombreUsuario, email, contraseña, imagenDePerfil, biografía, fechaModificacion, fechaEliminacion \\ \hline
 
-        
+      \textbf{2.HASHTAG} & \underline{hashtag}, contador, categoria \\ \hline
+
+      \textbf{3.PUBLICACION} & \underline{idPublicacion}, nombre, descripcion, categoria, imagen \\ \hline
+
+      \textbf{4.ANUNCIO} & \underline{idAnuncio}, titulo, cuerpo, enlace, fechaFin, nombreCaracteristica, valorCaracteristica\\ \hline
+
+      \textbf{5.MENSAJE} & \underline{idMensaje}, mensaje, fechaEnvio, horaEnvio, bitAviso\\ \hline
+
+      \textbf{6.CONTIENE\_PUBLICIDAD} & \underline{\overwithlabel{idPublicacion}{CE3}}, \overwithlabel{idAnuncio}{CE4} \\ \hline
+%                                      & \small\textit{(Relación N:N entre PUBLICACION y ANUNCIO. PK compuesta: (idPublicacion, idAnuncio). `*` = FK hacia PUBLICACION y ANUNCIO.)} \\ \hline
+
+      \textbf{7.LIKE} & \underline{\overwithlabel{idUsuario}{CE1}}, \underline{\overwithlabel{idAnuncio}{CE3}}, fechaLike \\ \hline
+%                      & \small\textit{(Usuario marca Like a Publicación. PK compuesta: (idUsuario, idPublicacion). FKs a USUARIO y PUBLICACION.)} \\ \hline
+
+      \textbf{8.DES\/ACTIVAR} & \underline{\overwithlabel{idUsuario1}{CE1}}, \underline{\overwithlabel{idUsuario2}{CE1}} \\ \hline
+%                              & \small\textit{(Relaci\'on entre usuarios para activar/desactivar cuentas u otras acciones administrativas. PK compuesta: (idUsuarioActiva, idUsuarioObjetivo)).} \\ \hline
+
+      \textbf{9.BLOQUEAR\_USUARIO} & \underline{\overwithlabel{idUsuario1}{CE1}}, \underline{\overwithlabel{idUsuario2}{CE1}}, fechaBloqueo \\ \hline
+%                                    & \small\textit{(Usuario A bloquea a Usuario B. PK compuesta: (idUsuarioBloqueador, idUsuarioBloqueado)).} \\ \hline
+
+      \textbf{10.AÑADIR\_AMIGO} & \underline{\overwithlabel{idUsuario1}{CE1}}, \underline{\overwithlabel{idUsuario2}{CE1}}, fechaAmistad \\ \hline
+%                                & \small\textit{(Relaci\'on de amistad entre dos usuarios. PK compuesta: (idUsuario1, idUsuario2). `estadoAmistad` puede ser pendiente/aceptada/rechazada.)} \\ \hline
+
+      \textbf{11.ENVIA} & \underline{\overwithlabel{idUsuario1}{CE1}}, \overwithlabel{idUsuario2}{CE1}, fechaEnvio, horaEnvio \\ \hline
+%                        & \small\textit{(Relación que liga MENSAJE con su emisor y receptor. PK normalmente idMensaje; idUsuarioEmisor e idUsuarioReceptor son FKs a USUARIO.)} \\ \hline
+
+      \textbf{12.Contiene} & \overwithlabel{idUsuario}{CE1}, \underline{\overwithlabel{hashtag}{CE2}} \\ \hline
+%                                           & \small\textit{(Relación N:N entre PUBLICACION y HASHTAG. PK compuesta: (idPublicacion, hashtag).)} \\ \hline
+      \textbf{13.Crear\_O\_Mencionar\_Hashtag} & \underline{\overwithlabel{idPublicacion}{CE3}}, \underline{\overwithlabel{hashtag}{CE2}} \\ \hline
+%                                           & \small\textit{(Relación N:N entre PUBLICACION y HASHTAG. PK compuesta: (idPublicacion, hashtag).)} \\ \hline
+
+
     \end{tabular}
-    }
-    \vspace{0.2cm}
-    
-    % Leyenda explicativa
-    \footnotesize{\textit{Nota: Los atributos \underline{subrayados} indican la Clave Primaria (PK). Los atributos seguidos de un asterisco (*) indican Claves Foráneas (FK).}}
+  }
+  \vspace{0.2cm}
+
+  % Leyenda explicativa
+  \footnotesize{\textit{Nota: Los atributos \underline{subrayados} indican la Clave Primaria (PK). Los atributos seguidos de un asterisco (*) indican Claves Foráneas (FK).}}
 \end{table}
