@@ -1,0 +1,34 @@
+% -----------------------------------------------------------------------
+% TABLA DE DISEÑO LÓGICO (PASO A TABLAS) - SISTEMA EKIS
+% -----------------------------------------------------------------------
+\begin{table}[h!]
+    \centering
+    \caption{Diseño Lógico: Esquema Relacional del Sistema EKIS}
+    \label{tab:diseno_logico}
+    \renewcommand{\arraystretch}{1.4} % Aumenta el espacio entre filas para legibilidad
+    \resizebox{\textwidth}{!}{%
+    \begin{tabular}{|l|p{12cm}|}
+        \hline
+        \rowcolor{gray!20} \textbf{Tabla} & \textbf{Esquema Relacional (Atributos)} \\ \hline
+        
+        % ENTIDADES 
+        \textbf{USUARIO} & \underline{idUsuario}, nombreUsuario, email, contraseña, imagenDePerfil, biografía, fechaModificacion, fechaEliminacion \\ \hline
+        
+        \textbf{HASHTAG} & \underline{hashtag}, contador, categoria \\ \hline
+        
+        \textbf{PUBLICACION} & \underline{idPublicacion}, nombre, descripcion, categoria, imagen \\ \hline
+        
+        \textbf{ANUNCIO} & \underline{idAnuncio}, titulo, cuerpo, enlace, fechaFin, nombreCaracteristica, valorCaracteristica\\ \hline
+        
+        \textbf{MENSAJE} & \underline{idMensaje}, mensaje, fechaEnvio, horaEnvio, bitAviso\\ \hline
+
+        \textbf{CONTIENE_PUBLICIDAD} & \underline{idPublicidad}, \overbrace{contenido}^{idPub\ arriba}, idAnuncio, idPublicidad\\ \hline
+
+        
+    \end{tabular}
+    }
+    \vspace{0.2cm}
+    
+    % Leyenda explicativa
+    \footnotesize{\textit{Nota: Los atributos \underline{subrayados} indican la Clave Primaria (PK). Los atributos seguidos de un asterisco (*) indican Claves Foráneas (FK).}}
+\end{table}
