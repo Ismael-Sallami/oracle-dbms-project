@@ -13,45 +13,44 @@
         % === COLUMNA CENTRAL: PROCESOS ========================
         % ======================================================
         
-        \node[proceso, right of=Usuario, node distance = 8cm, minimum width=6cm] (P4) {RF5.4: Visualizar mensajes};
-        \node[proceso, above of=P4,      node distance = 3cm, minimum width=5cm] (P2) {RF5.2: Eliminar mensaje};
-        \node[proceso, above of=P2,      node distance = 3cm, minimum width=5cm] (P1) {RF5.1: Enviar mensaje};
-        \node[proceso, below of=P4,      node distance = 3cm,minimum width=5cm] (P3) {RF5.3: Listar usuarios};
-        \node[proceso, below of=P3,      node distance = 3cm,minimum width=5cm] (P5) {RF5.5: Des/Archivar usuario};
+        \node[proceso, right of=Usuario, node distance = 8cm, minimum width=5cm] (P1) {RF5.1: Enviar mensaje};
+        \node[proceso, below of=P1,      node distance = 3cm, minimum width=5cm] (P2) {RF5.2: Eliminar mensaje};
+        \node[proceso, below of=P2,      node distance = 3cm, minimum width=5cm] (P3) {RF5.3: Listar usuarios};
+        \node[proceso, below of=P3,      node distance = 3cm, minimum width=5cm] (P4) {RF5.4: Visualizar mensajes};
+        \node[proceso, below of=P4,      node distance = 3cm, minimum width=5cm] (P5) {RF5.5: Des/Archivar usuario};
     
         % ======================================================
         % === COLUMNA DERECHA: ALMACENES ==================
         % ======================================================
-        \node[almacen, right of=P2, node distance=10cm, minimum width=5cm] (Mensajes) {Mensajes};
-        \node[almacen, right of=P3, node distance=10cm, minimum width=5cm] (Convers) {Usuarios Archivados};
+        \node[almacen, right of=P3, node distance=10cm, minimum width=5cm] (Convers) {Conversaciones};
     
         % ======================================================
         % === FLUJOS DE DATOS ==================================
         % ======================================================
     
         % -- Usuario → Procesos --
-        \draw[->] (Usuario) to[out=80, in=180] node[midway, above] {RDE5.1} (P1);
-        \draw[->] (Usuario) to[out=30, in=180] node[midway, above] {RDE5.2} (P2);
-        \draw[->] (Usuario) to[out=10, in=175] node[midway, above] {RDE5.4} (P4);
-        \draw[->] (Usuario) to[out=-40, in=185] node[midway, above] {RDE5.3} (P3);
-        \draw[->] (Usuario) to[out=-60, in=180] node[midway, above] {RDE5.5} (P5);
+        \draw[flujo] (Usuario) -- node[midway, above] {RDE5.1} (P1);
+        \draw[flujo] ($(Usuario.south)+(+0.75, 0)$) |- node[pos=0.8, above] {RDE5.2} (P2);
+        \draw[flujo] ($(Usuario.south)+(+0.45,0)$) |- node[pos=0.8, above] {RDE5.3} ($(P3.west)+(0, 0.1)$);
+        \draw[flujo] ($(Usuario.south)+(-0.15,0)$) |- node[pos=0.8, above] {RDE5.4} ($(P4.west)+(0, 0.1)$);
+        \draw[flujo] ($(Usuario.south)+(-0.75,0)$) |- node[pos=0.8, below] {RDE5.5} (P5);
     
         % -- Procesos → Usuario --
-        \draw[->] (P3) to[out=175, in=-20] node[midway, above] {RDS5.1} (Usuario);
-        \draw[->] (P4) to[out=185, in=-10] node[midway, above] {RDS5.1} (Usuario);
+        \draw[flujo] ($(P3.west)+(0,-0.1)$) -| node[pos=0.2, below] {RDS5.1} ($(Usuario.south)+(+0.15,0)$);
+        \draw[flujo] ($(P4.west)+(0,-0.1)$) -| node[pos=0.2, below] {RDS5.2} ($(Usuario.south)+(-0.45,0)$);
 
         % -- Procesos -> Almacenes --
-        \draw[->] (P1) to[out=5, in=80] node[midway, above] {RDW5.1} (Mensajes);
-        \draw[->] (P2) to[out=5, in=170] node[midway, above] {RDW5.2} (Mensajes);
-        \draw[->] (P4) to[out=5, in=-100] node[midway, above] {RDW5.4} (Mensajes);
-        \draw[->] (P5) to[out=5, in=-100] node[midway, above] {RDW5.5} (Convers);
+        \draw[flujo] ($(P1.east)+(0,0.25)$) -| node[pos=0.2, above] {RDW5.1} ($(Convers.north)+(1.5,0)$);
+        \draw[flujo] ($(P2.east)+(0,0.25)$) -| node[pos=0.2, above] {RDW5.2} ($(Convers.north)+(-0.5,0)$);
+        \draw[flujo] ($(P4.east)+(0,-0.25)$) -| node[pos=0.2, below] {RDW5.3} ($(Convers.south)+(-0.5,0)$);
+        \draw[flujo] ($(P5.east)+(0,-0.25)$) -| node[pos=0.2, below] {RDW5.4} ($(Convers.south)+(1.5,0)$);
 
         % -- Procesos <- Almacenes --
-        \draw[->] (Mensajes) to[out=100, in=-5] node[midway, above] {RDR5.1} (P1);
-        \draw[->] (Mensajes) to[out=190, in=-5] node[midway, above]{RDR5.2} (P2);
-        \draw[->] (Mensajes) to[out=-80, in=-5] node[midway, above] {RDR5.4} (P4);
-        \draw[->] (Convers)  to[out=180, in=-5] node[midway, above] {RDR5.2} (P3);
-        \draw[->] (Convers)  to[out=-80, in=-5] node[midway, above] {RDR5.4} (P5);
+        \draw[flujo] ($(Convers.north)+(0.5,0)$) |- node[pos=0.8, below] {RDR5.1} ($(P1.east)+(0,-0.25)$);
+        \draw[flujo] ($(Convers.north)+(-1.5,0)$) |- node[pos=0.8, below]{RDR5.2} ($(P2.east)+(0,-0.25)$);
+        \draw[flujo] (Convers) -- node[pos=0.5, below] {RDR5.3} (P3);
+        \draw[flujo] ($(Convers.south)+(-1.5,0)$) |- node[pos=0.8, above] {RDR5.4} ($(P4.east)+(0,0.25)$);
+        \draw[flujo] ($(Convers.south)+(0.5,0)$) |- node[pos=0.8, above] {RDR5.5} ($(P5.east)+(0,0.25)$);
 
     \end{tikzpicture}
     }

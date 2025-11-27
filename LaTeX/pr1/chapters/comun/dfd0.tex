@@ -53,17 +53,17 @@
 
         % -- Procesos → Almacenes--
         
-        \draw[flujo] (S1.east) -| ($(EKIS.north)+(1.5cm,0)$) node[pos=0.5, above] {Escritura usuarios};
-        \draw[flujo] (S2.north east) -| ($(EKIS.north)+(-1cm,0)$) node[pos=0.5, above] {Escritura publicaciones};
+        \draw[flujo] (S1.east) -| ($(EKIS.north)+(1.5cm,0)$) node[pos=0.2, above] {Escritura usuarios};
+        \draw[flujo] (S2.north east) -| ($(EKIS.north)+(-1cm,0)$) node[pos=0.2, above] {Escritura publicaciones};
         \draw[flujo] (S3.north east) -- ($(EKIS.west)+(0,0.6cm)$) node[pos=0.5, above] {Escritura Mensajes };
-        \draw[flujo] (S4.north east) -| ($(EKIS.south)+(-2cm,0)$) node[pos=0.5, below] {Escritura Tendencias };
-        \draw[flujo] (S5.north east) -| ($(EKIS.south)+(1cm,0)$) node[pos=0.5, below] {Escritura Publicidad};
+        \draw[flujo] (S4.north east) -| ($(EKIS.south)+(-2cm,0)$) node[pos=0.2, below] {Escritura Tendencias };
+        \draw[flujo] (S5.north east) -| ($(EKIS.south)+(1cm,0)$) node[pos=0.2, below] {Escritura Publicidad};
         
         % -- Procesos <- Almacenes --
-        \draw[iflujo] (S2.south east) -| ($(EKIS.north)+(-2cm,0)$) node[pos=0.5, above] {Lectura publicaciones};
+        \draw[iflujo] (S2.south east) -| ($(EKIS.north)+(-2cm,0)$) node[pos=0.2, above] {Lectura publicaciones};
         \draw[iflujo] (S3.south east) -- ($(EKIS.west)+(0,-0.6cm)$) node[pos=0.5, above] {Lectura Mensajes };
-        \draw[iflujo] (S4.south east) -| ($(EKIS.south)+(-1cm,0)$) node[pos=0.5, below] {Lectura Tendencias };
-        \draw[iflujo] (S5.south east) -| ($(EKIS.south)+(2cm,0)$) node[pos=0.5, below] {Lectura Publicidad};
+        \draw[iflujo] (S4.south east) -| ($(EKIS.south)+(-1cm,0)$) node[pos=0.2, below] {Lectura Tendencias };
+        \draw[iflujo] (S5.south east) -| ($(EKIS.south)+(2cm,0)$) node[pos=0.2, below] {Lectura Publicidad};
 
     \end{tikzpicture}
     }
