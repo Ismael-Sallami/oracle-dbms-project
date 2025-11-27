@@ -131,9 +131,8 @@ Requisito de datos de salida: \textcolor{azul}{RDS5.\theRDS} \\[12pt]
 \hspace*{1cm} ID Usuario: Cadena de caracteres (40) 
 \hspace*{1cm} Bit elección (indica si se quiere ver el grupo de conversaciones archivadas o las no archivadas True/False): Booleano (1) \\[12pt]
 
-\textcolor{azul}{\textbf{RDS5.\theRDS:}} Lista de usuarios archivados o no con los que dispone algún mensaje, seguidos de los primeros quince caracteres del último mensaje. \\
-\hspace*{1cm} Nombre Usuario con ID usuario: Cadena de caracteres (20) \\
-\hspace*{1cm} Último mensaje: Cadena de caracteres (15) \\[12pt]
+\textcolor{azul}{\textbf{RDS5.\theRDS:}} Lista de usuarios archivados o no con los que dispone algún mensaje. \\
+\hspace*{1cm} Nombre Usuario con ID usuario: Cadena de caracteres (20) [12pt]
 
 \setcounter{RS}{1}
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
@@ -211,7 +210,7 @@ Requisito de datos de salida: ninguno \\[12pt]
 \hspace*{1cm} ID Usuario: Cadena de caracteres (40) \\[12pt]
 
 \textcolor{azul}{\textbf{RDR5.\theRDR:}} Comprobación de que existe el usuario a archivar y un mensaje entre ambos usuarios, además de si el usuario está ya archivado\\
-\hspace*{1cm} ID Usuario a archivar: Cadena de caracteres (40) 
+\hspace*{1cm} ID Usuario a archivar: Cadena de caracteres (40) \\
 \hspace*{1cm} ID Usuario que archiva: Cadena de caracteres (40) \\[12pt]
 
 \textcolor{azul}{\textbf{RDW5.\theRDW:}} Datos del usuario que se desea archivar/desarchivar, si el ya está archivado, se borra la tupla, si no, se añade. \\
