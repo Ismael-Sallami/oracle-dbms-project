@@ -13,17 +13,17 @@
         % === COLUMNA CENTRAL: PROCESOS ========================
         % ======================================================
         
-        \node[proceso, right of=Usuario, node distance = 8cm, minimum width=6cm] (P4) {RF5.4: Visualizar conversación};
+        \node[proceso, right of=Usuario, node distance = 8cm, minimum width=6cm] (P4) {RF5.4: Visualizar mensajes};
         \node[proceso, above of=P4,      node distance = 3cm, minimum width=5cm] (P2) {RF5.2: Eliminar mensaje};
         \node[proceso, above of=P2,      node distance = 3cm, minimum width=5cm] (P1) {RF5.1: Enviar mensaje};
-        \node[proceso, below of=P4,      node distance = 3cm,minimum width=5cm] (P3) {RF5.3: Listar conversaciones};
-        \node[proceso, below of=P3,      node distance = 3cm,minimum width=5cm] (P5) {RF5.5: Des/Archivar conversación};
+        \node[proceso, below of=P4,      node distance = 3cm,minimum width=5cm] (P3) {RF5.3: Listar usuarios};
+        \node[proceso, below of=P3,      node distance = 3cm,minimum width=5cm] (P5) {RF5.5: Des/Archivar usuario};
     
         % ======================================================
         % === COLUMNA DERECHA: ALMACENES ==================
         % ======================================================
         \node[almacen, right of=P2, node distance=10cm, minimum width=5cm] (Mensajes) {Mensajes};
-        \node[almacen, right of=P3, node distance=10cm, minimum width=5cm] (Convers) {Conversaciones};
+        \node[almacen, right of=P3, node distance=10cm, minimum width=5cm] (Convers) {Usuarios Archivados};
     
         % ======================================================
         % === FLUJOS DE DATOS ==================================
