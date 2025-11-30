@@ -73,6 +73,9 @@
 % Uso: \pk{texto}
 \newcommand{\pk}[1]{\ensuremath{\underset{\textit{\tiny CP}}{\underline{#1}}}}
 \newcommand{\ck}[1]{\ensuremath{\underset{\textit{\tiny CC}}{\underline{#1}}}}
+% Comando para marcar Clave Externa (FK) debajo del atributo
+% Uso: \fk{texto}
+\newcommand{\fk}[1]{\ensuremath{\underset{\textit{\tiny CE}}{#1}}}
 
 \begin{table}[h!]
       \centering
@@ -89,11 +92,11 @@
 
                   \textbf{2.HASHTAG} & \pk{hashtag}, contador, categoria \\ \hline
 
-                  \textbf{3.PUBLICACION} & \pk{idPublicacion}, nombre, descripcion, categoria, imagen \\ \hline
+                  \textbf{3.PUBLICACION} & \pk{idPublicacion}, nombre, descripcion, categoria, imagen, fechaDeCreacion, fechaDeModificacion, eliminado\\ \hline
 
                   \textbf{4.ANUNCIO} & \pk{idAnuncio}, titulo, cuerpo, enlace, fechaFin, nombreCaracteristica, valorCaracteristica\\ \hline
 
-                  \textbf{5.MENSAJE} & \pk{idMensaje}, mensaje, fechaEnvio, horaEnvio, bitAviso\\ \hline
+                  \textbf{5.MENSAJE} & \pk{idMensaje}, mensaje, fechaEnvio, horaEnvio, bitVisto\\ \hline
 
                   \textbf{6.CONTIENE\_PUBLICIDAD} & \pk{\overwithlabel{idPublicacion}{CE3}, \overwithlabel{idAnuncio}{CE4}} \\ \hline
 
@@ -105,11 +108,15 @@
 
                   \textbf{10.AÑADIR\_AMIGO} & \pk{\overwithlabel{idUsuario1}{CE1}, \overwithlabel{idUsuario2}{CE1}}, fechaAmistad \\ \hline
 
-                  \textbf{11.ENVIA} & \pk{\overwithlabel{idUsuario1}{CE1}}, \ck{\overwithlabel{idUsuario2}{CE1}} \\ \hline
+                  \textbf{11.CONVERSA} & \pk{\overwithlabel{idUsuario1}{CE1}, \overwithlabel{idUsuario2}{CE1}} \\ \hline
 
-                  \textbf{12.CONTIENE} & \overwithlabel{idUsuario}{CE11}, \pk{\overwithlabel{idMensaje}{CE5}} \\ \hline
+                  \textbf{12.CONTIENE} & \overwithlabel{idUsuario1, idUsuario2}{CE11}, \pk{\overwithlabel{idMensaje}{CE5}} \\ \hline
 
                   \textbf{13.CREAR\_O\_MENCIONAR\_HASHTAG} & \pk{\overwithlabel{idPublicacion}{CE3}, \overwithlabel{hashtag}{CE2}} \\ \hline
+
+                  \textbf{14. CREAR PUBLICACION} & \pk{\overwithlabel{idPublicacion}{CE3}, \overwithlabel{idUsuario}{CE1}} \\ \hline
+
+                  \textbf{15. MODIFICA PUBLICACION} & \pk{\overwithlabel{idPublicacion}{CE3}, \overwithlabel{idUsuario}{CE1}} \\ \hline
 
             \end{tabular}
       }
