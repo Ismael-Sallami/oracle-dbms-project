@@ -1,10 +1,22 @@
-\begin{table}[h!]
-\centering
-\begin{tabular}{|p{3cm}|p{11cm}|}
+\begin{longtable}{|p{3cm}|p{11cm}|}
+%\centering
+%\begin{tabular}{}
 \hline
 \textbf{CAMBIO} & \textbf{DETALLES} \\
 \hline
+\endfirsthead
 
+\hline
+\textbf{CAMBIO} & \textbf{DETALLES} \\
+\hline
+\endhead
+
+\hline 
+\multicolumn{2}{r}{Continúa en la siguiente página}\\
+\hline 
+\endfoot
+
+% Ismael
 Enum/entidad de valores & Añadida la restricción semántica 3.2.2. Se ha añadido solo como requisito de datos el RDE2.2. \\
 \hline
 
@@ -23,6 +35,35 @@ RS3.4.1 & Corregidos RDs. \\
 RS3.5.1 & Corregidos RDs. \\
 \hline
 
+% Javier 
+RF1.1 & Se han añadido las variables Fecha de modificación, likes y eliminado en RDW1.1.
+RS1.2 → Corregido RDs \\
+\hline
+
+RF1.2 & RDE1.2 ya no hace referencia a RDE1.1. Ahora se detallan explícitamente los datos de entrada: Nombre de publicación, Imagen, Descripción, Categoría.\\
+
+      & RDW1.2 ya no hace referencia a RDE1.2. Ahora se detallan explícitamente los datos de escritura: IDs de usuario y publicación, fecha de modificación y likes.\\
+
+      & RDR1.1 ya no hace referencia a RDE1.2. Ahora se detallan explícitamente los datos de lectura.\\
+
+      & RS1.3 → Corregido RDs\\
+      & RS1.4 → Corregido RDs\\
+\hline
+
+RF1.3 & RDR1.2 ya no hace referencia a RDE1.1. Ahora se detallan explícitamente los datos de lectura. Además se ha añadido la opción de que aparezcan anuncios.\\
+\hline
+
+RF1.4 & RDS1.3 ya no hace referencia a RDE1.1. Ahora se detallan explícitamente los datos de entrada: Nombre de publicación, Imagen, Descripción, Categoría, Fecha de creación, Fecha de modificación y likes.\\
+
+      & RS1.6 → Corregido RDs\\
+      & RS1.7 → Corregido RDs\\
+\hline
+
+RF1.5 & RS1.8 → Corregido RDs\\
+      & RS1.9 → Corregido RDs\\
+\hline
+
+% Sergio 
 Modificación de índices & Se han modificado los índices de los RS. \\
 \hline
 
@@ -56,5 +97,5 @@ RS5.5.1 → RD(s) pasan a ser RDE y RDR.
 RS5.5.2 → RD(s) pasan a ser RDE y RDR. \\
 \hline
 
-\end{tabular}
-\end{table}
+%\end{tabular}
+\end{longtable}
