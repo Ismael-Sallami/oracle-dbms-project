@@ -1,0 +1,341 @@
+% Plantilla para un Trabajo Fin de Grado de la Universidad de Granada,
+% adaptada para el Doble Grado en Ingeniería Informática y Matemáticas.
+%
+%  Autor: Mario Román.
+%  Licencia: GNU GPLv2.
+%
+% Esta plantilla es una adaptación al castellano de la plantilla
+% classicthesis de André Miede, que puede obtenerse en:
+%  https://ctan.org/tex-archive/macros/latex/contrib/classicthesis?lang=en
+% La plantilla original se licencia en GNU GPLv2.
+%
+% Esta plantilla usa símbolos de la Universidad de Granada sujetos a la normativa
+% de identidad visual corporativa, que puede encontrarse en:
+% http://secretariageneral.ugr.es/pages/ivc/normativa
+%
+% La compilación se realiza con las siguientes instrucciones:
+%   pdflatex --shell-escape main.tex
+%   bibtex main
+%   pdflatex --shell-escape main.tex
+%   pdflatex --shell-escape main.tex
+
+% Opciones del tipo de documento
+\documentclass[twoside,openright,titlepage,numbers=noenddot,headinclude,footinclude=true,
+cleardoublepage=empty,abstractoff,BCOR=5mm,paper=a4,fontsize=12pt,main=spanish,pdfstartpage=1]{scrreprt}
+
+% Paquetes de latex que se cargan al inicio. Cubren la entrada de
+% texto, gráficos, código fuente y símbolos.
+\PassOptionsToPackage{table,dvipsnames}{xcolor}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fixltx2e}
+\usepackage{graphicx} % Inclusión de imágenes.
+\usepackage{grffile}  % Distintos formatos para imágenes.
+\usepackage{longtable} % Tablas multipágina.
+\usepackage{wrapfig} % Coloca texto alrededor de una figura.
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{dsfont}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{tikz} % Diagramas conmutativos.
+\usepackage{minted} % Código fuente.
+\usepackage[numbers]{natbib}
+\usepackage{booktabs} % Para tablas de figuras (ejemplo en salesman)
+\usepackage{listings} % Código
+\usepackage{comment}
+\usepackage{float}
+\usepackage[table]{xcolor}
+\PassOptionsToPackage{table,dvipsnames}{xcolor}
+
+\lstset{
+	basicstyle=\ttfamily,%
+	breaklines=true,%
+	captionpos=b,                    % sets the caption-position to bottom
+  tabsize=2,	                   % sets default tabsize to 2 spaces
+  frame=none,
+  numbers=left,
+  xleftmargin=18pt,
+  stepnumber=1,
+  aboveskip=12pt,
+  showstringspaces=false,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape,
+  numberstyle=\scriptsize\bfseries,
+  %morekeywords={sage},
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1 {ñ}{{\~n}}1 {Ñ}{{\~N}}1
+}
+
+
+% Operadores
+
+\DeclareMathOperator{\gr}{gr}
+\DeclareMathOperator{\mcd}{mcd}
+
+\lstset{ frame=Ltb,
+framerule=0pt,
+aboveskip=0.5cm,
+framextopmargin=3pt,
+framexbottommargin=3pt,
+framexleftmargin=0.4cm,
+framesep=0pt,
+rulesep=.4pt,
+backgroundcolor=\color{white},
+rulesepcolor=\color{black},
+%
+stringstyle=\ttfamily,
+showstringspaces = false,
+basicstyle=\small\ttfamily,
+commentstyle=\color{gray},
+keywordstyle=\bfseries,
+%
+numbers=left,
+numbersep=15pt,
+numberstyle=\tiny,
+numberfirstline = false,
+breaklines=true,
+}
+
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+
+\lstdefinestyle{mystyle}{
+  language=C++,
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+}
+
+\lstset{style=mystyle}
+% Plantilla classicthesis
+\usepackage[beramono,eulerchapternumbers,linedheaders,parts,a5paper,dottedtoc,
+manychapters,pdfspacing]{classicthesis}
+
+% Geometría y espaciado de párrafos.
+\setcounter{secnumdepth}{0}
+\usepackage{enumitem}
+\setitemize{noitemsep,topsep=0pt,parsep=0pt,partopsep=0pt}
+\setlist[enumerate]{topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex}
+\usepackage[top=1in, bottom=1.5in, left=1in, right=1in]{geometry}
+\setlength\itemsep{0em}
+\setlength{\parindent}{0pt}
+\usepackage{parskip}
+\usepackage{setspace}
+
+% Profundidad de la tabla de contenidos.
+\setcounter{secnumdepth}{3}
+
+% Usa el paquete minted para mostrar trozos de código.
+% Pueden seleccionarse el lenguaje apropiado y el estilo del código.
+\usepackage{minted}
+\usemintedstyle{colorful}
+\setminted{fontsize=\small}
+\setminted[haskell]{linenos=false,fontsize=\small}
+\renewcommand{\theFancyVerbLine}{\sffamily\textcolor[rgb]{0.5,0.5,1.0}{\oldstylenums{\arabic{FancyVerbLine}}}}
+
+% Path para las imágenes
+\graphicspath{{figures/}}
+
+% Archivos de configuración.
+\input{imports/macros}  % En macros.tex se almacenan las opciones y comandos para escribir matemáticas.
+\input{imports/classicthesis-config} % En classicthesis-config.tex se almacenan las opciones propias de la plantilla.
+
+% Color institucional UGR
+% \definecolor{ugrColor}{HTML}{ed1c3e} % Versión clara.
+\definecolor{ugrColor}{HTML}{FFA500}  % Usado en el título.
+\definecolor{ugrColor2}{HTML}{FFA500} % Usado en las secciones.
+% Prácticas DDSI
+% Definición de colores
+\definecolor{rojo}{RGB}{200,0,0}
+\definecolor{azul}{RGB}{0,70,160}
+\definecolor{verde}{RGB}{0,160,70}
+
+% Datos de portada
+\usepackage{titling} % Facilita los datos de la portada
+\author{Ismael Sallami Moreno \\ Jesús Rodríguez González \\ Fernando José Gracia Choin \\ Sergio Calvo González \\ Javier Niño Sánchez} 
+\title{Seminario 2: Lenguajes y Entornos de Desarrollo}
+
+% Portada
+\include{imports/titlepage}
+\usepackage{wallpaper}
+\usepackage[main=spanish]{babel}
+
+
+\usepackage{slantsc}
+
+% Algoritmos
+
+\usepackage[linesnumbered, onelanguage, ruled]{algorithm2e}
+\SetAlCapFnt{\sffamily}
+\SetAlCapNameFnt{\sffamily}
+\newcommand\mycommentfont[1]{\sffamily\textcolor{darkgray}{#1}}
+\SetCommentSty{mycommentfont}
+%\SetAlFnt{\sffamily}
+%\SetKwSty{sffamily}
+\SetAlCapSkip{.5em}
+\SetAlgoCaptionLayout{raggedright}
+\SetAlgorithmName{Algoritmo}{Algoritmo}{Lista de algoritmos}
+%\SetAlgoSkip{medskip}
+\SetAlgoInsideSkip{medskip}
+
+% Entorno algoritmo con líneas pero caption debajo
+\makeatletter
+\newenvironment{Ualgorithm}[1][htpb]{\def\@algocf@post@ruled{\color{gray}\hrule  height\algoheightrule\kern6pt\relax}%
+\def\@algocf@capt@ruled{under}%
+\setlength\algotitleheightrule{0pt}%
+\SetAlgoCaptionLayout{raggedright}%
+\begin{algorithm}[#1]}
+{\end{algorithm}}
+\makeatother
+
+% Comandos
+\theoremstyle{plain}
+\newtheorem{problemth}{Problema}
+
+%Tikz styles para la práctica 2 de ddsi
+\usepackage{tikz}
+\usetikzlibrary{
+    calc,           % Para cálculos de coordenadas
+    positioning,    % Para colocar nodos de manera relativa (ej: below of)
+    shapes,         % Para formas avanzadas (diamantes, elipses, etc.)
+    arrows,         % Para estilos de flechas
+    fit             % Para ajustar un nodo a un conjunto de nodos
+}
+
+\tikzstyle{agente} = [
+    rectangle, draw, thick, 
+    minimum width=2.5cm, minimum height=1cm, 
+    fill=blue!15, text centered, 
+    font=\bfseries\small
+] % Agente Externo
+
+\tikzstyle{proceso} = [
+    rectangle, rounded corners=5pt, draw, thick, 
+    minimum width=2.5cm, minimum height=1cm, 
+    fill=green!20, text centered, 
+    font=\bfseries\small
+] % Proceso
+
+\tikzset{
+    almacen/.style={
+        rectangle,
+        minimum width=3cm,
+        minimum height=1cm,
+        fill=yellow!20,
+        text centered,
+        inner sep=5pt,
+        font=\bfseries\small,
+        draw=none, % no dibuja borde automático
+        append after command={
+            \pgfextra{
+                % Dibuja todos los lados excepto el derecho
+                \draw[thick]
+                    (\tikzlastnode.north west) --
+                    (\tikzlastnode.north east) --
+                    (\tikzlastnode.south east) --
+                    (\tikzlastnode.south west) -- cycle;
+                % Borra (no dibujamos) el lado derecho
+                \draw[white, line width=3pt]
+                    (\tikzlastnode.north east) --
+                    (\tikzlastnode.south east);
+            }
+        }
+    }
+}
+
+
+\tikzstyle{flujo} = [
+  ->, very thick, >=stealth, 
+  font=\small
+] % Flujo de datos
+
+\tikzset{
+  flujo/.style={->, thick, shorten >=6pt, shorten <=6pt, to path={-| (\tikztotarget)}}
+}
+
+\tikzset{
+  flujo/.style={
+    ->, thick,
+    shorten >=6pt, shorten <=6pt,
+    rounded corners=8pt, % esquinas redondeadas para rodear nodos
+  },
+  autoavoid/.style={
+    to path={
+      % Intenta evitar otras flechas usando out/in y bend
+      [rounded corners=12pt]
+      |- (\tikztotarget)
+      \tikztonodes
+    }
+  }
+}
+
+\makeatletter
+\@addtoreset{chapter}{part}
+\makeatother
+
+
+
+
+
+
+\begin{document}
+
+
+\ThisULCornerWallPaper{1}{figures/ugrA4_orange.pdf}
+\maketitle
+
+\onehalfspacing
+
+% Indice
+\tableofcontents
+\newpage
+
+%Capítulos
+% \input{chapters/descripcion.tex}
+
+\chapter{Referencia a los tutoriales utilizados}
+\input{chapters/tutoriales}
+
+\chapter{Descripción de las tablas creadas}
+\input{chapters/tablas}
+
+\chapter{Funcionalidad implementada por cada persona y cambios realizados}
+\input{chapters/funcionalidad}
+
+\chapter{Conceptos y tecnologías utilizados}
+\input{chapters/conceptos}
+
+
+
+
+
+
+
+
+
+% ----------------------- %
+% BIBLIOGRAFÍA
+% ----------------------- %
+
+% Estilo de cita.
+\bibliographystyle{apa-good}
+%\renewcommand\bibname{Reference}
+
+%[citestyle=numeric]
+
+%\renewcommand\bibname{Bibliografía}
+%
+
+% Añadimos la bibliografía al índice
+\phantomsection
+\end{document}
