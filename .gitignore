@@ -33,3 +33,23 @@
 
 # Archivos relacionados con figuras
 *.eps-converted-to.pdf
+
+# ----------práctica 3-------------
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# IDEs
+.vscode/
+.idea/
+
+# Logs y SO
+*.log
+.DS_Store
+Thumbs.db
+
+arbol.txt

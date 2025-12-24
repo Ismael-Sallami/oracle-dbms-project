@@ -1,0 +1,6 @@
+# Driver ODBC para conectar con Oracle (Vital para la práctica)
+pyodbc>=5.0.0
+
+# (Opcional) Menús bonitos con colores como en el ejemplo
+# colorama
+# rich
