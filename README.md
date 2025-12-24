@@ -220,6 +220,8 @@ def mostrar_menu(conn):
 
 ```
 
+> A continuación, las funciones se definen en el fichero functions.py de cada subsistema.
+
 #### ¿Cómo subo mis Triggers/Procedimientos?
 
 1. Guarda tus scripts `.sql` en `pr3/database/TU_MODULO/`.
