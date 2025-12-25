@@ -3,7 +3,7 @@ from db_connection import DBConnection
 
 # --- IMPORTACIÓN DE SUBSISTEMAS ---
 # Descomentar a medida que los compañeros suban su código
-# from publicidad import menu as publicidad_sys
+from publicidad import menu as publicidad_sys
 # from usuarios import menu as usuarios_sys
 # from publicaciones import menu as publicaciones_sys
 # from tendencias import menu as tendencias_sys
@@ -39,11 +39,11 @@ def main():
             print("⚠️ Módulo en desarrollo (Fer)")
             # usuarios_sys.mostrar_menu(conn)
         elif opcion == "3":
-             print("⚠️ Módulo en desarrollo (Javi)")
+            print("⚠️ Módulo en desarrollo (Javi)")
         elif opcion == "4":
-             print("⚠️ Módulo en desarrollo (Jesús)")
+            print("⚠️ Módulo en desarrollo (Jesús)")
         elif opcion == "5":
-             print("⚠️ Módulo en desarrollo (Sergio)")
+            print("⚠️ Módulo en desarrollo (Sergio)")
         elif opcion == "0":
             db.close()
             print("¡Hasta luego!")
