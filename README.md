@@ -90,8 +90,8 @@ requirements.txt <-- las librerías necesarias para el fichero py
     ├── main.py               <-- Punto de entrada (Gestionado por Ismael)
     ├── db_connection.py      <-- Conexión Singleton (Gestionado por Ismael)
     ├── publicidad/           <-- Módulo de Ismael
-│       ├──-- functions.py
-│       ├──-- menu.py
+    │       ├──-- functions.py
+    │       ├──-- menu.py
     ├── usuarios/             <-- Módulo de Fer
     ├── publicaciones/        <-- Módulo de Javi
     ├── tendencias/           <-- Módulo de Jesús
