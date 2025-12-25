@@ -234,7 +234,7 @@ def mostrar_menu(conn):
 > - **Verificar scripts SQL:** Antes de entregar, crea y ejecuta un fichero `test.sql` en tu carpeta para comprobar que todos tus scripts funcionan correctamente y la base de datos está actualizada.
 > - **Actualizar la base de datos:** Si realizas cambios en los scripts de la base de datos, asegúrate de ejecutarlos para que los cambios se reflejen y estén disponibles para todos.
 > - **Configurar credenciales en la conexión:** En el archivo de conexión a la base de datos (`db_connection.py`), cada miembro debe poner su propio usuario y contraseña de Oracle para las pruebas locales. No subas tus credenciales personales al repositorio.
-> - **Se ha usado interfaz gráfica REVISAR**
+> - **Se ha usado interfaz gráfica REVISAR, los ejemplos de arriba mediante terminal son de ejemplo.**
 
 #### ¿Cómo subo mis Triggers/Procedimientos?
 
