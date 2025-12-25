@@ -15,3 +15,16 @@ BEGIN
     END IF;
 END;
 /
+
+/* =========================================================
+TRIGGER 2: Auditoría de Cambios en FECHAFIN
+========================================================= */
+
+CREATE OR REPLACE TRIGGER TRG_AUDITAR_CAMBIO_FECHA
+AFTER UPDATE OF FECHAFIN ON ANUNCIO
+FOR EACH ROW
+BEGIN
+    INSERT INTO HISTORIAL_CAMBIOS_FECHA (IDANUNCIO, FECHA_ANTIGUA, FECHA_NUEVA)
+    VALUES (:OLD.IDANUNCIO, :OLD.FECHAFIN, :NEW.FECHAFIN);
+END;
+/

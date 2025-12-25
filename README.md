@@ -79,6 +79,8 @@ requirements.txt <-- las librerías necesarias para el fichero py
 ├── database/                 <-- SCRIPTS SQL (Triggers, Procedures, DDL)
 │   ├── 00_init_tablas.sql    <-- Script maestro de creación de tablas (Global)
 │   ├── publicidad/           <-- Espacio de Ismael
+│       ├──-- procedures_tumodulo.py
+│       ├──-- triggers_tumodulo.py
 │   ├── usuarios/             <-- Espacio de Fer
 │   ├── publicaciones/        <-- Espacio de Javi
 │   ├── tendencias/           <-- Espacio de Jesús
@@ -88,6 +90,8 @@ requirements.txt <-- las librerías necesarias para el fichero py
     ├── main.py               <-- Punto de entrada (Gestionado por Ismael)
     ├── db_connection.py      <-- Conexión Singleton (Gestionado por Ismael)
     ├── publicidad/           <-- Módulo de Ismael
+│       ├──-- functions.py
+│       ├──-- menu.py
     ├── usuarios/             <-- Módulo de Fer
     ├── publicaciones/        <-- Módulo de Javi
     ├── tendencias/           <-- Módulo de Jesús
@@ -220,7 +224,16 @@ def mostrar_menu(conn):
 
 ```
 
-> A continuación, las funciones se definen en el fichero functions.py de cada subsistema.
+> A continuación, las funciones se definen en el fichero *functions.py* de cada subsistema. Así como los procedimientos que serán definidos en *database/tumodulo/procedures_tumodulo.py*.
+
+
+> [!WARNING]
+> **Recomendaciones Importantes:**
+>
+> - **Usar entorno virtual de Python:** Ejecuta siempre el `main.py` dentro de un entorno virtual (`venv`) para evitar conflictos de dependencias.
+> - **Verificar scripts SQL:** Antes de entregar, crea y ejecuta un fichero `test.sql` en tu carpeta para comprobar que todos tus scripts funcionan correctamente y la base de datos está actualizada.
+> - **Actualizar la base de datos:** Si realizas cambios en los scripts de la base de datos, asegúrate de ejecutarlos para que los cambios se reflejen y estén disponibles para todos.
+> - **Configurar credenciales en la conexión:** En el archivo de conexión a la base de datos (`db_connection.py`), cada miembro debe poner su propio usuario y contraseña de Oracle para las pruebas locales. No subas tus credenciales personales al repositorio.
 
 #### ¿Cómo subo mis Triggers/Procedimientos?
 
