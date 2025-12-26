@@ -1,0 +1,27 @@
+/* =========================================================
+TRIGGER 1: DAR ME GUSTA A UNA PUBLICACIÓN
+========================================================= */
+
+CREATE OR REPLACE TRIGGER TRG_PUBLICACIONES_DAR_LIKE
+AFTER INSERT ON ME_GUSTA
+FOR EACH ROW
+BEGIN
+  UPDATE PUBLICACION --NUM_LIKES es un NUMBER que hay que añadir
+  SET NUM_LIKES = NUM_LIKES + 1
+  WHERE IDPUBLICACION = :NEW.IDPUBLICACION;
+END;
+/
+
+/* =========================================================
+TRIGGER 2: QUITAR ME GUSTA A UNA PUBLICACIÓN
+========================================================= */
+
+CREATE OR REPLACE TRIGGER TRG_PUBLICACIONES_QUITAR_LIKE
+AFTER DELETE ON ME_GUSTA
+FOR EACH ROW
+BEGIN
+  UPDATE PUBLICACION --NUM_LIKES es un NUMBER que hay que añadir
+  SET NUM_LIKES = CASE WHEN NUM_LIKES > 0 THEN NUM_LIKES - 1 ELSE 0 END
+  WHERE IDPUBLICACION = :OLD.IDPUBLICACION;
+END;
+/
