@@ -16,32 +16,40 @@ def crear_usuario(conn, nombre_usuario, correo, contrasena, imagen_perfil=None, 
     try:
         # Comprobaciones mínimas
         if not nombre_usuario or not nombre_usuario.strip():
-            return False, "Nombre de usuario no puede estar vacío"
+            return "Nombre de usuario no puede estar vacío"
         if not correo or not correo.strip():
-            return False, "Correo no puede estar vacío"
+            return "Correo no puede estar vacío"
         if not contrasena or not contrasena.strip():
-            return False, "Contraseña no puede estar vacía"
+            return "Contraseña no puede estar vacía"
 
         cursor.execute("SELECT 1 FROM USUARIO WHERE LOWER(NOMBREUSUARIO) = LOWER(:1)", [nombre_usuario])
         if cursor.fetchone():
-            return False, "Nombre de usuario ya existe"
+            return "Nombre de usuario ya existe"
 
-        cursor.execute("SELECT 1 FROM USUARIO WHERE LOWER(CORREO) = LOWER(:1)", [correo])
+        cursor.execute("SELECT 1 FROM USUARIO WHERE LOWER(EMAIL) = LOWER(:1)", [correo])
         if cursor.fetchone():
-            return False, "Correo ya existe"
+            return "Correo ya existe"
 
-        id_usuario = uuid.uuid4().hex  
-
+        #id_usuario = uuid.uuid4().hex
+        #de momento el id de usuario se genera con IDENTITY
+        
+        #NO SE INCLUYE UNA FECHA_CREACION
         cursor.execute("""
-            INSERT INTO USUARIO (IDUSUARIO, NOMBREUSUARIO, CORREO, CONTRASENA, IMAGENPERFIL, BIOGRAFIA, FECHACREACION, ELIMINADO)
-            VALUES (:1,:2,:3,:4,:5,:6,:7, 0)
-        """, [id_usuario, nombre_usuario, correo, contrasena, imagen_perfil, biografia, fecha_creacion])
+            INSERT INTO USUARIO (NOMBREUSUARIO, EMAIL, CONTRASENIA, IMAGENDEPERFIL, BIOGRAFIA)
+            VALUES (:1,:2,:3,:4,:5)
+        """, [nombre_usuario, correo, contrasena, imagen_perfil, biografia])
 
         conn.commit()
-        return True, f"Usuario creado (ID={id_usuario})"
+
+        cursor.execute("""
+                       SELECT IDUSUARIO FROM USUARIO WHERE NOMBREUSUARIO=:1
+                       AND CONTRASENIA = :2
+                       """, [nombre_usuario,contrasena])
+        id_usuario = cursor.fetchone()
+        return f"Usuario creado (ID={id_usuario[0]})"
 
     except Exception as e:
-        return False, f"Error SQL: {e}"
+        return f"Error SQL: {e}"
     finally:
         cursor.close()
 
@@ -56,34 +64,34 @@ def modificar_usuario(conn, id_usuario, nombre_usuario=None, correo=None, contra
     cursor = conn.cursor()
     try:
         # Verificar que existe y no está eliminado
-        cursor.execute("SELECT 1 FROM USUARIO WHERE IDUSUARIO = :1 AND NVL(ELIMINADO,0) = 0", [id_usuario])
+        cursor.execute("SELECT 1 FROM USUARIO WHERE IDUSUARIO = :1 AND NVL(FECHAELIMINACION,0) = 0", [id_usuario])
         if not cursor.fetchone():
-            return False, "Usuario no existe o está eliminado"
+            return "Usuario no existe o está eliminado"
 
-        # Si no viene nada que modificar, salimos
+        # Si no tiene nada que modificar, salimos
         if all(v is None for v in [nombre_usuario, correo, contrasena, imagen_perfil, biografia]):
-            return False, "No hay cambios para aplicar"
+            return "No hay cambios para aplicar"
 
         # Unicidad opcional si se cambia nombre/correo
         if nombre_usuario is not None:
             if not nombre_usuario.strip():
-                return False, "Nombre de usuario no puede estar vacío"
+                return "Nombre de usuario no puede estar vacío"
             cursor.execute("""
                 SELECT 1 FROM USUARIO
                 WHERE LOWER(NOMBREUSUARIO) = LOWER(:1) AND IDUSUARIO <> :2
             """, [nombre_usuario, id_usuario])
             if cursor.fetchone():
-                return False, "Nombre de usuario ya existe"
+                return "Nombre de usuario ya existe"
 
         if correo is not None:
             if not correo.strip():
-                return False, "Correo no puede estar vacío"
+                return "Correo no puede estar vacío"
             cursor.execute("""
                 SELECT 1 FROM USUARIO
-                WHERE LOWER(CORREO) = LOWER(:1) AND IDUSUARIO <> :2
+                WHERE LOWER(EMAIL) = LOWER(:1) AND IDUSUARIO <> :2
             """, [correo, id_usuario])
             if cursor.fetchone():
-                return False, "Correo ya existe"
+                return "Correo ya existe"
 
         # Construcción dinámica del UPDATE (para no pisar campos que no se tocan)
         sets = []
@@ -94,22 +102,22 @@ def modificar_usuario(conn, id_usuario, nombre_usuario=None, correo=None, contra
             params.append(val)
 
         if nombre_usuario is not None: add_set("NOMBREUSUARIO", nombre_usuario)
-        if correo is not None: add_set("CORREO", correo)
-        if contrasena is not None: add_set("CONTRASENA", contrasena)
-        if imagen_perfil is not None: add_set("IMAGENPERFIL", imagen_perfil)
+        if correo is not None: add_set("EMAIL", correo)
+        if contrasena is not None: add_set("CONTRASENIA", contrasena)
+        if imagen_perfil is not None: add_set("IMAGENDEPERFIL", imagen_perfil)
         if biografia is not None: add_set("BIOGRAFIA", biografia)
 
         add_set("FECHAMODIFICACION", _now_date())
 
         params.append(id_usuario)
-        sql = f"UPDATE USUARIO SET {', '.join(sets)} WHERE IDUSUARIO = :{len(params)}"
+        sql = "UPDATE USUARIO SET " +", ".join(sets) + f"WHERE IDUSUARIO = :{len(params)}"
         cursor.execute(sql, params)
 
         conn.commit()
-        return True, "Usuario modificado"
+        return "Usuario modificado"
 
     except Exception as e:
-        return False, f"Error SQL: {e}"
+        return f"Error SQL: {e}"
     finally:
         cursor.close()
 
@@ -125,20 +133,20 @@ def eliminar_usuario(conn, id_usuario, contrasena):
         # Verificar credenciales
         cursor.execute("""
             SELECT 1 FROM USUARIO
-            WHERE IDUSUARIO = :1 AND CONTRASENA = :2
+            WHERE IDUSUARIO = :1 AND CONTRASENIA = :2
         """, [id_usuario, contrasena])
 
         if cursor.fetchone() is None:
-            return False, "Credenciales incorrectas o usuario no existe"
+            return "Credenciales incorrectas o usuario no existe"
 
         # Borrado físico con cascade
         cursor.execute("DELETE FROM USUARIO WHERE IDUSUARIO = :1", [id_usuario])
         conn.commit()
 
-        return True, "Usuario eliminado definitivamente (con borrado en cascada)"
+        return "Usuario eliminado definitivamente (con borrado en cascada)"
 
     except Exception as e:
-        return False, f"Error SQL: {e}"
+        return f"Error SQL: {e}"
     finally:
         cursor.close()
 
@@ -157,12 +165,12 @@ def bloquear_desbloquear_usuario(conn, id_emisor, id_objetivo):
     cursor = conn.cursor()
     try:
         if id_emisor == id_objetivo:
-            return False, "No puedes bloquearte a ti mismo"
+            return "No puedes bloquearte a ti mismo"
 
         # Comprobar que objetivo existe y no está eliminado
-        cursor.execute("SELECT 1 FROM USUARIO WHERE IDUSUARIO = :1 AND NVL(ELIMINADO,0) = 0", [id_objetivo])
+        cursor.execute("SELECT 1 FROM USUARIO WHERE IDUSUARIO = :1 AND NVL(FECHAELIMINACION,0) = 0", [id_objetivo])
         if not cursor.fetchone():
-            return False, "Usuario objetivo no existe o está eliminado"
+            return "Usuario objetivo no existe o está eliminado"
 
         # ¿Ya existe bloqueo emisor->objetivo?
         cursor.execute("""
@@ -178,7 +186,7 @@ def bloquear_desbloquear_usuario(conn, id_emisor, id_objetivo):
                 WHERE IDUSUARIO1 = :1 AND IDUSUARIO2 = :2
             """, [id_emisor, id_objetivo])
             conn.commit()
-            return True, "Usuario desbloqueado"
+            return "Usuario desbloqueado"
         else:
             # Al bloquear: eliminar amistad en ambos sentidos
             cursor.execute("""
@@ -193,10 +201,10 @@ def bloquear_desbloquear_usuario(conn, id_emisor, id_objetivo):
             """, [id_emisor, id_objetivo, _now_date()])
 
             conn.commit()
-            return True, "Usuario bloqueado"
+            return "Usuario bloqueado"
 
     except Exception as e:
-        return False, f"Error SQL: {e}"
+        return f"Error SQL: {e}"
     finally:
         cursor.close()
 
@@ -213,12 +221,12 @@ def anadir_amigo(conn, id_emisor, id_objetivo):
     cursor = conn.cursor()
     try:
         if id_emisor == id_objetivo:
-            return False, "No puedes añadirte a ti mismo"
+            return "No puedes añadirte a ti mismo"
 
         # Comprobar objetivo existe y no eliminado
-        cursor.execute("SELECT 1 FROM USUARIO WHERE IDUSUARIO = :1 AND NVL(ELIMINADO,0) = 0", [id_objetivo])
+        cursor.execute("SELECT 1 FROM USUARIO WHERE IDUSUARIO = :1 AND NVL(FECHAELIMINACION,0) = 0", [id_objetivo])
         if not cursor.fetchone():
-            return False, "Usuario objetivo no existe o está eliminado"
+            return "Usuario objetivo no existe o está eliminado"
 
         # Bloqueos (si cualquiera bloqueó a cualquiera, no se permite amistad)
         cursor.execute("""
@@ -227,7 +235,7 @@ def anadir_amigo(conn, id_emisor, id_objetivo):
                OR (IDUSUARIO1 = :2 AND IDUSUARIO2 = :1)
         """, [id_emisor, id_objetivo])
         if cursor.fetchone():
-            return False, "No se puede añadir como amigo: existe un bloqueo entre ambos"
+            return "No se puede añadir como amigo: existe un bloqueo entre ambos"
 
         # Duplicidad
         cursor.execute("""
@@ -235,7 +243,7 @@ def anadir_amigo(conn, id_emisor, id_objetivo):
             WHERE IDUSUARIO1 = :1 AND IDUSUARIO2 = :2
         """, [id_emisor, id_objetivo])
         if cursor.fetchone():
-            return False, "Ya has añadido a este usuario como amigo"
+            return "Ya has añadido a este usuario como amigo"
 
         cursor.execute("""
             INSERT INTO AMISTAD (IDUSUARIO1, IDUSUARIO2, FECHAAMISTAD)
@@ -243,9 +251,9 @@ def anadir_amigo(conn, id_emisor, id_objetivo):
         """, [id_emisor, id_objetivo, _now_date()])
 
         conn.commit()
-        return True, "Amigo añadido (solicitud/relación unilateral creada)"
+        return "Amigo añadido (solicitud/relación unilateral creada)"
 
     except Exception as e:
-        return False, f"Error SQL: {e}"
+        return f"Error SQL: {e}"
     finally:
         cursor.close()

@@ -1,4 +1,4 @@
-from .functions import (
+from functions import (
     crear_usuario,
     modificar_usuario,
     eliminar_usuario,
@@ -11,8 +11,6 @@ def mostrar_menu_usuarios(conexion):
     Interfaz de usuario para el subsistema de Usuarios.
     Recibe la conexión global compartida por el sistema.
     """
-    cursor = conexion.cursor()
-
     while True:
         print("\n========================================")
         print("     SISTEMA EKIS - MENÚ USUARIOS        ")
@@ -35,8 +33,8 @@ def mostrar_menu_usuarios(conexion):
             imagen = input("Imagen de perfil (opcional): ")
             bio = input("Biografía (opcional): ")
 
-            ok, msg = crear_usuario(
-                cursor,
+            msg = crear_usuario(
+                conexion,
                 nombre,
                 email,
                 password,
@@ -44,8 +42,6 @@ def mostrar_menu_usuarios(conexion):
                 bio if bio else None
             )
 
-            if ok:
-                conexion.commit()
             print(msg)
 
         # RF4.2 – Modificar usuario
@@ -59,8 +55,8 @@ def mostrar_menu_usuarios(conexion):
             imagen = input("Nueva imagen de perfil: ")
             bio = input("Nueva biografía: ")
 
-            ok, msg = modificar_usuario(
-                cursor,
+            msg = modificar_usuario(
+                conexion,
                 int(idu),
                 nombre if nombre else None,
                 email if email else None,
@@ -69,8 +65,6 @@ def mostrar_menu_usuarios(conexion):
                 bio if bio else None
             )
 
-            if ok:
-                conexion.commit()
             print(msg)
 
         # RF4.3 – Eliminar usuario (borrado físico, cascade)
@@ -80,9 +74,7 @@ def mostrar_menu_usuarios(conexion):
             confirm = input("¿Está seguro? (S/N): ").upper()
 
             if confirm == "S":
-                ok, msg = eliminar_usuario(cursor, int(idu), password)
-                if ok:
-                    conexion.commit()
+                msg = eliminar_usuario(conexion, int(idu), password)
                 print(msg)
             else:
                 print("Operación cancelada.")
@@ -92,9 +84,7 @@ def mostrar_menu_usuarios(conexion):
             id1 = input("ID del usuario activo: ")
             id2 = input("ID del usuario a bloquear/desbloquear: ")
 
-            ok, msg = bloquear_desbloquear_usuario(cursor, int(id1), int(id2))
-            if ok:
-                conexion.commit()
+            msg = bloquear_desbloquear_usuario(conexion, int(id1), int(id2))
             print(msg)
 
         # RF4.5 – Añadir amigo
@@ -102,9 +92,7 @@ def mostrar_menu_usuarios(conexion):
             id1 = input("ID del usuario activo: ")
             id2 = input("ID del usuario a añadir como amigo: ")
 
-            ok, msg = anadir_amigo(cursor, int(id1), int(id2))
-            if ok:
-                conexion.commit()
+            msg = anadir_amigo(conexion, int(id1), int(id2))
             print(msg)
 
         elif opcion == "6":
@@ -114,4 +102,15 @@ def mostrar_menu_usuarios(conexion):
         else:
             print("Opción no válida. Intente de nuevo.")
 
-    cursor.close()
+
+import oracledb
+try:
+    connection = oracledb.connect(
+            user="ORACLE_USER",
+            password="ORACLE_USER",
+            dsn="oracle0.ugr.es:1521/practbd"
+            )
+    mostrar_menu_usuarios(connection)
+except Exception as e:
+    print(f"Error: {e}")
+    exit(127)
