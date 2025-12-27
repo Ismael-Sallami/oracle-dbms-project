@@ -1,33 +1,34 @@
-import pyodbc
+# Eliminamos pyodbc para evitar conflictos de drivers
+import oracledb
 
 def enviar_mensaje(conn, id1, id2, mensaje):
     cursor = conn.cursor()
     try:
-        # Lógica de Savepoint omitida para simplificar compatibilidad dependiendo del driver, 
-        # pero mantenemos la lógica de transacción.
-        cursor.execute("SELECT 1 FROM AMISTAD WHERE (IDUSUARIO1 = ? AND IDUSUARIO2 = ?)", (id1, id2))
+        # En oracledb los parámetros se pasan como :1, :2, etc. o en una lista
+        cursor.execute("SELECT 1 FROM AMISTAD WHERE (IDUSUARIO1 = :1 AND IDUSUARIO2 = :2)", [id1, id2])
         u1esamigo = cursor.fetchone() is not None
-        cursor.execute("SELECT 1 FROM AMISTAD WHERE (IDUSUARIO1 = ? AND IDUSUARIO2 = ?)", (id2, id1))
+        
+        cursor.execute("SELECT 1 FROM AMISTAD WHERE (IDUSUARIO1 = :1 AND IDUSUARIO2 = :2)", [id2, id1])
         u2esamigo = cursor.fetchone() is not None
-       
+        
         if u1esamigo and u2esamigo:
             cursor.execute("""
                 SELECT 1 FROM CONVERSA 
-                WHERE (IDUSUARIO1 = ? AND IDUSUARIO2 = ?) OR (IDUSUARIO1 = ? AND IDUSUARIO2 = ?)
-            """, (id1, id2, id2, id1))
+                WHERE (IDUSUARIO1 = :1 AND IDUSUARIO2 = :2) OR (IDUSUARIO1 = :3 AND IDUSUARIO2 = :4)
+            """, [id1, id2, id2, id1])
             hayconver = cursor.fetchone() is not None
 
             if not hayconver:
-                cursor.execute("INSERT INTO CONVERSA (IDUSUARIO1, IDUSUARIO2) VALUES(?,?)", (id1, id2))
-                cursor.execute("INSERT INTO CONVERSA (IDUSUARIO1, IDUSUARIO2) VALUES(?,?)", (id2, id1))
+                cursor.execute("INSERT INTO CONVERSA (IDUSUARIO1, IDUSUARIO2) VALUES(:1,:2)", [id1, id2])
+                cursor.execute("INSERT INTO CONVERSA (IDUSUARIO1, IDUSUARIO2) VALUES(:1,:2)", [id2, id1])
                 
-            cursor.execute("INSERT INTO MENSAJE (IDUSUARIO1, IDUSUARIO2, MENSAJE) VALUES(?,?,?)", (id1, id2, mensaje))
+            cursor.execute("INSERT INTO MENSAJE (IDUSUARIO1, IDUSUARIO2, MENSAJE) VALUES(:1,:2,:3)", [id1, id2, mensaje])
             conn.commit()
             return True, "Mensaje enviado"
         else:
             return False, "No sois amigos recíprocamente"
         
-    except pyodbc.Error as e: 
+    except Exception as e: 
         return False, f"Error SQL: {e}"
     finally:
         cursor.close()
@@ -35,17 +36,16 @@ def enviar_mensaje(conn, id1, id2, mensaje):
 def eliminar_mensaje(conn, id_usuario_activo, id_mensaje):
     cursor = conn.cursor()
     try:
-        # Verificamos que el mensaje exista y pertenezca al usuario activo
-        cursor.execute("SELECT 1 FROM MENSAJE WHERE IDMENSAJE = ? AND IDUSUARIO1 = ?", (id_mensaje, id_usuario_activo))
+        cursor.execute("SELECT 1 FROM MENSAJE WHERE IDMENSAJE = :1 AND IDUSUARIO1 = :2", [id_mensaje, id_usuario_activo])
         es_propio = cursor.fetchone() is not None
         
         if es_propio:
-            cursor.execute("DELETE FROM MENSAJE WHERE IDMENSAJE = ?", (id_mensaje,))
+            cursor.execute("DELETE FROM MENSAJE WHERE IDMENSAJE = :1", [id_mensaje])
             conn.commit()
             return True, "Mensaje eliminado"
         else:
-            return False, "No puedes borrar este mensaje (no es tuyo o no existe)"
-    except pyodbc.Error as e: 
+            return False, "No puedes borrar este mensaje"
+    except Exception as e: 
         return False, f"Error: {e}"
     finally:
         cursor.close()
@@ -53,8 +53,6 @@ def eliminar_mensaje(conn, id_usuario_activo, id_mensaje):
 def listar_usuarios(conn, idusuarioactivo, archivados=False):
     cursor = conn.cursor()
     try:
-        # Buscamos usuarios que son amigos recíprocos:
-        # (idusuarioactivo sigue a U e idusuarioactivo es seguido por U)
         base_query = """
             SELECT u.IDUSUARIO, u.NOMBREUSUARIO
             FROM USUARIO u
@@ -62,24 +60,20 @@ def listar_usuarios(conn, idusuarioactivo, archivados=False):
                 SELECT a1.IDUSUARIO2 
                 FROM AMISTAD a1
                 JOIN AMISTAD a2 ON a1.IDUSUARIO1 = a2.IDUSUARIO2 AND a1.IDUSUARIO2 = a2.IDUSUARIO1
-                WHERE a1.IDUSUARIO1 = ?
+                WHERE a1.IDUSUARIO1 = :1
             )
         """
         
         if archivados:
-            # Solo los que están en la tabla ARCHIVADO
-            query = base_query + " AND u.IDUSUARIO IN (SELECT IDUSUARIO2 FROM ARCHIVADO WHERE IDUSUARIO1 = ?)"
-            params = (idusuarioactivo, idusuarioactivo)
+            query = base_query + " AND u.IDUSUARIO IN (SELECT IDUSUARIO2 FROM ARCHIVADO WHERE IDUSUARIO1 = :2)"
         else:
-            # Solo los que NO están en la tabla ARCHIVADO
-            query = base_query + " AND u.IDUSUARIO NOT IN (SELECT IDUSUARIO2 FROM ARCHIVADO WHERE IDUSUARIO1 = ?)"
-            params = (idusuarioactivo, idusuarioactivo)
+            query = base_query + " AND u.IDUSUARIO NOT IN (SELECT IDUSUARIO2 FROM ARCHIVADO WHERE IDUSUARIO1 = :2)"
 
-        cursor.execute(query, params)
+        cursor.execute(query, [idusuarioactivo, idusuarioactivo])
         resultado = cursor.fetchall()
         return [(row[0], row[1]) for row in resultado]
 
-    except pyodbc.Error as e:
+    except Exception as e:
         print(f"Error en listar_usuarios: {e}")
         return []
     finally:
@@ -88,18 +82,17 @@ def listar_usuarios(conn, idusuarioactivo, archivados=False):
 def visualizar_conversacion(conn, idusuarioactivo, idusuario2):
     cursor = conn.cursor()
     try:
-        # NOTA: Necesitamos 'm.IDMENSAJE' para poder borrarlo después
         query = """
             SELECT m.IDMENSAJE, m.IDUSUARIO1, u.NOMBREUSUARIO, m.MENSAJE
             FROM MENSAJE m
             JOIN USUARIO u ON m.IDUSUARIO1 = u.IDUSUARIO
-            WHERE (m.IDUSUARIO1 = ? AND m.IDUSUARIO2 = ?)
-               OR (m.IDUSUARIO1 = ? AND m.IDUSUARIO2 = ?)
+            WHERE (m.IDUSUARIO1 = :1 AND m.IDUSUARIO2 = :2)
+               OR (m.IDUSUARIO1 = :3 AND m.IDUSUARIO2 = :4)
             ORDER BY m.FECHAENVIO ASC
         """
-        cursor.execute(query, (idusuarioactivo, idusuario2, idusuario2, idusuarioactivo))
-        return cursor.fetchall() # Retorna filas crudas [(id_msg, id_remitente, nombre, texto), ...]
-    except pyodbc.Error as e: 
+        cursor.execute(query, [idusuarioactivo, idusuario2, idusuario2, idusuarioactivo])
+        return cursor.fetchall() 
+    except Exception as e: 
         print(f"Error: {e}")
         return []
     finally:
@@ -108,18 +101,18 @@ def visualizar_conversacion(conn, idusuarioactivo, idusuario2):
 def des_archivar_usuario(conn, idusuarioactivo, idusuario2):
     cursor = conn.cursor()
     try:
-        cursor.execute("SELECT 1 FROM ARCHIVADO WHERE (IDUSUARIO1 = ? AND IDUSUARIO2 = ?)", (idusuarioactivo, idusuario2))
+        cursor.execute("SELECT 1 FROM ARCHIVADO WHERE (IDUSUARIO1 = :1 AND IDUSUARIO2 = :2)", [idusuarioactivo, idusuario2])
         existe = cursor.fetchone() is not None
 
         if existe:
-            cursor.execute("DELETE FROM ARCHIVADO WHERE (IDUSUARIO1 = ? AND IDUSUARIO2 = ?)",(idusuarioactivo, idusuario2))
+            cursor.execute("DELETE FROM ARCHIVADO WHERE (IDUSUARIO1 = :1 AND IDUSUARIO2 = :2)", [idusuarioactivo, idusuario2])
             msg = "Usuario Desarchivado"
         else:
-            cursor.execute("INSERT INTO ARCHIVADO (IDUSUARIO1, IDUSUARIO2) VALUES(?,?)", (idusuarioactivo, idusuario2))
+            cursor.execute("INSERT INTO ARCHIVADO (IDUSUARIO1, IDUSUARIO2) VALUES(:1,:2)", [idusuarioactivo, idusuario2])
             msg = "Usuario Archivado"
         conn.commit()
         return True, msg
-    except pyodbc.Error as e: 
+    except Exception as e: 
         return False, f"Error: {e}"
     finally:
         cursor.close()
