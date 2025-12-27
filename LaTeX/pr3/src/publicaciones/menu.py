@@ -1,191 +1,290 @@
-from .functions import(
-    crear_publicacion,
-    modificar_publicacion,
-    listar_publicaciones,
-    eliminar_publicacion
-)
-from .utils import conversion_a_int_seguro, confirmar_resultado, input_truncado
+import customtkinter as ctk
+from tkinter import messagebox
+from . import functions
+import random
+from publicidad.functions import listar_activos_bd as obtener_anuncios
 
-def obtener_id_publicacion(cursor,id_usuario):
-    id_publicacion=input("Introduzca el id de publicación (Deje vacío para listar sus publicaciones)")
-    id_publicacion=conversion_a_int_seguro(id_publicacion,default=-1)
+ID_USUARIO_ACTIVO = 3
+NUM_PUBLICACIONES_MOSTRAR = 5
+DEFAULT_FONT="Arial"
+LIKE_RED_COLOR="#E74C3C"
+LIKED_GREEN_COLOR="#2ECC71"
 
-    """
-    si el usuario no sabe el id_publicación (bastante razonable), se le lista sus publicaciones
-    con el id_usuario, vamos a ser majos y no le vamos a poner anuncios por estar
-    viendo sus propias publicaciones... debido a ello, la conexión puede ser None
-    ya que esta conexión era para el subsistema de anuncios
-    """
-    while id_publicacion == -1:
-        """
-        Conexion es None, como solo necesitamos la conexion para los anuncios
-        en caso de búsqueda privada (como es este caso), el que se comparta o no
-        la conexion implica si queremos que haya anuncios o no, en este caso, como
-        no hay anuncios, no pasamos ninguna conexión, aún así, si quisiéramos
-        poner anuncios en un futuro sería tan fácil como añadir un argumento a esta función
-        y pasarlo a listar publicaciones. Pero esa NO es la intención ahora y posiblemente nunca
-        """
-        print("A continuación se listan sus publicaciones, copie el id_publicacion de la publicación que quiera modificar, aparece debajo del título")
-        listar_publicaciones(cursor,id_usuario)
-        id_publicacion = input("¿Ha podido guardar correctamente la id? Péguelo en este prompt (déjelo vacío si desea volver a intentarlo o abandonar la operación)")
-        id_publicacion=conversion_a_int_seguro(id_publicacion,default=-1)
-
-        if id_publicacion == -1:
-            print("Puede volver a listar las publicaciones o dejar la operación")
-            resultado = confirmar_resultado("¿Desea volver a listar las publicaciones?[y/n]")
-            if resultado == "n":
-                print("Entendido, abortando...")
-                id_publicacion = None
-
-    return id_publicacion
-
-
-def menu_edicion():
-    """
-    Pequeña interfaz para la edición de datos
-    Si el valor es un string vacío, se conserva el valor
-    original.
-    Si el valor es None, se borra la descripción original (se queda en null).
-    Excepto para el nombre (que no puede ser null).
-    Se devolverá None (null) si se cancelan los cambios
-    """
-    nombre=""
-    descripcion=""
-    imagen=""
-    categoria=""
-    while True:
-        print("\n========================================")
-        print(" MENÚ PUBLICACIONES - EDITAR PUBLICACION ")
-        print("========================================")
-        print(f"1. Editar nombre" + (f": ({nombre})" if nombre else ""))
-        print(f"2. Editar descripción" + (f": ({descripcion})" if descripcion else ""))
-        print(f"3. Editar imagen" + (f": ({imagen})" if imagen else ""))
-        print(f"4. Editar categoría" + (f": ({categoria})" if categoria else ""))
-        print("5. Realizar cambios")
-        print("6. Cancelar cambios y volver")
-        print("----------------------------------------")
+class VentanaPublicaciones(ctk.CTkFrame):
+    def __init__(self, master, conn):
+        super().__init__(master)
+        self.conn = conn
+        self.id_usuario = ID_USUARIO_ACTIVO
         
-        opcion=input("Seleccione una opción: ").strip()
-        opcion=conversion_a_int_seguro(opcion)
+        # --- CONFIGURACIÓN PRINCIPAL ---
+        self.lbl_titulo = ctk.CTkLabel(self, text="Muro de Publicaciones", font=(DEFAULT_FONT, 24, "bold"))
+        self.lbl_titulo.pack(pady=10)
 
-        if opcion == 1:
-            print("Recordatorio: Si no introduce nada, no se cambiará el nombre")
-            nombre = input_truncado("Nuevo nombre de publicación (20 caracteres): ", 20)
-        elif opcion == 2:
-            descripcion = input_truncado("Nueva descripcion de publicación (80 caracteres): ", 80)
-            if not descripcion:
-                print("Aviso: No se ha introducido ninguna descripción.")
-                resultado = confirmar_resultado("¿Desea borrar la descripción? [y/n]")
-                if resultado == "y":
-                    descripcion = None 
-        elif opcion == 3:
-            imagen = input_truncado("Nueva imagen de la publicación (255 caracteres)", 255)
-            if not imagen:
-                print("Aviso: No se ha introducido ninguna imagen.")
-                resultado = confirmar_resultado("¿Desea borrar la imagen? [y/n]")
-                if resultado == "y":
-                    imagen = None
-        elif opcion == 4:
-            categoria = input_truncado("Nueva categoría de la publicación (32 caracteres)", 32)
-            if not categoria:
-                print("Aviso: No se ha introducido ninguan categoría")
-                resultado = confirmar_resultado("¿Desea borrar la categoría? [y/n]")
-                if resultado == "y":
-                    categoria = None
-        elif opcion == 5:
-            opciones = (nombre,descripcion,imagen,categoria)
-            #no hay ningún cambio registrado
-            if not any(no_vacio for no_vacio in opciones if no_vacio):
-                print("Aviso: No se ha registrado ningún cambio, cancelando...")
-                return None
-            else:
-                return (nombre,descripcion,imagen,categoria)
-        elif opcion == 6:
-            #Se cancela la edición
-            return None 
+        # --- BARRA DE NAVEGACIÓN SUPERIOR (PESTAÑAS) ---
+        self.nav_frame = ctk.CTkFrame(self, fg_color="transparent")
+        self.nav_frame.pack(fill="x", padx=20, pady=5)
+
+        # Botón Feed General (Documento)
+        self.btn_feed = ctk.CTkButton(self.nav_frame, text="📄 Feed Global", font=(DEFAULT_FONT, 20),
+                                      command=self.mostrar_feed_general,
+                                      fg_color="#2E86C1", width=120)
+        self.btn_feed.pack(side="left", padx=5)
+
+        # Botón Mis Publicaciones (Home)
+        self.btn_propias = ctk.CTkButton(self.nav_frame, text="🏠 Mis Publicaciones", font=(DEFAULT_FONT, 20),
+                                         command=self.mostrar_mis_publicaciones,
+                                         fg_color="#28B463", width=120)
+        self.btn_propias.pack(side="left", padx=5)
+
+        # Botón Crear (+)
+        self.btn_crear = ctk.CTkButton(self.nav_frame, text="➕ Crear", font=(DEFAULT_FONT, 20),
+                                       command=self.abrir_ventana_crear,
+                                       fg_color="#D35400", width=80)
+        self.btn_crear.pack(side="right", padx=5)
+
+        # --- ÁREA DE CONTENIDO (SCROLL) ---
+        self.scroll_frame = ctk.CTkScrollableFrame(self, label_text="Publicaciones", label_font=(DEFAULT_FONT, 20))
+        self.scroll_frame.pack(fill="both", expand=True, padx=20, pady=10)
+
+        # Cargar vista por defecto
+        self.mostrar_feed_general()
+
+    def limpiar_lista(self):
+        for widget in self.scroll_frame.winfo_children():
+            widget.destroy()
+
+    def mostrar_feed_general(self):
+        self.limpiar_lista()
+        self.scroll_frame.configure(label_text="Feed Global - Todas las publicaciones")
+        
+        #Se obtienen las publicaciones con los anuncios
+        publicaciones = functions.obtener_publicaciones(self.conn, self.id_usuario, privado=False)
+        if not publicaciones:
+            ctk.CTkLabel(self.scroll_frame, text="No hay publicaciones aún.").pack(pady=20)
+            return
+        anuncios_disponibles = obtener_anuncios(self.conn)
+        
+        #Se obtienen los likes que ha dado el usuario
+        likes_usuario = functions.obtener_likes_usuario(self.id_usuario, self.conn)
+
+        
+        num_publicaciones=len(publicaciones)
+        publicaciones_en_pantalla=min(NUM_PUBLICACIONES_MOSTRAR,num_publicaciones)
+        anuncio_en=0
+        for num_publi,p in enumerate(publicaciones):
+            """
+            Este if simula el cálculo en TUI, donde tiene que haber al menos
+            dos publicaciones entre cada anuncio, el primer if es para permitir
+            que pasen 5 publicaciones antes de recalcular donde se deberá de poner el 
+            siguiente anuncio
+            """
+            if num_publi % NUM_PUBLICACIONES_MOSTRAR == 0:
+                if anuncio_en + 2 >= NUM_PUBLICACIONES_MOSTRAR:
+                    limite_inferior = (anuncio_en+2)%publicaciones_en_pantalla
+                else: limite_inferior = 0
+                if limite_inferior < publicaciones_en_pantalla:
+                    anuncio_en=random.randrange(limite_inferior,publicaciones_en_pantalla)
+                else: anuncio_en = 0
+            
+            if anuncios_disponibles and num_publi%publicaciones_en_pantalla == anuncio_en:
+                anuncio = functions.cargar_anuncio_en_publicacion(anuncios_disponibles,self.conn)
+                self.crear_tarjeta_anuncio(anuncio)
+
+            # Desempaquetado seguro según functions.py
+            nombre, desc, img, likes, autor, id_pub = p
+            le_ha_dado_like = id_pub in likes_usuario
+            self.crear_tarjeta_publicacion(id_pub, nombre, desc, img, likes, autor, 
+                                           es_propia=False, like_inicial=le_ha_dado_like)
+
+    def mostrar_mis_publicaciones(self):
+        self.limpiar_lista()
+        self.scroll_frame.configure(label_text="Mis Publicaciones - Gestión")
+        
+        # obtener_publicaciones privado devuelve: (NOMBRE, DESC, IMG, LIKES, ID)
+        publicaciones = functions.obtener_publicaciones(self.conn, self.id_usuario, privado=True)
+
+        if not publicaciones:
+            ctk.CTkLabel(self.scroll_frame, text="No has publicado nada aún.").pack(pady=20)
+            return
+
+        for p in publicaciones:
+            # Nota: la consulta privada NO devuelve el nombre de usuario, porque es el propio
+            nombre, desc, img, likes, id_pub = p
+            self.crear_tarjeta_publicacion(id_pub, nombre, desc, img, likes, "Yo", es_propia=True)
+
+    def crear_tarjeta_publicacion(self, id_pub, nombre, desc, img, likes, autor, es_propia, like_inicial=False):
+        """Crea un frame visual para cada publicación"""
+        card = ctk.CTkFrame(self.scroll_frame, fg_color=("#E5E7E9", "#34495E"))
+        card.pack(fill="x", pady=5, padx=5)
+
+        info_frame = ctk.CTkFrame(card, fg_color="transparent")
+        info_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
+
+        ctk.CTkLabel(info_frame, text=f"{nombre}", font=(DEFAULT_FONT, 18, "bold"), anchor="w").pack(fill="x")
+        ctk.CTkLabel(info_frame, text=f"👤 {autor}", font=(DEFAULT_FONT, 16, "italic"), text_color="gray", anchor="w").pack(fill="x")
+        
+        if desc:
+            ctk.CTkLabel(info_frame, text=desc, font=(DEFAULT_FONT, 16), wraplength=400, anchor="w", justify="left").pack(fill="x", pady=(5,0))
+        
+        if img:
+            # Placeholder visual si hay imagen
+            ctk.CTkLabel(info_frame, text=f"🖼️ [Imagen adjunta]: {img}", font=(DEFAULT_FONT,16), text_color="#5DADE2", anchor="w").pack(fill="x", pady=(5,0))
+
+        # Columna Derecha: Acciones
+        action_frame = ctk.CTkFrame(card, fg_color="transparent")
+        action_frame.pack(side="right", padx=10, pady=10)
+
+        lbl_likes=ctk.CTkLabel(action_frame, text=f"{likes}")
+        lbl_likes.pack(pady=(0,5))
+
+        if not es_propia:
+            # Botón LIKE
+            color_btn = LIKED_GREEN_COLOR if like_inicial else LIKE_RED_COLOR
+            btn_like = ctk.CTkButton(action_frame, text="❤️", width=40, fg_color=color_btn)
+            btn_like.configure(command=lambda: self.accion_like(id_pub,btn_like,lbl_likes))
+            btn_like.pack()
         else:
-            print(f"Opcion {opcion} inválida.")
+            # Botones EDITAR y BORRAR
+            btn_edit = ctk.CTkButton(action_frame, text="✏️", width=40, fg_color="#F39C12",
+                                     command=lambda: self.abrir_ventana_editar(id_pub, nombre, desc, img))
+            btn_edit.pack(pady=2)
+            
+            btn_del = ctk.CTkButton(action_frame, text="🗑️", width=40, fg_color="#C0392B",
+                                    command=lambda: self.accion_eliminar(id_pub))
+            btn_del.pack(pady=2)
 
+    def crear_tarjeta_anuncio(self, datos_anuncio):
+        """ Crea una tarjeta visualmente distinta para publicidad """
+        if not datos_anuncio: return
 
-def mostrar_menu_publicaciones(conexion, id_usuario):
-    """
-    Interfaz de usuario para el subsistema de Publicaciones.
-    Recibe la conexión global compartida por el sistema.
-    """
-    cursor = conexion.cursor()
-    
-    while True:
-        print("\n========================================")
-        print("    SISTEMA EKIS - MENÚ PUBLICACIONES    ")
-        print("========================================")
-        print("1. Crear publicación (RF1.1)")
-        print("2. Modificar publicación (RF1.2)")
-        print("3. Listar publicaciones (RF1.3)")
-        #print("4. Dar me gusta a publicacion (RF1.4)")
-        print("4. Eliminar publicación (RF1.5)")
-        print("5. Volver al Menú Principal")
-        print("----------------------------------------")
-        
-        # El RF1.4: No se incluye porque se activa con un disparador.
-        opcion=input("Seleccione una opción: ").strip()
-        opcion=conversion_a_int_seguro(opcion)
+        try:
+            titulo, cuerpo, enlace = datos_anuncio
+        except ValueError:
+            # Fallback por si devuelve algo diferente
+            titulo = "Publicidad"
+            cuerpo = str(datos_anuncio)
+            enlace = ""
 
-        
-        if opcion == 1:
-            nombre = input_truncado("Introduzca nombre de la publicacion (20 caracteres máximo): ",20)
-            while not nombre.strip():
-                nombre = input_truncado("El nombre es obligatorio",20)
-            imagen = input_truncado("Introduzca una imagen (opcional, 255): ",255)
-            descripcion = input_truncado("Introduzca una descripción (opcional 80 caracteres máximo): ",80)
-            categoria = input_truncado("Introduzca una categoria (opcional 32 caracteres máximo): ",32)
+        card = ctk.CTkFrame(self.scroll_frame, fg_color=("#F9E79F", "#7D6608"), border_color="#F1C40F", border_width=2)
+        card.pack(fill="x", pady=10, padx=5)
 
-            if crear_publicacion(cursor, id_usuario, nombre, imagen, descripcion, categoria):
-                conexion.commit()
-                print("Se ha creado la publicación correctamente")
+        ctk.CTkLabel(card, text="📢 PUBLICIDAD", font=(DEFAULT_FONT, 16, "bold"), text_color="white").pack(anchor="w", padx=10, pady=(5,0))
+        ctk.CTkLabel(card, text=titulo, font=(DEFAULT_FONT, 16, "bold"), text_color="white").pack(anchor="w", padx=10)
+        ctk.CTkLabel(card, text=cuerpo, font=(DEFAULT_FONT, 16), wraplength=400, justify="left", text_color="white").pack(fill="x", padx=10, pady=5)
+        if enlace:
+             ctk.CTkLabel(card, text=f"🔗 {enlace}", text_color="#85C1E9", cursor="hand2").pack(anchor="w", padx=10, pady=(0,10))
+
+    # --- ACCIONES LÓGICAS ---
+
+    def accion_like(self, id_pub,btn_widget,lbl_widget):
+        functions.toggle_like(id_pub, self.id_usuario, self.conn)
+        # Refrescar vista actual para actualizar contador
+        color_actual = btn_widget.cget("fg_color")
+        likes_actuales = int(lbl_widget.cget("text"))
+        if color_actual == LIKE_RED_COLOR: 
+            nuevo_color =  LIKED_GREEN_COLOR 
+            nuevos_likes = likes_actuales + 1
+        else: # Estaba verde (like), ahora quitamos like
+            nuevo_color = LIKE_RED_COLOR # Rojo
+            nuevos_likes = max(0, likes_actuales - 1)
+        btn_widget.configure(fg_color=nuevo_color)
+        lbl_widget.configure(text=str(nuevos_likes))
+
+    def accion_eliminar(self, id_pub):
+        respuesta = messagebox.askyesno("Confirmar", "¿Seguro que deseas eliminar esta publicación?")
+        if respuesta:
+            cursor = self.conn.cursor()
+            if functions.eliminar_publicacion(cursor, self.id_usuario, id_pub):
+                self.conn.commit()
+                messagebox.showinfo("Éxito", "Publicación eliminada")
             else:
-                print("Error en la creación de la publicación " + nombre)
-            
-            #Debido a que no se ve la publicación creada directamente,
-            #cosa que seria recomendable cambiar, no hace falta eliminar el cursor
-        elif opcion == 2:
-            cambios = menu_edicion()
-            #Hay que tener en cuenta si se ha cancelado la edición, en cuyo caso no se hace nada
-            if not cambios:
-                continue
-            #Si hemos llegado hasta aquí entonces hay cambios por realizar, en ese caso, le damos
-            #la opción al usuario de poner el id_publicación directamente. Si no conoce la id
-            #se le da la opción de listar todas sus publicaciones y que copia un id_publicacion
-            #en el caso en el que quiera cancelar la operación, devolverá None
-            id_publicacion=obtener_id_publicacion(cursor,id_usuario)
-            
-            if id_publicacion and modificar_publicacion(cursor, id_usuario, id_publicacion, *cambios):
-                conexion.commit()
-                print("Se ha modificado la publicación correctamente")
-            elif id_publicacion is not None:
-                print("Error en la modificación de la publicación.")
-            #Debido a que no se ve la publicación modificada directamente,
-            #cosa que seria recomendable cambiar, no hace falta eliminar el cursor
-        elif opcion == 3:
-            #Al igual que con la opción 2, esta parte no es específica del requisito funcional
-            #Así que de momento no se implementa
-            #listar_un_solo_usuario = confirmar_resultado("¿Quiere ver las publicaciones de un usuario en específico?[y/n]")
-            #if listar_un_solo_usuario == "y":
-            
-            listar_publicaciones(cursor,id_usuario,conexion)
-        elif opcion == 4:
-            id_publicacion=obtener_id_publicacion(cursor,id_usuario)
-            if id_publicacion and eliminar_publicacion(cursor,id_usuario,id_publicacion):
-                conexion.commit()
-                print("Se ha eliminado la publicación correctamente")
-            elif id_publicacion is not None:
-                print("Error en la eliminación de la publcación")
+                messagebox.showerror("Error", "No se pudo eliminar la publicación")
+            cursor.close()
+            self.mostrar_mis_publicaciones()
 
-        #Dar me gusta es un trigger, por lo que no está como opción
-        elif opcion == 5:
-            print("Saliendo del subsistema de Publicaciones...")
-            break
-            
-        else:
-            print("Opción no válida. Intente de nuevo.")
+    def abrir_ventana_crear(self):
+        VentanaGestionPublicacion(self, self.conn, self.id_usuario, modo="crear")
 
-    cursor.close()
+    def abrir_ventana_editar(self, id_pub, nombre, desc, img):
+        # Necesitamos pasar los datos actuales
+        datos_actuales = {"nombre": nombre, "desc": desc, "img": img}
+        VentanaGestionPublicacion(self, self.conn, self.id_usuario, modo="editar", 
+                                  id_publicacion=id_pub, datos=datos_actuales)
+
+
+class VentanaGestionPublicacion(ctk.CTkToplevel):
+    def __init__(self, parent, conn, id_usuario, modo="crear", id_publicacion=None, datos=None):
+        super().__init__(parent)
+        self.conn = conn
+        self.id_usuario = id_usuario
+        self.modo = modo
+        self.id_publicacion = id_publicacion
+        self.parent = parent # Referencia para refrescar
+
+        self.title("Crear Publicación" if modo == "crear" else "Editar Publicación")
+        self.geometry("400x500")
+        self.attributes("-topmost", True)
+
+        # Campos
+        ctk.CTkLabel(self, text="Título (Obligatorio)", font=(DEFAULT_FONT,20)).pack(pady=(20, 5))
+        self.entry_nombre = ctk.CTkEntry(self, width=300)
+        self.entry_nombre.pack()
+
+        ctk.CTkLabel(self, text="Descripción",font=(DEFAULT_FONT,16)).pack(pady=(10, 5))
+        self.entry_desc = ctk.CTkTextbox(self, width=300, height=100)
+        self.entry_desc.pack()
+
+        ctk.CTkLabel(self, text="URL Imagen / Texto",font=(DEFAULT_FONT,16)).pack(pady=(10, 5))
+        self.entry_img = ctk.CTkEntry(self, width=300)
+        self.entry_img.pack()
+        
+        ctk.CTkLabel(self, text="Categoría",font=(DEFAULT_FONT,16)).pack(pady=(10, 5))
+        self.entry_cat = ctk.CTkEntry(self, width=300)
+        self.entry_cat.pack()
+
+        # Pre-llenar datos si es editar
+        if modo == "editar" and datos:
+            self.entry_nombre.insert(0, datos["nombre"])
+            if datos["desc"]: self.entry_desc.insert("0.0", datos["desc"])
+            if datos["img"]: self.entry_img.insert(0, datos["img"])
+            # Categoria no venía en el listado simple, lo dejamos vacío u opcional
+
+        # Botón Guardar
+        btn_text = "Publicar" if modo == "crear" else "Guardar Cambios"
+        ctk.CTkButton(self, text=btn_text, command=self.guardar, fg_color="#27AE60").pack(pady=30)
+
+    def guardar(self):
+        nombre = self.entry_nombre.get()
+        desc = self.entry_desc.get("0.0", "end").strip()
+        img = self.entry_img.get()
+        cat = self.entry_cat.get() # Opcional
+
+        if not nombre:
+            messagebox.showwarning("Faltan datos", "El título es obligatorio.")
+            return
+
+        cursor = self.conn.cursor()
+        try:
+            exito = False
+            if self.modo == "crear":
+                exito = functions.crear_publicacion(cursor, self.id_usuario, nombre, img, desc, cat)
+            else:
+                # Modificar: functions espera (cursor, id_usu, id_pub, nombre, desc, img, cat)
+                exito = functions.modificar_publicacion(cursor, self.id_usuario, self.id_publicacion, nombre, desc, img, cat)
+            
+            if exito:
+                self.conn.commit()
+                messagebox.showinfo("Éxito", "Operación realizada correctamente.")
+                self.destroy()
+                # Refrescar la ventana padre dependiendo de donde vengamos
+                if self.modo == "crear":
+                    self.parent.mostrar_feed_general() # Ir al feed para ver la nueva
+                else:
+                    self.parent.mostrar_mis_publicaciones()
+            else:
+                messagebox.showerror("Error", "Hubo un problema en la base de datos.")
+        
+        except Exception as e:
+            messagebox.showerror("Error Crítico", str(e))
+        finally:
+            cursor.close()
