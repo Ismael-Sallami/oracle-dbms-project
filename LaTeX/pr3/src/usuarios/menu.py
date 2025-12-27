@@ -5,7 +5,7 @@ from functions import (
     bloquear_desbloquear_usuario,
     anadir_amigo
 )
-
+'''
 def mostrar_menu_usuarios(conexion):
     """
     Interfaz de usuario para el subsistema de Usuarios.
@@ -101,8 +101,57 @@ def mostrar_menu_usuarios(conexion):
 
         else:
             print("Opción no válida. Intente de nuevo.")
+'''
+def mostrar_menu_usuarios(conexion, id_usuario_activo):
+    while True:
+        print("\n========================================")
+        print(f"     EKIS - MENÚ USUARIOS (ID {id_usuario_activo})")
+        print("========================================")
+        print("1. Modificar MI usuario (RF4.2)")
+        print("2. Eliminar MI usuario (RF4.3)")
+        print("3. Bloquear / Desbloquear usuario (RF4.4)")
+        print("4. Añadir amigo (RF4.5)")
+        print("5. Volver")
+        print("----------------------------------------")
 
+        opcion = input("Seleccione una opción: ")
 
+        if opcion == "1":
+            # ya no pides ID, usas el activo
+            nombre = input("Nuevo nombre (blank=igual): ") or None
+            email = input("Nuevo email (blank=igual): ") or None
+            password = input("Nueva contraseña (blank=igual): ") or None
+            imagen = input("Nueva imagen (blank=igual): ") or None
+            bio = input("Nueva bio (blank=igual): ") or None
+
+            msg = modificar_usuario(conexion, id_usuario_activo, nombre, email, password, imagen, bio)
+            print(msg)
+
+        elif opcion == "2":
+            password = input("Contraseña: ")
+            confirm = input("¿Seguro? (S/N): ").upper()
+            if confirm == "S":
+                msg = eliminar_usuario(conexion, id_usuario_activo, password)
+                print(msg)
+                break
+            else:
+                print("Cancelado.")
+
+        elif opcion == "3":
+            id2 = int(input("ID del usuario a bloquear/desbloquear: "))
+            msg = bloquear_desbloquear_usuario(conexion, id_usuario_activo, id2)
+            print(msg)
+
+        elif opcion == "4":
+            id2 = int(input("ID del usuario a añadir como amigo: "))
+            msg = anadir_amigo(conexion, id_usuario_activo, id2)
+            print(msg)
+
+        elif opcion == "5":
+            break
+        else:
+            print("Opción no válida.")
+'''
 import oracledb
 try:
     connection = oracledb.connect(
@@ -114,3 +163,4 @@ try:
 except Exception as e:
     print(f"Error: {e}")
     exit(127)
+'''
