@@ -1,9 +1,6 @@
 import uuid
 import datetime
 import oracledb
-def _now_date():
-    return datetime.datetime.now()
-
 # -------------------------------------------------------------------
 # RF4.1: Crear usuario
 # -------------------------------------------------------------------
@@ -64,7 +61,7 @@ def modificar_usuario(conn, id_usuario, nombre_usuario=None, correo=None, contra
     cursor = conn.cursor()
     try:
         # Verificar que existe y no está eliminado
-        cursor.execute("SELECT 1 FROM USUARIO WHERE IDUSUARIO = :1 AND NVL(FECHAELIMINACION,0) = 0", [id_usuario])
+        cursor.execute("SELECT 1 FROM USUARIO WHERE IDUSUARIO = :1 AND FECHAELIMINACION IS NULL", [id_usuario])
         if not cursor.fetchone():
             return "Usuario no existe o está eliminado"
 
@@ -106,8 +103,8 @@ def modificar_usuario(conn, id_usuario, nombre_usuario=None, correo=None, contra
         if contrasena is not None: add_set("CONTRASENIA", contrasena)
         if imagen_perfil is not None: add_set("IMAGENDEPERFIL", imagen_perfil)
         if biografia is not None: add_set("BIOGRAFIA", biografia)
-
-        add_set("FECHAMODIFICACION", _now_date())
+        
+        sets.append(f"FECHAMODIFICACION = SYSDATE ")
 
         params.append(id_usuario)
         sql = "UPDATE USUARIO SET " +", ".join(sets) + f"WHERE IDUSUARIO = :{len(params)}"
@@ -168,7 +165,7 @@ def bloquear_desbloquear_usuario(conn, id_emisor, id_objetivo):
             return "No puedes bloquearte a ti mismo"
 
         # Comprobar que objetivo existe y no está eliminado
-        cursor.execute("SELECT 1 FROM USUARIO WHERE IDUSUARIO = :1 AND NVL(FECHAELIMINACION,0) = 0", [id_objetivo])
+        cursor.execute("SELECT 1 FROM USUARIO WHERE IDUSUARIO = :1 AND FECHAELIMINACION IS NULL", [id_objetivo])
         if not cursor.fetchone():
             return "Usuario objetivo no existe o está eliminado"
 
@@ -192,13 +189,13 @@ def bloquear_desbloquear_usuario(conn, id_emisor, id_objetivo):
             cursor.execute("""
                 DELETE FROM AMISTAD
                 WHERE (IDUSUARIO1 = :1 AND IDUSUARIO2 = :2)
-                   OR (IDUSUARIO1 = :2 AND IDUSUARIO2 = :1)
-            """, [id_emisor, id_objetivo])
+                   OR (IDUSUARIO1 = :4 AND IDUSUARIO2 = :3)
+            """, [id_emisor, id_objetivo, id_emisor, id_objetivo])
 
             cursor.execute("""
                 INSERT INTO BLOQUEO (IDUSUARIO1, IDUSUARIO2, FECHABLOQUEO)
-                VALUES (:1,:2,:3)
-            """, [id_emisor, id_objetivo, _now_date()])
+                VALUES (:1,:2,SYSDATE)
+            """, [id_emisor, id_objetivo])
 
             conn.commit()
             return "Usuario bloqueado"
@@ -224,7 +221,7 @@ def anadir_amigo(conn, id_emisor, id_objetivo):
             return "No puedes añadirte a ti mismo"
 
         # Comprobar objetivo existe y no eliminado
-        cursor.execute("SELECT 1 FROM USUARIO WHERE IDUSUARIO = :1 AND NVL(FECHAELIMINACION,0) = 0", [id_objetivo])
+        cursor.execute("SELECT 1 FROM USUARIO WHERE IDUSUARIO = :1 AND FECHAELIMINACION IS NULL", [id_objetivo])
         if not cursor.fetchone():
             return "Usuario objetivo no existe o está eliminado"
 
@@ -232,8 +229,8 @@ def anadir_amigo(conn, id_emisor, id_objetivo):
         cursor.execute("""
             SELECT 1 FROM BLOQUEO
             WHERE (IDUSUARIO1 = :1 AND IDUSUARIO2 = :2)
-               OR (IDUSUARIO1 = :2 AND IDUSUARIO2 = :1)
-        """, [id_emisor, id_objetivo])
+               OR (IDUSUARIO1 = :4 AND IDUSUARIO2 = :3)
+        """, [id_emisor, id_objetivo, id_emisor, id_objetivo])
         if cursor.fetchone():
             return "No se puede añadir como amigo: existe un bloqueo entre ambos"
 
@@ -247,8 +244,8 @@ def anadir_amigo(conn, id_emisor, id_objetivo):
 
         cursor.execute("""
             INSERT INTO AMISTAD (IDUSUARIO1, IDUSUARIO2, FECHAAMISTAD)
-            VALUES (:1,:2,:3)
-        """, [id_emisor, id_objetivo, _now_date()])
+            VALUES (:1,:2,SYSDATE)
+        """, [id_emisor, id_objetivo])
 
         conn.commit()
         return "Amigo añadido (solicitud/relación unilateral creada)"
