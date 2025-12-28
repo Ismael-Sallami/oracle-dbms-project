@@ -4,7 +4,7 @@ from . import functions
 import random
 from publicidad.functions import listar_activos_bd as obtener_anuncios
 
-ID_USUARIO_ACTIVO = 3
+ID_USUARIO_ACTIVO = 8
 NUM_PUBLICACIONES_MOSTRAR = 5
 DEFAULT_FONT="Arial"
 LIKE_RED_COLOR="#E74C3C"
@@ -57,15 +57,15 @@ class VentanaPublicaciones(ctk.CTkFrame):
         self.limpiar_lista()
         self.scroll_frame.configure(label_text="Feed Global - Todas las publicaciones")
         
-        #Se obtienen las publicaciones con los anuncios
-        publicaciones = functions.obtener_publicaciones(self.conn, self.id_usuario, privado=False)
+        #Se obtienen las publicaciones y si el usuario ha dado like
+        #cada publicación es (NOMBRE, DESC, IMAGEN, NUM_LIKES, NOMBREUSUARIO, IDPUB), like_dado
+        publicaciones = functions.listar_publicaciones(self.conn, self.id_usuario, privado=False)
         if not publicaciones:
             ctk.CTkLabel(self.scroll_frame, text="No hay publicaciones aún.").pack(pady=20)
             return
+        #se obtienen los anuncios
         anuncios_disponibles = obtener_anuncios(self.conn)
         
-        #Se obtienen los likes que ha dado el usuario
-        likes_usuario = functions.obtener_likes_usuario(self.id_usuario, self.conn)
 
         
         num_publicaciones=len(publicaciones)
@@ -91,17 +91,19 @@ class VentanaPublicaciones(ctk.CTkFrame):
                 self.crear_tarjeta_anuncio(anuncio)
 
             # Desempaquetado seguro según functions.py
-            nombre, desc, img, likes, autor, id_pub = p
-            le_ha_dado_like = id_pub in likes_usuario
+            try:
+                nombre, desc, img, likes, autor, id_pub, le_ha_dado_like = p
+            except ValueError:
+                print(p)
             self.crear_tarjeta_publicacion(id_pub, nombre, desc, img, likes, autor, 
-                                           es_propia=False, like_inicial=le_ha_dado_like)
+                                           es_propia=False, like_inicial=bool(le_ha_dado_like))
 
     def mostrar_mis_publicaciones(self):
         self.limpiar_lista()
         self.scroll_frame.configure(label_text="Mis Publicaciones - Gestión")
         
-        # obtener_publicaciones privado devuelve: (NOMBRE, DESC, IMG, LIKES, ID)
-        publicaciones = functions.obtener_publicaciones(self.conn, self.id_usuario, privado=True)
+        # listar_publicaciones privado devuelve: (NOMBRE, DESC, IMG, LIKES, ID)
+        publicaciones = functions.listar_publicaciones(self.conn, self.id_usuario, privado=True)
 
         if not publicaciones:
             ctk.CTkLabel(self.scroll_frame, text="No has publicado nada aún.").pack(pady=20)

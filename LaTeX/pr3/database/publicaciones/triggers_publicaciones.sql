@@ -1,7 +1,7 @@
 /* =========================================================
 TRIGGER 1: DAR ME GUSTA A UNA PUBLICACIÓN
 ========================================================= */
-
+/*
 CREATE OR REPLACE TRIGGER TRG_PUBLICACIONES_DAR_LIKE
 AFTER INSERT ON ME_GUSTA
 FOR EACH ROW
@@ -11,11 +11,11 @@ BEGIN
   WHERE IDPUBLICACION = :NEW.IDPUBLICACION;
 END;
 /
-
+*/
 /* =========================================================
 TRIGGER 2: QUITAR ME GUSTA A UNA PUBLICACIÓN
 ========================================================= */
-
+/*
 CREATE OR REPLACE TRIGGER TRG_PUBLICACIONES_QUITAR_LIKE
 AFTER DELETE ON ME_GUSTA
 FOR EACH ROW
@@ -25,3 +25,63 @@ BEGIN
   WHERE IDPUBLICACION = :OLD.IDPUBLICACION;
 END;
 /
+*/
+-- Esto debería de ir en init
+BEGIN
+  EXECUTE IMMEDIATE 'CREATE INDEX IDX_ME_GUSTA_PUB ON ME_GUSTA (IDPUBLICACION)';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQL_CODE != -955 THEN RAISE; END IF;
+END;
+/
+
+BEGIN
+  EXECUTE IMMEDIATE 'CREATE INDEX IDX_ME_GUSTA_USR_PUB ON ME_GUSTA (IDUSUARIO,IDPUBLICACION)';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQL_CODE != -955 THEN RAISE; END IF;
+END;
+/
+
+/* =========================================================
+TRIGGER 3: BORRADO DE RELACIONES EN PUBLICACIONES BORRADAS LOGICAMENTE 
+========================================================= */
+
+CREATE OR REPLACE TRIGGER TRG_PUBLICACION_SOFT_DELETE
+BEFORE UPDATE OF ELIMINADO ON PUBLICACION
+FOR EACH ROW
+WHEN (NEW.ELIMINADO = 'Y' AND OLD.ELIMINADO = 'N')
+BEGIN
+    -- Eliminar likes asociados, merece la pena? Pierdes auditoría
+    DELETE FROM ME_GUSTA
+    WHERE IDPUBLICACION = :OLD.IDPUBLICACION;
+
+    -- Evitar cambios posteriores
+    :NEW.FECHAMODIFICACION := SYSDATE;
+END;
+/
+
+/* =========================================================
+TRIGGER 4: BORRADO EN PUBLICACIONES ACTUALIZA FECHA DE MODIFICACIÓN
+========================================================= */
+
+CREATE OR REPLACE TRIGGER TRG_PUB_FECHA_MOD
+BEFORE UPDATE ON PUBLICACION
+FOR EACH ROW
+BEGIN
+    :NEW.FECHAMODIFICACION := SYSDATE;
+END;
+/
+
+/* =========================================================
+TRIGGER 5: BORRADO LÓGICO 
+========================================================= */
+
+CREATE OR REPLACE TRIGGER TRG_PUB_CASCADE_LOGIC
+BEFORE DELETE ON USUARIO
+FOR EACH ROW
+BEGIN
+    UPDATE PUBLICACION
+    SET ELIMINADO = 'Y'
+    WHERE IDUSUARIO = :OLD.IDUSUARIO;
+END;
+/
+

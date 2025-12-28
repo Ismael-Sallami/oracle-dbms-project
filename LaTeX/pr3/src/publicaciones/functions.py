@@ -5,23 +5,6 @@ from .utils import conversion_a_int_seguro, vacio_a_none
 
 NUM_PUBLICACIONES_MOSTRAR=5
 
-def obtener_likes_usuario(id_usuario,connection):
-    cursor = connection.cursor()
-    try:
-        cursor.execute("""
-                       SELECT IDPUBLICACION FROM ME_GUSTA
-                       WHERE IDUSUARIO = :1
-                       """, [id_usuario])
-        #Se devuelve un set, ya que las búsquedas son O(1), que es lo que nos interesa
-        #para poder mostrar en O(n) todas las publicaciones al usuario con los me gusta
-        return {row[0] for row in cursor.fetchall()}
-    except Exception as e:
-        print(f"Error obteniendo likes: {e}")
-        return set()
-    finally:
-        cursor.close()
-
-
 def toggle_like(id_publicacion,id_usuario,connection):
     cursor = connection.cursor()
     try:
@@ -37,10 +20,14 @@ def toggle_like(id_publicacion,id_usuario,connection):
                             """, (id_usuario,id_publicacion))
         #No existe la fila? Pues se crea
         else:
-            cursor.execute("""
+            #para evitar posibles errores de concurrencia se hace otro try
+            try:
+                cursor.execute("""
                             INSERT INTO ME_GUSTA (IDUSUARIO, IDPUBLICACION)
                             VALUES(:1, :2)
                             """, (id_usuario,id_publicacion))
+            except Exception as e:
+                print("Insert error por concurrencia:",e)
         connection.commit()
     except Exception as e:
         print(f"Error actualizando me gusta: {e}")
@@ -140,28 +127,42 @@ def modificar_publicacion(cursor, id_usuario, id_publicacion, nombre, descripcio
         print(f"Un error ha ocurrido: {e}")
         return False
     
-def obtener_publicaciones(connection,id_usuario,privado=False):
+def listar_publicaciones(connection,id_usuario,privado=False):
     resultados=[]
+    parametros=[id_usuario]
     cursor = connection.cursor()
     try:
         if not privado:
-            parametros=[]
             sql_query="""
-                SELECT PUBLICACION.NOMBRE,
-                    PUBLICACION.DESCRIPCION,
-                    PUBLICACION.IMAGEN,
-                    PUBLICACION.NUM_LIKES,
-                    USUARIO.NOMBREUSUARIO,
-                    PUBLICACION.IDPUBLICACION
-                FROM PUBLICACION
-                INNER JOIN USUARIO ON PUBLICACION.IDUSUARIO = USUARIO.IDUSUARIO
-                WHERE PUBLICACION.ELIMINADO = 'N'
-                """ 
+                SELECT p.NOMBRE, p.DESCRIPCION, p.IMAGEN,
+                NVL(l.num_likes,0) AS NUM_LIKES, u.NOMBREUSUARIO, p.IDPUBLICACION,
+                CASE 
+                    WHEN ul.IDPUBLICACION IS NOT NULL THEN 1 
+                    ELSE 0 
+                END AS DIO_LIKE
+                FROM PUBLICACION p 
+                LEFT JOIN (
+                    SELECT IDPUBLICACION, COUNT(*) AS num_likes
+                    FROM ME_GUSTA
+                    GROUP BY IDPUBLICACION
+                ) l ON l.IDPUBLICACION = p.IDPUBLICACION
+                LEFT JOIN USUARIO u ON u.IDUSUARIO = p.IDUSUARIO
+                LEFT JOIN (
+                    SELECT IDPUBLICACION FROM ME_GUSTA WHERE IDUSUARIO = :1
+                ) ul ON ul.IDPUBLICACION = p.IDPUBLICACION
+                WHERE p.ELIMINADO = 'N'
+                """
         else:
-            parametros=[id_usuario]
             sql_query="""
-                SELECT NOMBRE, DESCRIPCION, IMAGEN, NUM_LIKES, IDPUBLICACION
-                FROM PUBLICACION WHERE IDUSUARIO = :1 AND ELIMINADO = 'N'
+                SELECT p.NOMBRE, p.DESCRIPCION, p.IMAGEN,
+                NVL(l.num_likes,0) AS NUM_LIKES, p.IDPUBLICACION
+                FROM PUBLICACION p 
+                LEFT JOIN (
+                    SELECT IDPUBLICACION, COUNT(*) AS num_likes
+                    FROM ME_GUSTA
+                    GROUP BY IDPUBLICACION
+                ) l on l.IDPUBLICACION = p.IDPUBLICACION
+                WHERE p.ELIMINADO = 'N' AND p.IDUSUARIO = :1
                 """
         cursor.execute(sql_query,parametros)
         resultados = cursor.fetchall()
