@@ -63,6 +63,7 @@ import sys
 
 # Importamos los módulos (Aquí irán los de tus compañeros también)
 from publicidad.menu import VentanaPublicidad
+from publicaciones.menu import VentanaPublicaciones
 
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -100,6 +101,9 @@ class App(ctk.CTk):
 
         self.btn_publicidad = ctk.CTkButton(self.sidebar_frame, text="Publicidad", command=self.mostrar_publicidad)
         self.btn_publicidad.grid(row=2, column=0, padx=20, pady=10)
+
+        self.btn_publicaciones = ctk.CTkButton(self.sidebar_frame, text="Publicaciones", command=self.mostrar_publicaciones)
+        self.btn_publicaciones.grid(row=3, column=0, padx=20, pady=10)
         
         # Aquí añadirías los botones de Fer, Javi, etc...
         # self.btn_usuarios = ...
@@ -131,6 +135,11 @@ class App(ctk.CTk):
         # Instanciamos TU clase de publicidad dentro del panel derecho
         ventana_pub = VentanaPublicidad(self.frame_contenido, self.conn)
         ventana_pub.pack(fill="both", expand=True)
+
+    def mostrar_publicaciones(self):
+        self.limpiar_panel()
+        ventana_publicaciones = VentanaPublicaciones(self.frame_contenido,self.conn)
+        ventana_publicaciones.pack(fill="both", expand=True)
 
     def salir(self):
         self.db.close()

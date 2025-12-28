@@ -4,7 +4,7 @@ from . import functions
 import random
 from publicidad.functions import listar_activos_bd as obtener_anuncios
 
-ID_USUARIO_ACTIVO = 8
+ID_USUARIO_ACTIVO = 1
 NUM_PUBLICACIONES_MOSTRAR = 5
 DEFAULT_FONT="Arial"
 LIKE_RED_COLOR="#E74C3C"
@@ -91,10 +91,7 @@ class VentanaPublicaciones(ctk.CTkFrame):
                 self.crear_tarjeta_anuncio(anuncio)
 
             # Desempaquetado seguro según functions.py
-            try:
-                nombre, desc, img, likes, autor, id_pub, le_ha_dado_like = p
-            except ValueError:
-                print(p)
+            nombre, desc, img, likes, autor, id_pub, le_ha_dado_like = p
             self.crear_tarjeta_publicacion(id_pub, nombre, desc, img, likes, autor, 
                                            es_propia=False, like_inicial=bool(le_ha_dado_like))
 
