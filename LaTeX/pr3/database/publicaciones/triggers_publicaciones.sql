@@ -44,7 +44,7 @@ END;
 /* =========================================================
 TRIGGER 3: BORRADO DE RELACIONES EN PUBLICACIONES BORRADAS LOGICAMENTE 
 ========================================================= */
-
+/*
 CREATE OR REPLACE TRIGGER TRG_PUBLICACION_SOFT_DELETE
 BEFORE UPDATE OF ELIMINADO ON PUBLICACION
 FOR EACH ROW
@@ -57,7 +57,7 @@ BEGIN
     -- Evitar cambios posteriores
     :NEW.FECHAMODIFICACION := SYSDATE;
 END;
-/
+/*/
 
 /* =========================================================
 TRIGGER 4: BORRADO EN PUBLICACIONES ACTUALIZA FECHA DE MODIFICACIÓN
