@@ -137,27 +137,35 @@ def eliminar_usuario(conn, id_usuario, contrasena):
 
         contrasena_hash = seguridad.hash_password_sha256(contrasena)
 
-        # Verificar credenciales (hash vs hash)
+        # Verificar credenciales y que no esté ya borrado
         cursor.execute("""
-            SELECT 1 FROM USUARIO
-            WHERE IDUSUARIO = :1 AND CONTRASENIA = :2
+            SELECT 1
+            FROM USUARIO
+            WHERE IDUSUARIO = :1
+              AND CONTRASENIA = :2
+              AND BORRADO = 'N'
         """, [id_usuario, contrasena_hash])
 
         if cursor.fetchone() is None:
-            return "Credenciales incorrectas o usuario no existe"
+            return "Credenciales incorrectas, usuario no existe o ya está eliminado"
 
-        # Borrado físico con cascade
-        cursor.execute("DELETE FROM USUARIO WHERE IDUSUARIO = :1", [id_usuario])
+        # Borrado lógico
+        cursor.execute("""
+            UPDATE USUARIO
+            SET BORRADO = 'Y',
+                FECHAELIMINACION = SYSDATE,
+                FECHAMODIFICACION = SYSDATE
+            WHERE IDUSUARIO = :1
+        """, [id_usuario])
+
         conn.commit()
-
-        return "Usuario eliminado definitivamente (con borrado en cascada)"
+        return "Usuario eliminado (borrado lógico)"
 
     except Exception as e:
         conn.rollback()
         return f"Error SQL: {e}"
     finally:
         cursor.close()
-  
 
 # -------------------------------------------------------------------
 # RF4.4: Bloquear / Desbloquear usuario (toggle)
