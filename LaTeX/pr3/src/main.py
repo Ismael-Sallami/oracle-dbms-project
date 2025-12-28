@@ -63,6 +63,10 @@ import sys
 
 # Importamos los módulos (Aquí irán los de tus compañeros también)
 from publicidad.menu import VentanaPublicidad
+# from usuarios import menu as usuarios_sys
+# from publicaciones import menu as publicaciones_sys
+# from tendencias import menu as tendencias_sys
+# from mensajeria import menu as mensajeria_sys
 
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
