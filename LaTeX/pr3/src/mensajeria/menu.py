@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from tkinter import messagebox
 from mensajeria import functions
+from datetime import datetime
 
 class VentanaMensajeria(ctk.CTkFrame):
     def __init__(self, master, conn, id_usuario_actual):
@@ -22,55 +23,43 @@ class VentanaMensajeria(ctk.CTkFrame):
         self.lbl_estado = ctk.CTkLabel(self.frame_top, text="Contactos Activos", font=("Arial", 14, "italic"))
         self.lbl_estado.pack(side="right", padx=20)
 
-        self.scroll_usuarios = ctk.CTkScrollableFrame(self, label_text="Selecciona un contacto para chatear")
+        self.scroll_usuarios = ctk.CTkScrollableFrame(self, label_text="Contactos")
         self.scroll_usuarios.pack(fill="both", expand=True, padx=20, pady=10)
 
         self.cargar_usuarios()
 
-    def limpiar_lista(self):
+    def cargar_usuarios(self):
         for widget in self.scroll_usuarios.winfo_children():
             widget.destroy()
-
-    def cargar_usuarios(self):
-        self.limpiar_lista()
         try:
             usuarios = functions.listar_usuarios(self.conn, self.id_usuario_actual, self.viendo_archivados)
             if not usuarios:
-                lbl = ctk.CTkLabel(self.scroll_usuarios, text="No hay contactos aquí.")
-                lbl.pack(pady=20)
+                ctk.CTkLabel(self.scroll_usuarios, text="No hay contactos.").pack(pady=20)
                 return
 
             for uid, nombre in usuarios:
                 fila = ctk.CTkFrame(self.scroll_usuarios, fg_color="transparent")
                 fila.pack(fill="x", pady=2)
 
-                btn_user = ctk.CTkButton(fila, text=f"👤 {nombre} (ID: {uid})", 
-                                         anchor="w",
-                                         fg_color=("#E5E7E9", "#2E4053"),
-                                         text_color=("black", "white"),
-                                         hover_color="#3498DB",
+                btn_user = ctk.CTkButton(fila, text=f"👤 {nombre}", anchor="w",
+                                         fg_color=("#E5E7E9", "#2E4053"), text_color=("black", "white"),
                                          command=lambda u=uid, n=nombre: self.abrir_chat(u, n))
                 btn_user.pack(side="left", fill="x", expand=True, padx=(0, 5))
 
-                texto_accion = "📦" if not self.viendo_archivados else "📤"
-                btn_acc = ctk.CTkButton(fila, text=texto_accion, width=40, 
-                                        fg_color="#AAB7B8",
-                                        hover_color="#EC7063",
-                                        command=lambda u=uid: self.gestionar_archivo(u))
-                btn_acc.pack(side="right")
+                texto_icon = "📦" if not self.viendo_archivados else "📤"
+                ctk.CTkButton(fila, text=texto_icon, width=40, fg_color="#AAB7B8",
+                              command=lambda u=uid: self.gestionar_archivo(u)).pack(side="right")
         except Exception as e:
-            messagebox.showerror("Error", f"No se pudieron cargar usuarios: {e}")
+            print(f"Error: {e}")
 
     def toggle_archivados(self):
         self.viendo_archivados = not self.viendo_archivados
-        self.lbl_estado.configure(text="Contactos Archivados" if self.viendo_archivados else "Contactos Activos")
-        self.btn_toggle.configure(text="Ver Activos" if self.viendo_archivados else "Ver Archivados")
+        self.lbl_estado.configure(text="Archivados" if self.viendo_archivados else "Activos")
         self.cargar_usuarios()
 
     def gestionar_archivo(self, id_destino):
-        exito, msg = functions.des_archivar_usuario(self.conn, self.id_usuario_actual, id_destino)
-        if exito:
-            self.cargar_usuarios() 
+        functions.des_archivar_usuario(self.conn, self.id_usuario_actual, id_destino)
+        self.cargar_usuarios() 
 
     def abrir_chat(self, id_destino, nombre_destino):
         VentanaChat(self, self.conn, self.id_usuario_actual, id_destino, nombre_destino)
@@ -83,96 +72,143 @@ class VentanaChat(ctk.CTkToplevel):
         self.id_origen = id_origen
         self.id_destino = id_destino
         
-        # --- ESTADO DE SELECCIÓN ---
+        # --- ESTADO Y CONFIGURACIÓN ---
+        self.MAX_CHARS_INPUT = 300 
         self.modo_seleccion = False
-        self.seleccionados = set() # Aquí guardaremos los IDs de los mensajes a borrar
+        self.seleccionados = set()
+        self.ultima_fecha_cargada = None
+        self.lista_checkboxes = [] 
 
         self.title(f"Chat con {nombre_destino}")
-        self.geometry("500x650")
+        self.geometry("600x720")
+        
+        # Mantiene la ventana por encima
         self.attributes("-topmost", True)
+        
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=1) # El frame de mensajes ocupa el centro
+        self.grid_rowconfigure(1, weight=1)
 
-        # --- PANEL SUPERIOR (Acciones) ---
-        self.frame_top_acciones = ctk.CTkFrame(self)
-        self.frame_top_acciones.grid(row=0, column=0, columnspan=2, padx=20, pady=(10, 0), sticky="ew")
+        # 1. PANEL DE ACCIONES (SUPERIOR)
+        self.frame_top = ctk.CTkFrame(self)
+        self.frame_top.grid(row=0, column=0, padx=20, pady=10, sticky="ew")
 
-        self.btn_modo = ctk.CTkButton(self.frame_top_acciones, text="Seleccionar Mensajes", 
+        self.btn_modo = ctk.CTkButton(self.frame_top, text="Seleccionar Mensajes", 
                                       fg_color="#5D6D7E", command=self.toggle_modo_seleccion)
         self.btn_modo.pack(side="left", padx=10, pady=10)
 
-        # Estos botones solo se ven en modo selección
-        self.btn_confirmar = ctk.CTkButton(self.frame_top_acciones, text="Eliminar (0)", 
+        self.btn_confirmar = ctk.CTkButton(self.frame_top, text="Eliminar (0)", 
                                            fg_color="#E74C3C", command=self.ejecutar_borrado_multiple)
-        
-        self.btn_cancelar = ctk.CTkButton(self.frame_top_acciones, text="Cancelar", 
+        self.btn_cancelar = ctk.CTkButton(self.frame_top, text="Cancelar", 
                                           fg_color="#95A5A6", command=self.toggle_modo_seleccion)
 
-        # --- ÁREA DE MENSAJES ---
-        self.frame_mensajes = ctk.CTkScrollableFrame(self, label_text=f"Conversación con {nombre_destino}")
-        self.frame_mensajes.grid(row=1, column=0, columnspan=2, padx=20, pady=10, sticky="nsew")
+        # 2. ÁREA DE MENSAJES (Nombre dinámico aplicado aquí)
+        self.frame_mensajes = ctk.CTkScrollableFrame(self, label_text=f"{nombre_destino}")
+        self.frame_mensajes.grid(row=1, column=0, padx=20, pady=10, sticky="nsew")
 
-        # --- ÁREA DE ENTRADA ---
-        self.entry_msj = ctk.CTkEntry(self, placeholder_text="Escribe un mensaje...")
-        self.entry_msj.grid(row=2, column=0, padx=(20, 10), pady=20, sticky="ew")
+        # 3. ENTRADA DE TEXTO
+        self.frame_input = ctk.CTkFrame(self, fg_color="transparent")
+        self.frame_input.grid(row=2, column=0, padx=20, pady=(0, 20), sticky="ew")
+        self.frame_input.columnconfigure(0, weight=1)
+
+        self.lbl_contador = ctk.CTkLabel(self.frame_input, text=f"0 / {self.MAX_CHARS_INPUT}", font=("Arial", 10))
+        self.lbl_contador.grid(row=1, column=0, sticky="e", padx=(0, 95))
+
+        vcmd = (self.register(self.validar_longitud), '%P')
+        self.entry_msj = ctk.CTkEntry(self.frame_input, placeholder_text="Escribe...", 
+                                      validate="key", validatecommand=vcmd)
+        self.entry_msj.grid(row=0, column=0, padx=(0, 10), sticky="ew")
         self.entry_msj.bind("<Return>", lambda e: self.enviar())
 
-        self.btn_enviar = ctk.CTkButton(self, text="Enviar", width=100, command=self.enviar)
-        self.btn_enviar.grid(row=2, column=1, padx=(10, 20), pady=20)
+        self.btn_enviar = ctk.CTkButton(self.frame_input, text="Enviar", width=80, command=self.enviar)
+        self.btn_enviar.grid(row=0, column=1)
 
         self.cargar_mensajes()
+
+    def insertar_burbuja(self, id_msj, id_remit, texto, fecha_raw):
+        f_obj = fecha_raw if isinstance(fecha_raw, datetime) else datetime.now()
+        fecha_str = f_obj.strftime("%d/%m/%Y")
+        hora_str = f_obj.strftime("%H:%M")
+
+        if fecha_str != self.ultima_fecha_cargada:
+            ctk.CTkLabel(self.frame_mensajes, text=f"— {fecha_str} —", 
+                         text_color="gray", font=("Arial", 11, "bold")).pack(pady=10)
+            self.ultima_fecha_cargada = fecha_str
+
+        fila = ctk.CTkFrame(self.frame_mensajes, fg_color="transparent")
+        fila.pack(fill="x", pady=2)
+        fila.columnconfigure(0, weight=1) 
+        fila.columnconfigure(1, weight=0) 
+        fila.columnconfigure(2, weight=0) 
+
+        es_mio = int(id_remit) == int(self.id_origen)
+        
+        burbuja = ctk.CTkFrame(fila, fg_color="#2E86C1" if es_mio else "#515A5A", corner_radius=12)
+        burbuja.grid(row=0, column=1, padx=5, sticky="e" if es_mio else "w")
+        
+        # Texto alineado a la izquierda
+        lbl = ctk.CTkLabel(burbuja, text=texto, padx=12, pady=6, 
+                           wraplength=280, justify="left", anchor="w")
+        lbl.pack(fill="both", expand=True)
+
+        if es_mio and id_msj:
+            cb = ctk.CTkCheckBox(fila, text="", width=20, 
+                                 command=lambda mid=id_msj: self.actualizar_conteo(mid))
+            self.lista_checkboxes.append(cb)
+            if self.modo_seleccion:
+                cb.grid(row=0, column=2, padx=(5, 15))
+
+        ctk.CTkLabel(fila, text=hora_str, font=("Arial", 8), 
+                     text_color="gray").grid(row=1, column=1, sticky="e" if es_mio else "w", padx=10)
 
     def toggle_modo_seleccion(self):
         self.modo_seleccion = not self.modo_seleccion
         self.seleccionados.clear()
+        self.btn_confirmar.configure(text="Eliminar (0)", state="disabled")
         
         if self.modo_seleccion:
-            self.btn_modo.pack_forget() # Ocultamos botón principal
-            self.btn_confirmar.pack(side="left", padx=10, pady=10)
-            self.btn_confirmar.configure(text="Eliminar (0)", state="disabled")
-            self.btn_cancelar.pack(side="right", padx=10, pady=10)
-            self.btn_enviar.configure(state="disabled")
-            self.entry_msj.configure(state="disabled")
+            self.btn_modo.pack_forget()
+            self.btn_confirmar.pack(side="left", padx=10)
+            self.btn_cancelar.pack(side="right", padx=10)
+            for cb in self.lista_checkboxes:
+                cb.grid(row=0, column=2, padx=(5, 15))
         else:
             self.btn_confirmar.pack_forget()
             self.btn_cancelar.pack_forget()
             self.btn_modo.pack(side="left", padx=10, pady=10)
-            self.btn_enviar.configure(state="normal")
-            self.entry_msj.configure(state="normal")
-        
-        self.cargar_mensajes()
+            for cb in self.lista_checkboxes:
+                cb.grid_forget()
+                cb.deselect()
 
     def cargar_mensajes(self):
         for widget in self.frame_mensajes.winfo_children():
             widget.destroy()
+        self.lista_checkboxes.clear()
+        self.ultima_fecha_cargada = None
 
         try:
             mensajes = functions.visualizar_conversacion(self.conn, self.id_origen, self.id_destino)
-            for id_msj, id_remit, nombre, texto in mensajes:
-                fila_msj = ctk.CTkFrame(self.frame_mensajes, fg_color="transparent")
-                fila_msj.pack(fill="x", pady=5, padx=5)
-
-                if int(id_remit) == int(self.id_origen):
-                    # --- MENSAJE PROPIO ---
-                    if self.modo_seleccion:
-                        cb = ctk.CTkCheckBox(fila_msj, text="", width=20,
-                                             command=lambda mid=id_msj: self.actualizar_conteo(mid))
-                        cb.pack(side="right", padx=(5, 0))
-
-                    lbl = ctk.CTkLabel(fila_msj, text=f"TÚ:\n{texto}", 
-                                       fg_color="#2E86C1", corner_radius=10, 
-                                       padx=10, pady=5, justify="right")
-                    lbl.pack(side="right")
-                else:
-                    # --- MENSAJE RECIBIDO ---
-                    lbl = ctk.CTkLabel(fila_msj, text=f"{nombre}:\n{texto}", 
-                                       fg_color="#5D6D7E", corner_radius=10, 
-                                       padx=10, pady=5, justify="left")
-                    lbl.pack(side="left")
-            
-            self.frame_mensajes._parent_canvas.yview_moveto(1.0)
+            for m in mensajes:
+                self.insertar_burbuja(m[0], m[1], m[3], m[4])
+            self.after(100, self.bajar_scroll)
         except Exception as e:
-            print(f"Error al cargar mensajes: {e}")
+            print(f"Error: {e}")
+
+    def ejecutar_borrado_multiple(self):
+        if not self.seleccionados: return
+
+        # parent=self para que salga encima de la ventana topmost
+        if messagebox.askyesno("Confirmar", f"¿Eliminar {len(self.seleccionados)} mensajes?", parent=self):
+            for mid in self.seleccionados:
+                functions.eliminar_mensaje(self.conn, self.id_origen, mid)
+            
+            self.seleccionados.clear()
+            self.modo_seleccion = False
+            self.btn_confirmar.configure(text="Eliminar (0)", state="disabled")
+            self.btn_confirmar.pack_forget()
+            self.btn_cancelar.pack_forget()
+            self.btn_modo.pack(side="left", padx=10, pady=10)
+            
+            self.cargar_mensajes()
 
     def actualizar_conteo(self, id_mensaje):
         if id_mensaje in self.seleccionados:
@@ -184,18 +220,21 @@ class VentanaChat(ctk.CTkToplevel):
         self.btn_confirmar.configure(text=f"Eliminar ({cant})", 
                                      state="normal" if cant > 0 else "disabled")
 
-    def ejecutar_borrado_multiple(self):
-        cant = len(self.seleccionados)
-        if messagebox.askyesno("Borrar", f"¿Seguro que quieres borrar {cant} mensajes?"):
-            for mid in self.seleccionados:
-                functions.eliminar_mensaje(self.conn, self.id_origen, mid)
-            
-            self.toggle_modo_seleccion() # Refresca y sale del modo
-
     def enviar(self):
         texto = self.entry_msj.get().strip()
         if texto:
-            exito, _ = functions.enviar_mensaje(self.conn, self.id_origen, self.id_destino, texto)
+            exito, err = functions.enviar_mensaje(self.conn, self.id_origen, self.id_destino, texto)
             if exito:
                 self.entry_msj.delete(0, "end")
-                self.cargar_mensajes()
+                self.insertar_burbuja(None, self.id_origen, texto, datetime.now())
+                self.after(10, self.bajar_scroll)
+
+    def validar_longitud(self, texto_nuevo):
+        if len(texto_nuevo) <= self.MAX_CHARS_INPUT:
+            if hasattr(self, 'lbl_contador'):
+                self.lbl_contador.configure(text=f"{len(texto_nuevo)} / {self.MAX_CHARS_INPUT}")
+            return True
+        return False
+
+    def bajar_scroll(self):
+        self.frame_mensajes._parent_canvas.yview_moveto(1.0)

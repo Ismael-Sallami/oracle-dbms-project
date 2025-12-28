@@ -87,7 +87,7 @@ def visualizar_conversacion(conn, idusuarioactivo, idusuario2):
         conn.commit()
 
         query = """
-            SELECT m.IDMENSAJE, m.IDUSUARIO1, u.NOMBREUSUARIO, m.MENSAJE
+            SELECT m.IDMENSAJE, m.IDUSUARIO1, u.NOMBREUSUARIO, m.MENSAJE, m.FECHAENVIO, m.BITVISTO
             FROM MENSAJE m
             JOIN USUARIO u ON m.IDUSUARIO1 = u.IDUSUARIO
             WHERE (m.IDUSUARIO1 = :1 AND m.IDUSUARIO2 = :2)
