@@ -1,16 +1,18 @@
 
-#aqui hago lo del login por ahora no tiene puesto lo del hash
-
+import seguridad
 
 def login(conn, email, contrasena):
     cursor = conn.cursor()
     try:
+        # hash de la contraseña introducida
+        pwd_hash_in = seguridad.hash_password_sha256(contrasena)
+
         cursor.execute("""
             SELECT IDUSUARIO
             FROM USUARIO
             WHERE LOWER(EMAIL) = LOWER(:1)
               AND CONTRASENIA = :2
-        """, [email, contrasena])
+        """, [email, pwd_hash_in])
 
         row = cursor.fetchone()
         if row is None:
