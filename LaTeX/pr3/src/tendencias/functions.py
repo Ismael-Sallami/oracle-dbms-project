@@ -27,7 +27,7 @@ def listar_tendencias(cursor):
     else:
         print("\n--- TOP 10 TENDENCIAS ---")
         for i, row in enumerate(resultados, 1):
-            print(f"{i}. {row.HASHTAG}: {row.MENCIONES} menciones")
+            print(f"{i}. {row[0]}: {row[1]} menciones")
 
     
 
@@ -52,7 +52,7 @@ def mostrar_categoria_ordenada(cursor, categoria):
     else:
         print("\n--- TENDENCIAS EN LA CATEGORÍA ", categoria, " ---")
         for i, row in enumerate(resultados, 1):
-            print(f"{i}. {row.HASHTAG}: {row.MENCIONES} menciones")
+            print(f"{i}. {row[0]}: {row[1]} menciones")
 
 def eliminar_tendencia(cursor, hashtag):
     cursor.execute("SELECT hashtag FROM HASHTAG WHERE hashtag = :1", [hashtag])
