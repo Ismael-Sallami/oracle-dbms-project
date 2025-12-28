@@ -5,15 +5,15 @@ def crear_o_mencionar_hashtag(cursor, hashtag, id_publicacion):
         print("Error: El hashtag debe comenzar con #")
         return
 
-    cursor.execute("SELECT menciones FROM HASHTAG WHERE hashtag = ?", (hashtag,))
+    cursor.execute("SELECT menciones FROM HASHTAG WHERE hashtag = :1", [hashtag])
     resultado = cursor.fetchone()
 
     if resultado:
-        cursor.execute("UPDATE HASHTAG SET menciones = menciones + 1 WHERE hashtag = ?", (hashtag,))
+        cursor.execute("UPDATE HASHTAG SET menciones = menciones + 1 WHERE hashtag = :1", [hashtag])
     else:
-        cursor.execute("INSERT INTO HASHTAG (hashtag, menciones) VALUES (?, 1)", (hashtag,))
+        cursor.execute("INSERT INTO HASHTAG (hashtag, menciones) VALUES (:1, 1)", [hashtag])
 
-    cursor.execute("INSERT INTO CONTIENE_HASHTAG (idpublicacion, hashtag) VALUES (?, ?)", (id_publicacion, hashtag))
+    cursor.execute("INSERT INTO CONTIENE_HASHTAG (idpublicacion, hashtag) VALUES (:1, :2)", [id_publicacion, hashtag])
     
 
 def listar_tendencias(cursor):
@@ -32,17 +32,17 @@ def listar_tendencias(cursor):
     
 
 def asignar_categoria_a_tendencia(cursor, hashtag, categoria):
-    cursor.execute("SELECT hashtag FROM HASHTAG WHERE hashtag = ?", (hashtag,))
+    cursor.execute("SELECT hashtag FROM HASHTAG WHERE hashtag = :1", [hashtag])
     if not cursor.fetchone():
         print("Error: El hashtag no existe.")
         return False
 
     else:
-        cursor.execute("UPDATE HASHTAG SET categoria = ? WHERE hashtag = ?", (categoria, hashtag))
+        cursor.execute("UPDATE HASHTAG SET categoria = :1 WHERE hashtag = :2", [categoria, hashtag])
         return True
 
 def mostrar_categoria_ordenada(cursor, categoria):
-    cursor.execute("SELECT hashtag, menciones FROM HASHTAG where categoria = ? ORDER BY menciones DESC", (categoria,))
+    cursor.execute("SELECT hashtag, menciones FROM HASHTAG where categoria = :1 ORDER BY menciones DESC", [categoria])
 
     resultados = cursor.fetchall()
 
@@ -55,12 +55,12 @@ def mostrar_categoria_ordenada(cursor, categoria):
             print(f"{i}. {row.HASHTAG}: {row.MENCIONES} menciones")
 
 def eliminar_tendencia(cursor, hashtag):
-    cursor.execute("SELECT hashtag FROM HASHTAG WHERE hashtag = ?", (hashtag,))
+    cursor.execute("SELECT hashtag FROM HASHTAG WHERE hashtag = :1", [hashtag])
     if not cursor.fetchone():
         print("Error: El hashtag no existe.")
         return False
 
     else:
-        cursor.execute("UPDATE HASHTAG SET menciones = 0 WHERE hashtag = ?", (hashtag,))
+        cursor.execute("UPDATE HASHTAG SET menciones = 0 WHERE hashtag = :1", [hashtag])
         print("Tendencia --", hashtag, "-- eliminada con éxito.")
         return True
