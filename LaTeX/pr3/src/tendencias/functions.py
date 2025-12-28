@@ -17,50 +17,57 @@ def crear_o_mencionar_hashtag(cursor, hashtag, id_publicacion):
     
 
 def listar_tendencias(cursor):
-    cursor.execute("SELECT hashtag, menciones FROM HASHTAG ORDER BY menciones DESC FETCH FIRST 10 ROWS ONLY")
+    try:
+        cursor.execute("SELECT hashtag, menciones FROM HASHTAG ORDER BY menciones DESC FETCH FIRST 10 ROWS ONLY")
+        return cursor.fetchall()
 
-    resultados = cursor.fetchall()
-
-    if not resultados:
-        print("No se encontró ninguna tendencia en el sistema.")
-
-    else:
-        print("\n--- TOP 10 TENDENCIAS ---")
-        for i, row in enumerate(resultados, 1):
-            print(f"{i}. {row[0]}: {row[1]} menciones")
-
+    except Exception as e:
+        print (f"Error al listar las tendencias: {e}")
+        return []
     
 
 def asignar_categoria_a_tendencia(cursor, hashtag, categoria):
-    cursor.execute("SELECT hashtag FROM HASHTAG WHERE hashtag = :1", [hashtag])
-    if not cursor.fetchone():
-        print("Error: El hashtag no existe.")
-        return False
+    try:
+        cursor.execute("SELECT hashtag FROM HASHTAG WHERE hashtag = :1", [hashtag])
+        if not cursor.fetchone():
+            return False, "El hashtag no existe en el sistema."
 
-    else:
         cursor.execute("UPDATE HASHTAG SET categoria = :1 WHERE hashtag = :2", [categoria, hashtag])
-        return True
+        return True, f"Categoría '{categoria}' asignada a {hashtag}."
+
+    except Exception as e:
+        return False, f"Error de BD: {str(e)}"
 
 def mostrar_categoria_ordenada(cursor, categoria):
-    cursor.execute("SELECT hashtag, menciones FROM HASHTAG where categoria = :1 ORDER BY menciones DESC", [categoria])
+    try:
+        cursor.execute("SELECT hashtag, menciones FROM HASHTAG where categoria = :1 ORDER BY menciones DESC", [categoria])
+        return cursor.fetchall()
 
-    resultados = cursor.fetchall()
-
-    if not resultados:
-        print("No se encontró ninguna tendencia con la categoría --", categoria, "-- en el sistema.")
-
-    else:
-        print("\n--- TENDENCIAS EN LA CATEGORÍA ", categoria, " ---")
-        for i, row in enumerate(resultados, 1):
-            print(f"{i}. {row[0]}: {row[1]} menciones")
+    except Exception as e:
+        print (f"Error al listar las tendencias: {e}")
+        return []
+    
 
 def eliminar_tendencia(cursor, hashtag):
-    cursor.execute("SELECT hashtag FROM HASHTAG WHERE hashtag = :1", [hashtag])
-    if not cursor.fetchone():
-        print("Error: El hashtag no existe.")
-        return False
-
-    else:
+    try:
+        cursor.execute("SELECT hashtag FROM HASHTAG WHERE hashtag = :1", [hashtag])
+        if not cursor.fetchone():
+            return False, "El hashtag no existe."
+        
         cursor.execute("UPDATE HASHTAG SET menciones = 0 WHERE hashtag = :1", [hashtag])
-        print("Tendencia --", hashtag, "-- eliminada con éxito.")
-        return True
+        return True, f"Tendencia --{hashtag}-- eliminada con éxito."
+    
+    except Exception as e:
+       return False, f"Error al eliminar hashtag: {str(e)}"
+    
+def obtener_categorias_unicas(cursor):
+    """
+    Recupera todas las categorías distintas que tienen al menos un hashtag asignado.
+    """
+    try:
+        # Usamos DISTINCT para que no se repitan y filtramos los nulos
+        cursor.execute("SELECT DISTINCT categoria FROM HASHTAG WHERE categoria IS NOT NULL ORDER BY categoria ASC")
+        return cursor.fetchall()
+    except Exception as e:
+        print(f"Error al obtener las categorías únicas: {e}")
+        return []
