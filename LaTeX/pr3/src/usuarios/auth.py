@@ -1,5 +1,5 @@
+from . import seguridad
 
-import seguridad
 
 def login(conn, email, contrasena):
     cursor = conn.cursor()

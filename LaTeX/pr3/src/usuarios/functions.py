@@ -1,7 +1,7 @@
 import uuid
 import datetime
 import oracledb
-import seguridad
+from . import seguridad
 # -------------------------------------------------------------------
 # RF4.1: Crear usuario
 # -------------------------------------------------------------------
