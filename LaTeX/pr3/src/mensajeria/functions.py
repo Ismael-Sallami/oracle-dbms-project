@@ -1,10 +1,6 @@
-# Eliminamos pyodbc para evitar conflictos de drivers
-import oracledb
-
 def enviar_mensaje(conn, id1, id2, mensaje):
     cursor = conn.cursor()
     try:
-        # En oracledb los parámetros se pasan como :1, :2, etc. o en una lista
         cursor.execute("SELECT 1 FROM AMISTAD WHERE (IDUSUARIO1 = :1 AND IDUSUARIO2 = :2)", [id1, id2])
         u1esamigo = cursor.fetchone() is not None
         
@@ -53,7 +49,7 @@ def eliminar_mensaje(conn, id_usuario_activo, id_mensaje):
 def listar_usuarios(conn, idusuarioactivo, archivados=False):
     cursor = conn.cursor()
     try:
-        base_query = """
+        base_query = """    
             SELECT u.IDUSUARIO, u.NOMBREUSUARIO
             FROM USUARIO u
             WHERE u.IDUSUARIO IN (
@@ -82,8 +78,16 @@ def listar_usuarios(conn, idusuarioactivo, archivados=False):
 def visualizar_conversacion(conn, idusuarioactivo, idusuario2):
     cursor = conn.cursor()
     try:
+        query_update = """
+            UPDATE MENSAJE 
+            SET BITVISTO = 'Y' 
+            WHERE IDUSUARIO1 = :1 AND IDUSUARIO2 = :2 AND BITVISTO = 'N'
+        """
+        cursor.execute(query_update, [idusuario2, idusuarioactivo])
+        conn.commit()
+
         query = """
-            SELECT m.IDMENSAJE, m.IDUSUARIO1, u.NOMBREUSUARIO, m.MENSAJE
+            SELECT m.IDMENSAJE, m.IDUSUARIO1, u.NOMBREUSUARIO, m.MENSAJE, m.FECHAENVIO, m.BITVISTO
             FROM MENSAJE m
             JOIN USUARIO u ON m.IDUSUARIO1 = u.IDUSUARIO
             WHERE (m.IDUSUARIO1 = :1 AND m.IDUSUARIO2 = :2)

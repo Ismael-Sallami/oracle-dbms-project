@@ -1,7 +1,9 @@
 import oracledb
 from auth import login
 from functions import crear_usuario
-from menu import mostrar_menu_usuarios   
+from menu import mostrar_menu_usuarios  
+from getpass import getpass
+
 
 def main():
     try:
@@ -28,7 +30,7 @@ def main():
         # ---------------- LOGIN ----------------
         if opcion == "1":
             email = input("Email: ")
-            password = input("Contraseña: ")
+            password = getpass("Contraseña: ")
 
             ok, res = login(conexion, email, password)
             if ok:
@@ -42,7 +44,7 @@ def main():
         elif opcion == "2":
             nombre = input("Nombre de usuario: ")
             email = input("Email: ")
-            password = input("Contraseña: ")
+            password = getpass("Contraseña: ")
             imagen = input("Imagen de perfil (opcional): ")
             bio = input("Biografía (opcional): ")
 

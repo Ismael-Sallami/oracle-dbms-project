@@ -1,14 +1,11 @@
 import uuid
 import datetime
 import oracledb
+from . import seguridad
 # -------------------------------------------------------------------
 # RF4.1: Crear usuario
 # -------------------------------------------------------------------
 def crear_usuario(conn, nombre_usuario, correo, contrasena, imagen_perfil=None, biografia=None):
-    """
-    RF4.1 (Crear usuario): nombre, correo, contraseña, opcional imagen/biografía. :contentReference[oaicite:5]{index=5}
-    Restricciones recomendables (prácticas): username/email únicos.
-    """
     cursor = conn.cursor()
     try:
         # Comprobaciones mínimas
@@ -27,36 +24,36 @@ def crear_usuario(conn, nombre_usuario, correo, contrasena, imagen_perfil=None, 
         if cursor.fetchone():
             return "Correo ya existe"
 
-        #id_usuario = uuid.uuid4().hex
-        #de momento el id de usuario se genera con IDENTITY
-        
-        #NO SE INCLUYE UNA FECHA_CREACION
+        contrasena_hash = seguridad.hash_password_sha256(contrasena)
+
         cursor.execute("""
             INSERT INTO USUARIO (NOMBREUSUARIO, EMAIL, CONTRASENIA, IMAGENDEPERFIL, BIOGRAFIA)
             VALUES (:1,:2,:3,:4,:5)
-        """, [nombre_usuario, correo, contrasena, imagen_perfil, biografia])
+        """, [nombre_usuario, correo, contrasena_hash, imagen_perfil, biografia])
 
         conn.commit()
 
         cursor.execute("""
-                       SELECT IDUSUARIO FROM USUARIO WHERE NOMBREUSUARIO=:1
-                       AND CONTRASENIA = :2
-                       """, [nombre_usuario,contrasena])
+            SELECT IDUSUARIO
+            FROM USUARIO
+            WHERE LOWER(EMAIL) = LOWER(:1)
+        """, [correo])
+
         id_usuario = cursor.fetchone()
         return f"Usuario creado (ID={id_usuario[0]})"
 
     except Exception as e:
+        conn.rollback()
         return f"Error SQL: {e}"
     finally:
         cursor.close()
-
 
 # -------------------------------------------------------------------
 # RF4.2: Modificar usuario
 # -------------------------------------------------------------------
 def modificar_usuario(conn, id_usuario, nombre_usuario=None, correo=None, contrasena=None, imagen_perfil=None, biografia=None):
     """
-    RF4.2 (Modificar usuario): permite modificar datos del perfil. :contentReference[oaicite:6]{index=6}
+    RF4.2 (Modificar usuario): permite modificar datos del perfil.
     """
     cursor = conn.cursor()
     try:
@@ -90,6 +87,12 @@ def modificar_usuario(conn, id_usuario, nombre_usuario=None, correo=None, contra
             if cursor.fetchone():
                 return "Correo ya existe"
 
+        # Si se cambia contraseña, guardar hash SHA-256 en CONTRASENIA
+        if contrasena is not None:
+            if not contrasena.strip():
+                return "Contraseña no puede estar vacía"
+            contrasena = seguridad.hash_password_sha256(contrasena)
+
         # Construcción dinámica del UPDATE (para no pisar campos que no se tocan)
         sets = []
         params = []
@@ -103,21 +106,23 @@ def modificar_usuario(conn, id_usuario, nombre_usuario=None, correo=None, contra
         if contrasena is not None: add_set("CONTRASENIA", contrasena)
         if imagen_perfil is not None: add_set("IMAGENDEPERFIL", imagen_perfil)
         if biografia is not None: add_set("BIOGRAFIA", biografia)
-        
-        sets.append(f"FECHAMODIFICACION = SYSDATE ")
 
+        # Fecha de modificación (sin bind)
+        sets.append("FECHAMODIFICACION = SYSDATE")
+
+        # WHERE
         params.append(id_usuario)
-        sql = "UPDATE USUARIO SET " +", ".join(sets) + f"WHERE IDUSUARIO = :{len(params)}"
+        sql = "UPDATE USUARIO SET " + ", ".join(sets) + f" WHERE IDUSUARIO = :{len(params)}"
         cursor.execute(sql, params)
 
         conn.commit()
         return "Usuario modificado"
 
     except Exception as e:
+        conn.rollback()
         return f"Error SQL: {e}"
     finally:
         cursor.close()
-
 
 # -------------------------------------------------------------------
 # RF4.3: Eliminar usuario
@@ -127,28 +132,40 @@ def modificar_usuario(conn, id_usuario, nombre_usuario=None, correo=None, contra
 def eliminar_usuario(conn, id_usuario, contrasena):
     cursor = conn.cursor()
     try:
-        # Verificar credenciales
+        if not contrasena or not contrasena.strip():
+            return "Contraseña no puede estar vacía"
+
+        contrasena_hash = seguridad.hash_password_sha256(contrasena)
+
+        # Verificar credenciales y que no esté ya borrado
         cursor.execute("""
-            SELECT 1 FROM USUARIO
-            WHERE IDUSUARIO = :1 AND CONTRASENIA = :2
-        """, [id_usuario, contrasena])
+            SELECT 1
+            FROM USUARIO
+            WHERE IDUSUARIO = :1
+              AND CONTRASENIA = :2
+              AND BORRADO = 'N'
+        """, [id_usuario, contrasena_hash])
 
         if cursor.fetchone() is None:
-            return "Credenciales incorrectas o usuario no existe"
+            return "Credenciales incorrectas, usuario no existe o ya está eliminado"
 
-        # Borrado físico con cascade
-        cursor.execute("DELETE FROM USUARIO WHERE IDUSUARIO = :1", [id_usuario])
+        # Borrado lógico
+        cursor.execute("""
+            UPDATE USUARIO
+            SET BORRADO = 'Y',
+                FECHAELIMINACION = SYSDATE,
+                FECHAMODIFICACION = SYSDATE
+            WHERE IDUSUARIO = :1
+        """, [id_usuario])
+
         conn.commit()
-
-        return "Usuario eliminado definitivamente (con borrado en cascada)"
+        return "Usuario eliminado (borrado lógico)"
 
     except Exception as e:
+        conn.rollback()
         return f"Error SQL: {e}"
     finally:
         cursor.close()
-
-
-  
 
 # -------------------------------------------------------------------
 # RF4.4: Bloquear / Desbloquear usuario (toggle)
