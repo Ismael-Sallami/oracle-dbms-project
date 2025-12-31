@@ -2,8 +2,8 @@ import oracledb
 
 class DBConnection:
     def __init__(self):
-        self.username = "x1234567"   
-        self.password = "x1234567"  # CAMBIAR
+        self.username = "ORACLE_USER"   
+        self.password = "ORACLE_USER"  # CAMBIAR
         self.dsn = "oracle0.ugr.es:1521/practbd"
         self.connection = None 
 
