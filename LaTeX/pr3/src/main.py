@@ -71,6 +71,7 @@ ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 import customtkinter as ctk
 from usuarios.auth import login
+from publicidad.functions import es_admin_bd # parte de fer
 
 class LoginFrame(ctk.CTkFrame):
     def __init__(self, master, conn, on_login_ok):
@@ -78,7 +79,7 @@ class LoginFrame(ctk.CTkFrame):
         self.conn = conn
         self.on_login_ok = on_login_ok
         self.registro_activo = False
-
+        
         self.grid_columnconfigure(0, weight=1)
 
         # ---------- TÍTULO ----------
@@ -253,8 +254,19 @@ class App(ctk.CTk):
 
     def on_login_ok(self, id_usuario):
         self.id_usuario_activo = id_usuario
+        
+        
+        # parte añadida para probar la parte de publicidad
+        #----------------------------------------------------------------------
+        self.es_admin = es_admin_bd(self.conn, id_usuario)
+        role_str = "ADMINISTRADOR" if self.es_admin else "USUARIO ESTÁNDAR"
+        print(f"Login exitoso. Usuario: {id_usuario} | Rol: {role_str}")
+        #----------------------------------------------------------------------
+
+
         self.mostrar_dashboard()
         self.mostrar_home()
+        
 
     def mostrar_dashboard(self):
         self.limpiar_root()
@@ -316,7 +328,13 @@ class App(ctk.CTk):
 
     def mostrar_publicidad(self):
         self.limpiar_panel()
-        ventana_pub = VentanaPublicidad(self.frame_contenido, self.conn)
+        
+        ventana_pub = VentanaPublicidad(
+            self.frame_contenido, 
+            self.conn, 
+            self.id_usuario_activo,  
+            es_admin=self.es_admin
+        )
         ventana_pub.pack(fill="both", expand=True)
 
     def mostrar_publicaciones(self):
