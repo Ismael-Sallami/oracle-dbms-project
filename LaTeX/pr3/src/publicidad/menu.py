@@ -196,8 +196,6 @@ class VentanaPublicidad(ctk.CTkFrame):
         if nueva_fecha_str:
             try:
                 nueva_fecha = datetime.strptime(nueva_fecha_str, "%d/%m/%Y")
-                # Asegúrate de tener extender_campania_bd en functions
-                # Si no lo tienes, avísame para dártelo
                 try:
                     exito, msg = functions.extender_campania_bd(self.conn, id_anuncio, nueva_fecha)
                     if exito:
