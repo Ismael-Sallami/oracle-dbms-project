@@ -240,8 +240,58 @@ def mostrar_menu(conn):
 
 1. Guarda tus scripts `.sql` en `pr3/database/TU_MODULO/`.
 
-
 ---
+
+## Práctica 4 :gear:
+
+Este repositorio contiene el trabajo grupal en LaTeX. Para evitar conflictos en Git trabajando todos en la rama `main`, seguid estrictamente estas normas.
+
+### 👥 Reparto de Tareas
+
+| Integrante | Modelo Asignado | Archivo a editar | Carpeta de imágenes |
+| :--- | :--- | :--- | :--- |
+| **Ismael** | Objeto-Relacional (Oracle) | `chapters/01_ismael_or.tex` | `figures/ismael/` |
+| **Javi** | NoSQL Documental (MongoDB) | `chapters/02_javi_documental.tex` | `figures/javi/` |
+| **Jesús** | NoSQL Grafos (Neo4j) | `chapters/03_jesus_grafos.tex` | `figures/jesus/` |
+| **Fer** | NoSQL Clave-Valor (Redis) | `chapters/04_fer_clavevalor.tex` | `figures/fer/` |
+| **Sergio** | NoSQL Columnar (Cassandra) | `chapters/05_sergio_columnar.tex` | `figures/sergio/` |
+
+### ⚠️ Normas de Trabajo (LEER ANTES DE EMPEZAR)
+
+#### 1. No toques el archivo `trabajot4.tex`
+El archivo principal ya tiene los `\input` necesarios. Si necesitas añadir paquetes nuevos, avisa por el grupo antes de editar el preámbulo.
+
+#### 2. Edita SOLO tu archivo `.tex`
+Trabaja exclusivamente en el archivo asignado a tu nombre dentro de la carpeta `chapters/`.
+
+#### 3. Imágenes organizadas
+**NUNCA** subas imágenes sueltas a la carpeta `figures/`.
+* Guarda tus capturas en `figures/tu_nombre/`.
+* En LaTeX, llámalas así:
+    ```latex
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{figures/ismael/captura_oracle_1.png}
+        \caption{Creación de tipos en Oracle}
+        \label{fig:oracle_types}
+    \end{figure}
+    ```
+
+#### 4. Flujo de Git (Workflow)
+Antes de ponerte a escribir, actualiza siempre tu local:
+
+```bash
+git pull origin main
+```
+
+A la hora de subir tus cambios:
+
+```bash
+git add chapters/tu_archivo.tex
+git add figures/tu_nombre/
+git commit -m "Añadido apartado DML de [Modelo]"
+git push origin main
+```
 
 
 

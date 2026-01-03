@@ -53,3 +53,7 @@ venv/
 Thumbs.db
 
 arbol.txt
+test.sql
+00_init_tablas_vAnterior.sql
+init_structure.sh
+trabajot4.pdf
