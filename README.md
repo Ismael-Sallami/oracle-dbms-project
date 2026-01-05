@@ -240,6 +240,44 @@ def mostrar_menu(conn):
 
 1. Guarda tus scripts `.sql` en `pr3/database/TU_MODULO/`.
 
+
+## Documentación LaTeX (Práctica 3)
+
+La documentación de esta práctica sigue una estructura modular para que podamos trabajar todos a la vez sin conflictos.
+
+📍 **Ubicación:** Todo el trabajo está en: `pr3/documentacion/chapters_pr3/`
+
+### Estructura de Archivos
+
+Dentro de esa carpeta veréis archivos globales (que hacen los `input`) y una carpeta con vuestro nombre. **SOLO debéis tocar los archivos dentro de vuestra carpeta.**
+
+```text
+pr3/documentacion/chapters_pr3/
+├── aspectos_legales.tex           <-- ⛔ NO TOCAR (Global) A excepción de si te ha tocado esta parte.
+├── motivacion_software.tex        <-- ⛔ NO TOCAR (Global) A excepción de si te ha tocado esta parte.
+├── sentencias_creacion_tablas.tex <-- ⛔ NO TOCAR (Global)
+├── transacciones.tex              <-- ⛔ NO TOCAR (Global)
+├── disparadores.tex               <-- ⛔ NO TOCAR (Global)
+│
+├── fer/    <-- ✅ TU ESPACIO (Igual para javi, jesus, sergio)
+│   ├── sentencias_creacion_tablas.tex  <-- Pega aquí tus CREATE TABLE
+│   ├── transacciones.tex               <-- Explica aquí tus transacciones
+│   └── disparadores.tex                <-- Pega aquí tus Triggers
+│
+└── ismael/ ...
+
+```
+
+### ¿Qué tengo que poner en cada archivo?
+
+Entrad en vuestra carpeta (`fer`, `javi`, `jesus`, `sergio`) y editad únicamente estos tres ficheros:
+- sentencias_creacion_tablas.tex  
+- transacciones.tex               
+- disparadores.tex
+
+En las partes globales ya se hacen los inputs de esto por lo que no se debería de tocar, a excepción de a quien le toque la parte de aspectos legales y motivación del software, el cual, al no ser grupal, se debe de adjuntar en ese fichero el contenido.
+
+
 ---
 
 ## Práctica 4 :gear:

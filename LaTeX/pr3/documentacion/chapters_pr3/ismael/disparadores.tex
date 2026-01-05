@@ -1,0 +1,90 @@
+\section{Disparadores del Subsistema de Publicidad (Ismael)}
+
+Para garantizar la integridad de los datos y cumplir con los requisitos de auditoría, se han implementado tres disparadores (triggers) en el SGBD. Estos mecanismos permiten automatizar validaciones de negocio complejas y mantener un histórico de modificaciones críticas.
+
+\subsection{Trigger: Validación de Coherencia Temporal}
+\textbf{Motivación:} Este disparador implementa una regla de negocio fundamental (\textit{Business Rule}): un anuncio no puede tener una fecha de finalización anterior a la fecha actual. Esto evita errores humanos al programar campañas o cerrar anuncios erróneamente en el pasado.
+
+\textbf{Descripción:} Se ejecuta antes de insertar o actualizar (\texttt{BEFORE INSERT OR UPDATE}) en la tabla \texttt{ANUNCIO}. Compara la nueva fecha de fin con la fecha del sistema truncada (sin hora).
+
+\begin{lstlisting}[language=SQL, caption={Trigger TRG\_PUB\_VALIDAR\_FECHAS}]
+CREATE OR REPLACE TRIGGER TRG_PUB_VALIDAR_FECHAS
+BEFORE INSERT OR UPDATE ON ANUNCIO
+FOR EACH ROW
+BEGIN
+    -- Validamos contra la fecha actual (SYSDATE).
+    -- Regla: No se puede crear o modificar un anuncio para que termine en el pasado.
+    IF :NEW.FECHAFIN < TRUNC(SYSDATE) THEN
+        RAISE_APPLICATION_ERROR(-20001, 
+            'Error de Negocio: La fecha de fin del anuncio no puede ser anterior a la fecha actual.');
+    END IF;
+END;
+/
+\end{lstlisting}
+
+\subsection{Trigger: Auditoría de Cambios en Vigencia}
+\textbf{Motivación:} La modificación de la fecha de finalización de un anuncio tiene implicaciones contractuales y económicas. Por ello, es obligatorio registrar cualquier cambio en este campo para futuras auditorías o reclamaciones.
+
+\textbf{Descripción:} Este disparador salta únicamente cuando se actualiza la columna \texttt{FECHAFIN}. Guarda automáticamente el estado anterior y el nuevo en la tabla histórica \texttt{HISTORIAL\_CAMBIOS\_FECHA}.
+
+\begin{lstlisting}[language=SQL, caption={Trigger TRG\_AUDITAR\_CAMBIO\_FECHA}]
+CREATE OR REPLACE TRIGGER TRG_AUDITAR_CAMBIO_FECHA
+AFTER UPDATE OF FECHAFIN ON ANUNCIO
+FOR EACH ROW
+BEGIN
+    INSERT INTO HISTORIAL_CAMBIOS_FECHA (IDANUNCIO, FECHA_ANTIGUA, FECHA_NUEVA)
+    VALUES (:OLD.IDANUNCIO, :OLD.FECHAFIN, :NEW.FECHAFIN);
+END;
+/
+\end{lstlisting}
+
+\subsection{Trigger: Validación Semántica de Características}
+\textbf{Motivación:} La tabla \texttt{CARACTERISTICA} permite una flexibilidad clave-valor (Entity-Attribute-Value), pero esto conlleva el riesgo de datos sucios (ej. "Rojo", "rojo ", "Color Rojo"). Este disparador normaliza los datos y restringe los valores permitidos según el tipo de característica.
+
+\textbf{Descripción:} Realiza dos funciones:
+\begin{enumerate}
+    \item \textbf{Normalización:} Convierte claves y valores a mayúsculas y elimina espacios en blanco.
+    \item \textbf{Validación Lógica:} Utiliza una estructura \texttt{CASE} para aplicar listas blancas de valores permitidos según la etiqueta (Colores válidos, Tamaños válidos, Prioridades).
+\end{enumerate}
+
+\begin{lstlisting}[language=SQL, caption={Trigger TRG\_VALIDAR\_COHERENCIA}]
+CREATE OR REPLACE TRIGGER TRG_VALIDAR_COHERENCIA
+BEFORE INSERT OR UPDATE ON CARACTERISTICA
+FOR EACH ROW
+DECLARE
+    v_nombre_norm VARCHAR2(100);
+    v_valor_norm VARCHAR2(100);
+BEGIN
+    -- 1. Normalizamos los datos (quitamos espacios y pasamos a mayúsculas)
+    v_nombre_norm := UPPER(TRIM(:NEW.NOMBRE));
+    v_valor_norm := UPPER(TRIM(:NEW.VALOR));
+
+    -- 2. Lógica de control (Switch case)
+    CASE v_nombre_norm
+        -- CASO 1: Validación de Colores
+        WHEN 'COLOR' THEN
+            IF v_valor_norm NOT IN ('ROJO', 'AZUL', 'VERDE', 'AMARILLO', 'NEGRO', 'BLANCO', 'GRIS') THEN
+                RAISE_APPLICATION_ERROR(-20005,
+                'Valor incoherente: "' || :NEW.VALOR || '" no es un color válido.');
+            END IF;
+
+        -- CASO 2: Validación de Tamaño
+        WHEN 'TAMANO' THEN
+            IF v_valor_norm NOT IN ('PEQUEÑO', 'MEDIANO', 'GRANDE', 'BANNER', 'FULLSCREEN') THEN
+                RAISE_APPLICATION_ERROR(-20005,
+                'Valor incoherente: "' || :NEW.VALOR || '" no es un tamaño válido.');
+            END IF;
+
+        -- CASO 3: Validación de Prioridad
+        WHEN 'PRIORIDAD' THEN
+            IF v_valor_norm NOT IN ('ALTA', 'MEDIA', 'BAJA') THEN
+                RAISE_APPLICATION_ERROR(-20005, 
+                'La prioridad solo puede ser Alta, Media o Baja.');
+            END IF;
+
+        ELSE
+            NULL; -- Se permiten otras características sin restricción
+    END CASE;
+END;
+/
+\end{lstlisting}

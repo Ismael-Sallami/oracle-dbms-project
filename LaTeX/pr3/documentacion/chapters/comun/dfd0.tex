@@ -1,0 +1,101 @@
+\begin{figure}[h!]
+    \centering
+    \shorthandoff{<>}
+    \resizebox{\textwidth}{!}{
+    \begin{tikzpicture}[node distance=2.2cm, auto]
+    
+        % ======================================================
+        % ===================  AGENTES  ========================
+        % ======================================================
+        \node[agente, minimum width=1cm, minimum height=1.2cm] (Visitante) {Visitante};
+        \node[agente, below of= Visitante    , node distance = 4cm, minimum width=1cm, minimum height=1.2cm] (Usuario) {Usuario};
+        \node[agente, below of= Usuario      , node distance = 4cm, minimum width=1cm, minimum height=1.2cm] (Administrador) {Administrador};
+        \node[agente, below of= Administrador, node distance = 4cm, minimum width=1cm, minimum height=1.2cm] (Sistema) {Sistema};
+        
+        % ======================================================
+        % =================== PROCESOS ========================
+        % ======================================================
+        
+        \node[proceso, right of=Visitante,     node distance = 10cm, minimum width=5cm, minimum height=1.2cm] (S1) {Usuarios};
+        \node[proceso, below of=S1,            node distance = 3cm, minimum width=5cm, minimum height=1.2cm] (S2) {Publicaciones};
+        \node[proceso, below of=S2,            node distance = 3cm, minimum width=5cm, minimum height=1.2cm] (S3) {Mensajería privada};
+        \node[proceso, below of=S3,            node distance = 3cm, minimum width=5cm, minimum height=1.2cm] (S4) {Tendencias};
+        \node[proceso, below of=S4,            node distance = 3cm, minimum width=5cm, minimum height=1.2cm] (S5) {Publicidad};
+    
+        % ======================================================
+        % ================== ALMACENES =========================
+        % ======================================================
+        \node[almacen, right of=S3, node distance=10cm, minimum height=4cm, minimum width=7cm] (EKIS) {EKIS};
+    
+        % ======================================================
+        % === FLUJOS DE DATOS ==================================
+        % ======================================================
+    
+        % -- Usuario → Procesos --
+        \draw[flujo] ($(Visitante.east)+(0,0.2cm)$) -- node[pos=0.5, above]{Crear usuario}($(S1.west)+(0,0.2cm)$);
+
+        \draw[flujo] (Usuario.north) -- node[pos=0.5, above,sloped]{Gestionar Usuarios}($(S1.west)+(0, -0.2cm)$);
+        \draw[flujo] ($(Usuario.east)+(0,0.6cm)$) -- node[pos=0.5, above, sloped]{Gestionar Publicaciones}($(S2.west)+(0,0.4cm)$);
+        \draw[flujo] ($(Usuario.east)+(0,0)$) -- node[pos=0.5, above, sloped]{Gestionar Mensajes}($(S3.west)+(0, 0.5cm)$);
+        \draw[flujo] ($(Usuario.east)+(0,-0.6cm)$) -- node[pos=0.5, above, sloped]{Peticion Hashtag}($(S4.west)+(0,0.6cm)$);
+
+        \draw[flujo] ($(Administrador.east)+(0,0.4cm)$) -- node[pos=0.5, above, sloped]{Gestionar Tendencias}($(S4.south west)+(0,0.3cm)$);
+        \draw[flujo] ($(Administrador.east)+(0,-0.4cm)$) -- node[pos=0.5, above, sloped]{Gestionar Publicidad}($(S5.west)+(0,0.4 cm)$);
+
+        \draw[flujo] ($(Sistema.east)+(0,0.2cm)$) -- node[pos=0.5, above, sloped]{Consultar Anuncio}($(S5.west)+(0,0.2cm)$);
+
+        % -- Procesos → Usuario --
+        \draw[iflujo] ($(Usuario.east)+(0,0.2cm)$) -- node[pos=0.5, above, sloped]{Salida Publicaciones}($(S2.west)+(0,-0.5cm)$);
+        \draw[iflujo] ($(Usuario.east)+(0,-0.2cm)$) -- node[pos=0.7, above, sloped]{Salida Mensajes}($(S3.west)+(0,-0.5cm)$);
+        \draw[iflujo] (Usuario.south) -- node[pos=0.5, above, sloped]{Salida Tendencias}($(S4.west)+(0,0)$);
+
+        \draw[iflujo] ($(Sistema.east)+(0,-0.3cm)$) -- node[pos=0.5, above, sloped]{Salida Anuncio}($(S5.west)+(0,-0.3cm)$);
+
+        % -- Procesos → Almacenes--
+        
+        \draw[flujo] (S1.east) -| ($(EKIS.north)+(1.5cm,0)$) node[pos=0.2, above] {Escritura usuarios};
+        \draw[flujo] (S2.north east) -| ($(EKIS.north)+(-1cm,0)$) node[pos=0.2, above] {Escritura publicaciones};
+        \draw[flujo] (S3.north east) -- ($(EKIS.west)+(0,0.6cm)$) node[pos=0.5, above] {Escritura Mensajes };
+        \draw[flujo] (S4.north east) -| ($(EKIS.south)+(-2cm,0)$) node[pos=0.2, below] {Escritura Tendencias };
+        \draw[flujo] (S5.north east) -| ($(EKIS.south)+(1cm,0)$) node[pos=0.2, below] {Escritura Publicidad};
+        
+        % -- Procesos <- Almacenes --
+        \draw[iflujo] (S2.south east) -| ($(EKIS.north)+(-2cm,0)$) node[pos=0.2, above] {Lectura publicaciones};
+        \draw[iflujo] (S3.south east) -- ($(EKIS.west)+(0,-0.6cm)$) node[pos=0.5, above] {Lectura Mensajes };
+        \draw[iflujo] (S4.south east) -| ($(EKIS.south)+(-1cm,0)$) node[pos=0.2, below] {Lectura Tendencias };
+        \draw[iflujo] (S5.south east) -| ($(EKIS.south)+(2cm,0)$) node[pos=0.2, below] {Lectura Publicidad};
+
+    \end{tikzpicture}
+    }
+    \caption{DFD0 — Sistema EKIS}
+    \label{fig:dfd0}
+    \end{figure}
+    
+Podemos observar el DFD0 de nuestra aplicación en la figura \ref{fig:dfd0}. Cabe destacar que los flujos de datos se han renombrado, para mayor legibilidad del diagrama. 
+A continuación se especifican que requisitos de datos implica cada flujo en la la figura:
+\begin{itemize}
+    \item \textbf{Crear usuario}: RDE4.1
+    \item \textbf{Gestionar usuarios}: RDE4.2, RDE4.3, RDE4.4, RDE4.5
+    \item \textbf{Gestionar publicaciones}: RDE1.1, RDE1.4, RDE1.3, RDE1.2
+    \item \textbf{Salida de publicaciones}: RDS1.1, RDS1.2, RDS1.3
+    \item \textbf{Gestionar mensajes}: RDE5.1, RDE5.2, RDE5.3, RDE5.4, RDE5.5
+    \item \textbf{Salida mensajes}: RDS5.1, RDS5.2
+    \item \textbf{Petición de hashtag}: RDE2.1, Consulta tendencias, RDE2.4  
+    \item \textbf{Salida tendencias}: RDS2.2, RDS2.4
+    \item \textbf{Gestionar tendencias}: RDE2.3, RDE2.5
+    \item \textbf{Gestionar publicidad}: RDE3.2, RDE3.1, RDE3.3, RDE3.4
+    \item \textbf{Consultar anuncio}: RDE3.5
+    \item \textbf{Salida anuncio}: RDS3.5
+    
+    \item \textbf{Escritura usuarios}: RDW4.1, RDW4.2, RDW4.4, RDW4.5
+    \item \textbf{Escritura publicaciones}: RDW1.1, RDW1.2, RDW1.3, RDW1.4
+    \item \textbf{Lectura publicaciones}: RDR1.1, RDR1.2, RDR1.3
+    \item \textbf{Escritura mensajes}: RDW5.1, RDW5.2, RDW5.3, RDW5.4
+    \item \textbf{Lectura mensajes}: RDR5.1, RDR5.2, RDR5.3, RDR5.4, RDR5.5
+    \item \textbf{Escritura tendencias}: RDW2.1, RDW2.3, RDW2.5
+    \item \textbf{Lectura tendencias}: RDR2.2, RDR2.3, RDR2.4
+    \item \textbf{Escritura publicidad}: RDW3.1, RDW3.2, RDW3.3, RDW3.4
+    \item \textbf{Lectura publicidad}: RDR3.3, RDR3.4, RDR3.5
+    
+\end{itemize}
+

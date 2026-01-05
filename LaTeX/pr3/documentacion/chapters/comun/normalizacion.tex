@@ -1,0 +1,97 @@
+\sloppy
+
+% El esquema relacional propuesto se ha sometido al proceso de normalización hasta la Forma Normal de Boyce-Codd (FNBC). Según la definición formal, una relación $R$ está en FNBC si y solo si para toda dependencia funcional no trivial $\alpha \to \beta$, el determinante $\alpha$ es una superclave.
+
+% A continuación, se demuestra el cumplimiento de esta condición para las tablas definidas en el diseño lógico:
+
+% \section*{Entidades con Clave Simple}
+% Las tablas \textbf{USUARIO}, \textbf{HASHTAG}, \textbf{PUBLICACION}, \textbf{ANUNCIO} y \textbf{MENSAJE} poseen una estructura donde una clave primaria simple ($PK$) identifica unívocamente al resto de atributos no primos.
+
+% \begin{itemize}
+%     \item \textbf{Dependencias Funcionales (DF):} Para cada tabla, el conjunto de dependencias funcionales $F$ es de la forma $\{PK \to A_1, PK \to A_2, \dots, PK \to A_n\}$.
+%     \item \textbf{Análisis:} En todos los casos, el único determinante es $PK$. Por definición de clave primaria, $PK$ es una superclave.
+%     \item \textbf{Conclusión:} Al no existir dependencias transitivas ni dependencias donde el determinante no sea clave, se cumple la condición de FNBC.
+% \end{itemize}
+
+% \section*{Relaciones de Solo Clave (N:M)}
+% Las tablas \textbf{CONTIENE\_PUBLICIDAD}, \textbf{LIKE}, \textbf{DES/ARCHIVAR} y \textbf{CREAR\_O\_MENCIONAR\_HASHTAG} están compuestas exclusivamente por atributos que forman parte de la clave primaria compuesta.
+
+% \begin{itemize}
+%     \item \textbf{Dependencias Funcionales:} Las únicas dependencias existentes son triviales ($\alpha \to \alpha$ o $\alpha \to \beta$ donde $\beta \subseteq \alpha$).
+%     \item \textbf{Análisis:} No existen dependencias funcionales no triviales $\alpha \to \beta$.
+%     \item \textbf{Conclusión:} La definición de FNBC se satisface trivialmente al no existir dependencias que violen la norma.
+% \end{itemize}
+
+% \section*{Relaciones con Atributos Propios}
+% Las tablas \textbf{BLOQUEAR\_USUARIO} y \textbf{AÑADIR\_AMIGO} poseen una clave primaria compuesta y atributos descriptivos de la relación (e.g., \textit{fechaBloqueo}, \textit{fechaAmistad}).
+
+% \begin{itemize}
+%     \item \textbf{Dependencias Funcionales:} El conjunto de dependencias es de la forma $\{ (idUsuario1, idUsuario2) \to atributo \}$.
+%     \item \textbf{Análisis:} El atributo temporal depende funcionalmente de la combinación completa de ambos usuarios (la relación en sí misma). No existen dependencias parciales donde uno solo de los usuarios determine la fecha.
+%     \item \textbf{Conclusión:} El determinante es la clave primaria completa (superclave), cumpliendo FNBC.
+% \end{itemize}
+
+% \section*{Casos Específicos de Cardinalidad Restringida}
+
+% \textbf{Tabla 11. CONVERSA}
+% \begin{itemize}
+%     \item \textbf{Esquema:} $R(idUsuario1, idUsuario2, \dots)$.
+%     \item \textbf{Claves:} Se define $idUsuario1$ como Clave Primaria (PK) e $idUsuario2$ como Clave Candidata (CC).
+%     \item \textbf{Análisis:} Las dependencias funcionales son $idUsuario1 \to \{Resto\}$ y $idUsuario2 \to \{Resto\}$. Ambos determinantes son superclaves definidas explícitamente en el esquema.
+%     \item \textbf{Conclusión:} Cumple FNBC.
+% \end{itemize}
+
+% \textbf{Tabla 12. CONTIENE}
+% \begin{itemize}
+%     \item \textbf{Esquema:} $R(idUsuario, idMensaje)$.
+%     \item \textbf{Claves:} Se define $idMensaje$ como Clave Primaria.
+%     \item \textbf{Análisis:} Existe la dependencia funcional $idMensaje \to idUsuario$. Dado que $idMensaje$ es la clave primaria, el determinante es una superclave.
+%     \item \textbf{Conclusión:} Cumple FNBC.
+% \end{itemize}
+
+%-------------------------------------
+
+\section{Justificación de la Normalización (FNBC)}
+
+El esquema relacional propuesto se ha sometido al proceso de normalización hasta la Forma Normal de Boyce-Codd (FNBC). Según la definición formal descrita en la teoría de diseño relacional, una relación $R$ está en FNBC si y solo si para toda dependencia funcional no trivial $\alpha \to \beta$, el determinante $\alpha$ es una superclave.
+
+A continuación, se demuestra el cumplimiento de esta condición para las 15 tablas definidas en el diseño lógico:
+
+\subsection*{1. Entidades con Clave Simple}
+Las tablas \textbf{USUARIO}, \textbf{HASHTAG}, \textbf{PUBLICACION}, \textbf{ANUNCIO} y \textbf{MENSAJE} poseen una estructura donde una clave primaria simple ($PK$) identifica unívocamente al resto de atributos no primos.
+
+\begin{itemize}
+    \item \textbf{Dependencias Funcionales (DF):} Para cada tabla, el conjunto de dependencias funcionales $F$ es de la forma $\{PK \to A_1, PK \to A_2, \dots, PK \to A_n\}$.
+    \item \textbf{Análisis:} En todos los casos, el único determinante es $PK$. Por definición de clave primaria, $PK$ es una superclave.
+    \item \textbf{Conclusión:} Al no existir dependencias transitivas ni dependencias donde el determinante no sea clave, se cumple la condición de FNBC.
+\end{itemize}
+
+\subsection*{2. Relaciones N:M sin Atributos Propios}
+Este grupo incluye las tablas compuestas exclusivamente por atributos que forman parte de la clave primaria compuesta. Estas son: 
+\textbf{CONTIENE\_PUBLICIDAD}, \textbf{LIKE}, \textbf{DES/ARCHIVAR}, \textbf{CONVERSA} y \textbf{CREAR\_O\_MENCIONAR\_HASHTAG}.
+
+\begin{itemize}
+    \item \textbf{Estructura:} Todas siguen el patrón $R(\underline{FK_1, FK_2})$, donde la Clave Primaria es la composición de las claves foráneas.
+    \item \textbf{Dependencias Funcionales:} Las únicas dependencias existentes son triviales ($\alpha \to \alpha$). No existen atributos fuera de la clave, por lo tanto, no pueden existir violaciones a la FNBC.
+    \item \textbf{Conclusión:} La definición de FNBC se satisface trivialmente.
+\end{itemize}
+
+\subsection*{3. Relaciones N:M con Atributos Propios}
+Las tablas \textbf{BLOQUEAR\_USUARIO} y \textbf{AÑADIR\_AMIGO} poseen una clave primaria compuesta y atributos descriptivos de la relación (e.g., \textit{fechaBloqueo}, \textit{fechaAmistad}).
+
+\begin{itemize}
+    \item \textbf{Dependencias Funcionales:} El conjunto de dependencias es de la forma $\{ (idUsuario1, idUsuario2) \to atributo \}$.
+    \item \textbf{Análisis:} El atributo descriptivo depende funcionalmente de la combinación completa de las entidades participantes. No existen dependencias parciales.
+    \item \textbf{Conclusión:} El determinante es la clave primaria completa (superclave), cumpliendo FNBC.
+\end{itemize}
+
+\subsection*{4. Relaciones con Determinación Simple (1:N)}
+Las tablas \textbf{CONTIENE}, \textbf{CREAR PUBLICACION} y \textbf{MODIFICA PUBLICACION} se caracterizan por tener una Clave Primaria simple que determina una clave foránea o relación.
+
+\begin{itemize}
+    \item \textbf{Tabla 12 (CONTIENE):} $idMensaje \to \{idUsuario1, idUsuario2\}$. Identifica a qué conversación pertenece un mensaje único.
+    \item \textbf{Tabla 14 (CREAR PUBLICACION):} $idPublicacion \to idUsuario$. Identifica qué usuario creó una publicación específica.
+    \item \textbf{Tabla 15 (MODIFICA PUBLICACION):} $idPublicacion \to idUsuario$. Identifica qué usuario realizó la modificación de una publicación específica.
+    \item \textbf{Análisis:} En estos tres casos, la dependencia funcional es $PK \to FK$. Dado que el determinante es la Clave Primaria definida en el esquema, es por definición una superclave.
+    \item \textbf{Conclusión:} Cumplen estrictamente con la FNBC.
+\end{itemize}

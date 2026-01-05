@@ -1,0 +1,62 @@
+\section{Esquema Externo del DFD Nivel 1: Subsistema de Publicidad}
+
+En esta sección se detallan los flujos de datos asociados a los procesos del subsistema de publicidad. Se define la estructura de datos para las entradas, salidas, lecturas y escrituras en el almacén de datos.
+
+\begin{description}
+    % --- PROCESO 3.1 ---
+    \item[RF3.1: Añadir Anuncio] \hfill \\
+    Permite el registro de un nuevo anuncio en el sistema.
+    \begin{itemize}
+        \item \textbf{Flujo de Entrada ($RDE_{3.1}$):} Datos proporcionados por el Administrador.
+        \[ RDE_{3.1} = \{ \text{Título}, \text{Cuerpo}, \text{URL\_Destino}, \text{F\_Inicio}, \text{F\_Fin} \} \]
+        \item \textbf{Flujo de Escritura ($RDW_{3.1}$):} Datos almacenados en la BD EKIS.
+        \[ RDW_{3.1} = RDE_{3.1} \cup \{ \text{ID\_Anuncio (Gen)}, \text{ID\_Admin} \} \]
+    \end{itemize}
+
+    % --- PROCESO 3.2 ---
+    \item[RF3.2: Añadir Característica] \hfill \\
+    Asocia criterios de segmentación (público objetivo) a un anuncio existente.
+    \begin{itemize}
+        \item \textbf{Flujo de Entrada ($RDE_{3.2}$):} Selección de características.
+        \[ RDE_{3.2} = \{ \text{ID\_Anuncio}, \text{Tipo\_Característica}, \text{Valor\_Min}, \text{Valor\_Max} \} \]
+        \item \textbf{Flujo de Escritura ($RDW_{3.2}$):} Registro de la segmentación en la BD.
+        \[ RDW_{3.2} = \{ \text{ID\_Anuncio}, \text{ID\_Característica}, \text{Valor} \} \]
+    \end{itemize}
+
+    % --- PROCESO 3.3 ---
+    \item[RF3.3: Eliminar Anuncio] \hfill \\
+    Elimina o desactiva un anuncio del sistema.
+    \begin{itemize}
+        \item \textbf{Flujo de Entrada ($RDE_{3.3}$):} Identificador del anuncio a borrar.
+        \[ RDE_{3.3} = \{ \text{ID\_Anuncio} \} \]
+        \item \textbf{Flujo de Lectura ($RDR_{3.3}$):} Verificación de existencia.
+        \[ RDR_{3.3} = \{ \text{ID\_Anuncio}, \text{Estado} \} \]
+        \item \textbf{Flujo de Escritura ($RDW_{3.3}$):} Eliminación lógica o física.
+        \[ RDW_{3.3} = \{ \text{ID\_Anuncio} \} \quad (\text{Operación: Delete/Update}) \]
+    \end{itemize}
+
+    % --- PROCESO 3.4 ---
+    \item[RF3.4: Modificar Anuncio] \hfill \\
+    Actualiza la información de un anuncio vigente.
+    \begin{itemize}
+        \item \textbf{Flujo de Entrada ($RDE_{3.4}$):} Nuevos datos del anuncio.
+        \[ RDE_{3.4} = \{ \text{ID\_Anuncio}, \text{Nuevo\_Título}, \text{Nueva\_URL}, \text{Nueva\_Vigencia} \} \]
+        \item \textbf{Flujo de Lectura ($RDR_{3.4}$):} Datos actuales para consistencia.
+        \[ RDR_{3.4} = \{ \text{Datos\_Anuncio\_Actuales} \} \]
+        \item \textbf{Flujo de Escritura ($RDW_{3.4}$):} Persistencia de cambios.
+        \[ RDW_{3.4} = RDE_{3.4} \]
+    \end{itemize}
+
+    % --- PROCESO 3.5 ---
+    \item[RF3.5: Consultar Anuncio] \hfill \\
+    Muestra el listado de anuncios o el detalle de uno específico.
+    \begin{itemize}
+        \item \textbf{Flujo de Entrada ($RDE_{3.5}$):} Criterios de búsqueda.
+        \[ RDE_{3.5} = \{ \text{Filtro\_Fecha}, \text{ID\_Anuncio (Opcional)} \} \]
+        \item \textbf{Flujo de Lectura ($RDR_{3.5}$):} Recuperación de información.
+        \[ RDR_{3.5} = \{ \text{Lista\_Anuncios} \} \lor \{ \text{Detalle\_Anuncio} \} \]
+        \item \textbf{Flujo de Salida ($RDS_{3.5}$):} Visualización al Administrador.
+        \[ RDS_{3.5} = RDR_{3.5} \]
+    \end{itemize}
+\end{description}
+

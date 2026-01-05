@@ -1,0 +1,192 @@
+% Listado de requisitos funcionales, requisitos de datos y restricciones semánticas.
+
+% Funcionales: 
+% \begin{itemize}
+%     \item Añadir anuncio
+%     \item Añadir característica a un anuncio del público objetivo
+%     \item Eliminar anuncio
+%     \item Modificar anuncio
+%     \item Consultar anuncio
+%     \item Redirigir a enlace externo
+% \end{itemize}
+
+%======================= %
+% REQUISITOS FUNCIONALES %
+% ======================= %
+
+% \section*{Descripción}
+% El subsistema de Publicidad es responsable de gestionar los anuncios que se muestran a los usuarios en la plataforma. Este subsistema permite a los administradores crear, modificar, eliminar y consultar anuncios, así como definir características específicas para segmentar el público objetivo. La gestión eficiente de los anuncios es crucial para maximizar los ingresos publicitarios y mejorar la experiencia del usuario al mostrar contenido relevante. Conforme el desarrollo de las prácticas se irán implementando las funciones adicionales que se necesiten. Parte desarrollada por \textbf{Ismael Sallami Moreno}.
+% \newpage
+
+\section{Añadir anuncio}
+\textbf{\textcolor{rojo}{\underline{RF3.1:}}} Añadir anuncio: Permite a un administrador crear un nuevo anuncio en el sistema proporcionando toda la información necesaria, como el título, cuerpo, enlace de destino y período de vigencia. \\[6pt]
+
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: administrador. Acción: solicitar inserción de un nuevo anuncio. 
+Requisito de datos de entrada \textcolor{azul}{RDE3.1}. \\[6pt]
+
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW3.1}. \\[6pt]
+
+\textbf{\textcolor{rojo}{Salida:}} Agente externo: administrador. Acción: confirmación del resultado de la inserción. 
+Requisito de datos de salida: ninguno. \\[12pt]
+
+\textcolor{azul}{\textbf{RDE3.1:}} Datos de entrada de alta de anuncio \\
+\hspace*{1cm} Identificador Anuncio: Cadena de caracteres (10) \\
+\hspace*{1cm} Título: Cadena de caracteres (100) \\
+\hspace*{1cm} Cuerpo del Anuncio: Cadena de caracteres (500) \\
+\hspace*{1cm} Enlace Destino: Cadena de caracteres (255) \\
+\hspace*{1cm} Fecha de Inicio: Fecha \\
+\hspace*{1cm} Fecha de Fin: Fecha \\[12pt]
+
+\textcolor{azul}{\textbf{RDW3.1:}} Datos almacenados del anuncio. \\
+\hspace*{1cm} Los mismos datos que RDE3.1. \\[12pt]
+
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS3.1.1:}}} El Identificador del Anuncio debe ser único. \textbf{RF:} RF3.1. \textbf{RD(s):} RDW3.1. \\
+\hspace*{1cm} \textit{Descripción:} Si ya existe un anuncio con el mismo identificador, no se inserta el nuevo anuncio y se devuelve un error. \\[6pt]
+
+\textbf{\textcolor{verde}{\underline{RS3.1.2:}}} La fecha de fin debe ser posterior a la fecha de inicio. \textbf{RF:} RF3.1 \textbf{RD(s):} RDE3.1. \\
+\hspace*{1cm} \textit{Descripción:} Si la fecha de fin no es posterior a la fecha de inicio, la inserción es rechazada y se devuelve un mensaje de error.
+
+\section{Añadir característica a un anuncio del público objetivo}
+\textbf{\textcolor{rojo}{\underline{RF3.2:}}} Añadir característica a un anuncio del público objetivo: Permite asignar una característica específica a un anuncio para definir su público objetivo. Por ejemplo, se puede asignar la característica ''Edad'' con el valor ''18-25'' para dirigir el anuncio a usuarios dentro de ese rango de edad. \\[6pt]
+
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: administrador. Acción: solicitar asignación de característica. 
+Requisito de datos de entrada \textcolor{azul}{RDE3.2}. \\[6pt]
+
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW3.2}. \\[6pt]
+
+\textbf{\textcolor{rojo}{Salida:}} Agente externo: administrador. Acción: confirmación de la asignación. 
+Requisito de datos de salida: ninguno. \\[12pt]
+
+\textcolor{azul}{\textbf{RDE3.2:}} Datos para añadir característica a un anuncio \\
+\hspace*{1cm} Identificador Anuncio: Cadena de caracteres (10) \\
+\hspace*{1cm} Nombre Característica: Cadena de caracteres (50) \\
+\hspace*{1cm} Valor Característica: Cadena de caracteres (100) \\[12pt]
+
+\textcolor{azul}{\textbf{RDW3.2:}} Datos almacenados de la característica del público objetivo para un anuncio. \\
+\hspace*{1cm} Los mismos datos que RDE3.2. \\[12pt]
+
+
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS3.2.1:}}} El anuncio debe existir. \textbf{RF:} RF3.2. \textbf{RD(s):} RDW3.2. \\
+\hspace*{1cm} \textit{Descripción:} Si el `Identificador Anuncio` no corresponde a un anuncio existente en la base de datos, no se realiza la inserción y se devuelve un aviso. \\
+\textbf{\textcolor{verde}{\underline{RS3.2.2:}}} La característica debe estar predefinida. \textbf{RF:} RF3.2. \textbf{RD(s):} RDE3.2. \\
+\hspace*{1cm} \textit{Descripción:} El `Nombre Característica` debe corresponder a una de las características predefinidas válidas (ej. mediante una entidad/catálogo de características en la base de datos). Si la característica no es reconocida, no se realiza la asignación y se devuelve un error.
+
+
+\section{Eliminar anuncio}
+\textbf{\textcolor{rojo}{\underline{RF3.3:}}} Eliminar anuncio: Permite a un administrador eliminar un anuncio existente del sistema utilizando su identificador único. \\[6pt]
+
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: administrador. Acción: solicitar borrado de un anuncio. 
+Requisito de datos de entrada \textcolor{azul}{RDE3.3}. \\[6pt]
+
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW3.3}. \\[6pt]
+
+\textbf{\textcolor{rojo}{Salida:}} Agente externo: administrador. Acción: confirmación del resultado del borrado. 
+Requisito de datos de salida: ninguno. \\[12pt]
+
+\textcolor{azul}{\textbf{RDE3.3:}} Datos de entrada de baja de anuncio \\
+\hspace*{1cm} Identificador Anuncio: Cadena de caracteres (10) \\[12pt]
+
+\textcolor{azul}{\textbf{RDR3.3:}} Datos de entrada de baja de anuncio \\
+\hspace*{1cm} Identificador Anuncio: Cadena de caracteres (10) \\[12pt]
+
+% \textcolor{azul}{\textbf{RDW3.3:}} Identificador del anuncio a eliminar. \\
+% \hspace*{1cm} Los mismos datos que RDE3.3. \\[12pt] 
+
+\textcolor{azul}{\textbf{RDW3.3:}} Datos utilizados para la eliminación del anuncio. \\
+\hspace*{1cm} Los mismos datos que RDW3.1. \\[12pt] 
+
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS3.3.1:}}} No se puede eliminar un anuncio activo. \textbf{RF:} RF3.3. \textbf{RD(s):} RDE3.3 y RDR3.3. \\
+\hspace*{1cm} \textit{Descripción:} Si la fecha actual está dentro del período de vigencia del anuncio (entre Fecha de Inicio y Fecha de Fin), no se permite el borrado y se devuelve un error.
+
+\section{Modificar anuncio}
+\textbf{\textcolor{rojo}{\underline{RF3.4:}}} Modificar anuncio: Permite a un administrador actualizar la información de un anuncio existente, como el título, cuerpo, enlace de destino y período de vigencia. Los campos son opcionales, permitiendo modificar solo los necesarios. \\[6pt]
+
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: administrador. Acción: solicitar modificación de un anuncio existente. 
+Requisito de datos de entrada \textcolor{azul}{RDE3.4}. \\[6pt]
+
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de escritura \textcolor{azul}{RDW3.4}. \\[6pt]
+
+\textbf{\textcolor{rojo}{Salida:}} Agente externo: administrador. Acción: confirmación del resultado de la modificación. 
+Requisito de datos de salida: ninguno. \\[12pt]
+
+\textcolor{azul}{\textbf{RDE3.4:}} Datos de entrada para modificar un anuncio \\
+\hspace*{1cm} Identificador Anuncio: Cadena de caracteres (10) \\
+\hspace*{1cm} Título (opcional): Cadena de caracteres (100) \\
+\hspace*{1cm} Cuerpo del Anuncio (opcional): Cadena de caracteres (500) \\
+\hspace*{1cm} Enlace Destino (opcional): Cadena de caracteres (255) \\
+\hspace*{1cm} Fecha de Inicio (opcional): Fecha \\
+\hspace*{1cm} Fecha de Fin (opcional): Fecha \\[12pt]
+
+\textcolor{azul}{\textbf{RDR3.4:}} Datos del anuncio a leer para modificación. \\
+\hspace*{1cm} Todos los datos asociados al `Identificador Anuncio`, equivalentes a RDW3.1. \\[12pt]
+
+\textcolor{azul}{\textbf{RDW3.4:}} Datos del anuncio a actualizar. \\
+\hspace*{1cm} Los mismos datos que RDE4. \\[12pt]
+
+
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS3.4.1:}}} La fecha de fin debe ser posterior a la fecha de inicio. \textbf{RF:} RF4. \textbf{RD(s):} RDE3.4 y RDR3.4 \\
+\hspace*{1cm} \textit{Descripción:} Si se modifican las fechas y la nueva fecha de fin no es posterior a la nueva fecha de inicio, la modificación es rechazada y se devuelve un mensaje de error.
+
+\section{Consultar anuncio}
+\textbf{\textcolor{rojo}{\underline{RF3.5:}}} Consultar anuncio: Permite al sistema recuperar toda la información de un anuncio específico utilizando su identificador único, para mostrarlo o procesarlo según sea necesario.\\[6pt]
+
+\textbf{\textcolor{rojo}{Entrada:}} Agente externo: sistema. Acción: solicitar datos de un anuncio por su identificador. 
+Requisito de datos de entrada \textcolor{azul}{RDE3.5}. \\[6pt]
+
+\textbf{\textcolor{rojo}{BD:}} Requisito de datos de lectura \textcolor{azul}{RDR3.5}. \\[6pt]
+
+\textbf{\textcolor{rojo}{Salida:}} Agente externo: sistema. Acción: entregar datos del anuncio. 
+Requisito de datos de salida: \textcolor{azul}{RDS3.5}. \\[12pt]
+
+\textcolor{azul}{\textbf{RDE3.5:}} Datos de entrada para consultar un anuncio \\
+\hspace*{1cm} Identificador Anuncio: Cadena de caracteres (10) \\[12pt]
+
+\textcolor{azul}{\textbf{RDR3.5:}} Datos del anuncio a leer. \\
+\hspace*{1cm} Todos los datos asociados al `Identificador Anuncio`, equivalentes a RDW3.1. \\[12pt]
+
+\textcolor{azul}{\textbf{RDS3.5:}} Datos de salida del anuncio consultado. \\
+\hspace*{1cm} Los mismos datos que RDR3.5. \\[12pt]
+ 
+\textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+\textbf{\textcolor{verde}{\underline{RS3.5.1:}}} El anuncio debe existir. \textbf{RF:} RF3.5. \textbf{RD(s):} RDE3.5 y RDR3.5. \\
+\hspace*{1cm} \textit{Descripción:} Si el `Identificador Anuncio` no existe, la consulta devuelve un resultado vacío o un mensaje de error.
+
+% \section{Redirigir a enlace externo}
+% \textbf{\textcolor{rojo}{\underline{RF6:}}} Redirigir a enlace externo. \\[6pt]
+
+% \textbf{\textcolor{rojo}{Entrada:}} Agente externo: usuario final. Acción: hacer clic en un anuncio. 
+% Requisito de datos de entrada \textcolor{azul}{RDE6}. \\[6pt]
+
+% \textbf{\textcolor{rojo}{BD:}} Requisito de datos de lectura \textcolor{azul}{RDR6}. \\[6pt]
+
+% \textbf{\textcolor{rojo}{Salida:}} Agente externo: navegador del usuario final. Acción: redirigir a una URL. 
+% Requisito de datos de salida: \textcolor{azul}{RDS6}. \\[12pt]
+
+% \textcolor{azul}{\textbf{RDE6:}} Datos de entrada para la redirección \\
+% \hspace*{1cm} Identificador Anuncio: Cadena de caracteres (10) \\[12pt]
+
+% \textcolor{azul}{\textbf{RDR6:}} Datos del enlace a obtener. \\
+% \hspace*{1cm} Enlace Destino: Cadena de caracteres (255) \\[12pt]
+
+% \textcolor{azul}{\textbf{RDS6:}} Datos de salida para la redirección. \\
+% \hspace*{1cm} Los mismos datos que RDR6. \\[12pt]
+
+% \textbf{Descripción del requisito:} Permite redirigir al usuario final a una URL externa cuando hace clic en un anuncio, utilizando el enlace de destino asociado al anuncio.
+
+% \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
+% \textbf{\textcolor{verde}{\underline{RS6.1:}}} El enlace de destino debe ser una URL válida. \textbf{RF:} RF6. \textbf{RD(s):} RDR6. \\
+% \hspace*{1cm} \textit{Descripción:} Si el `Enlace Destino` recuperado no es una URL con un formato válido, se debe gestionar el error, por ejemplo, no realizando la redirección.
+
+
+
+
+%================= %
+%================= %
+% PRÁCTICAS 2
+%================= %
+%================= %
+

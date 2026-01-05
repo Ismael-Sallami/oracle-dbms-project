@@ -1,0 +1,46 @@
+\begin{figure}[h!]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[node distance=4cm, auto]
+
+        % ==== 1. Agentes Externos (fila superior) ====
+        \node[agente, minimum width=4cm, minimum height=1.2cm, inner sep=8pt] (Visitante) at (-10,6) {Visitante};
+        \node[agente, minimum width=4cm, minimum height=1.2cm, inner sep=8pt] (Usuario)   at ( 10,6) {Usuario};
+
+        % ==== 2. Procesos (fila intermedia, muy separados) ====
+        \node[proceso, minimum width=4.5cm, inner sep=8pt] (RF41) at (-10,2) {RF4.1: Crear};
+        \node[proceso, minimum width=4.5cm, inner sep=8pt] (RF42) at ( -5,2) {RF4.2: Modificar};
+        \node[proceso, minimum width=4.5cm, inner sep=8pt] (RF43) at (  0,2) {RF4.3: Eliminar};
+        \node[proceso, minimum width=4.5cm, inner sep=8pt] (RF44) at (  5,2) {RF4.4: Bloquear};
+        \node[proceso, minimum width=4.5cm, inner sep=8pt] (RF45) at ( 10,2) {RF4.5: A\~{n}adir Amigo};
+
+        % ==== 3. Almacén de Datos (fila inferior) ====
+        \node[almacen, minimum width=6cm, inner sep=10pt] (BD) at (0,-3.5) {EKIS (Usuarios y Relaciones)};
+
+        % ==== 4. Flujos de datos ====
+
+        % --- RF4.1: Crear Usuario (Visitante -> RF4.1 -> BD) ---
+        \draw[flujo] (Visitante.south) -- node[midway,left] {RDE4.1} (RF41.north);
+        \draw[flujo] (RF41.south) -- ++(0,-2) -| node[pos=0.0,below] {RDW4.1} (BD.west);
+
+        % --- RF4.2: Modificar Usuario (Usuario -> RF4.2 -> BD) ---
+        \draw[flujo] (Usuario.south) to[out=180,in=60] node[midway,above] {RDE4.2} (RF42.north);
+        \draw[flujo] (RF42.south) -- ++(0,-1.2) -| node[pos=0.0,below] {RDW4.2} ($(BD.north west)+(1,0)$);
+
+        % --- RF4.3: Eliminar Usuario (Usuario -> RF4.3 -> BD) ---
+        \draw[flujo] (Usuario.south) to[out=200,in=60] node[midway,above] {RDE4.3} (RF43.north);
+        \draw[flujo] (RF43.south) -- node[midway,right] {RDW4.3} (BD.north);
+
+        % --- RF4.4: Bloquear Usuario (Usuario -> RF4.4 -> BD) ---
+        \draw[flujo] (Usuario.south) to[out=220,in=60] node[midway,above] {RDE4.4} (RF44.north);
+        \draw[flujo] (RF44.south) -- ++(0,-1.2) -| node[pos=0.0,below] {RDW4.4} ($(BD.north east)-(1,0)$);
+
+        % --- RF4.5: A\~{n}adir Amigo (Usuario -> RF4.5 -> BD) ---
+        \draw[flujo] (Usuario.south) -- node[midway,right] {RDE4.5} (RF45.north);
+        \draw[flujo] (RF45.south) -- ++(0,-2) -| node[pos=0.0,below] {RDW4.5} (BD.east);
+
+    \end{tikzpicture}
+    } % Fin del resizebox
+    \caption{DFD1 - Subsistema de Usuarios}
+    \label{fig:dfd1_usuarios}
+\end{figure}

@@ -1,0 +1,37 @@
+\section{Transacciones del Subsistema de Publicidad (Ismael)}
+
+Las operaciones de negocio del subsistema de Publicidad se han encapsulado en transacciones atómicas para garantizar que la base de datos nunca quede en un estado inconsistente, especialmente crítico dado que se manejan costes y vigencias de anuncios.
+
+A continuación se describen las secuencias lógicas de las principales transacciones implementadas en la capa de aplicación (Python) y su interacción con el SGBD.
+
+\subsection{Transacción: Alta de Nuevo Anuncio}
+Esta transacción corresponde al requisito funcional \textbf{RF3.1}. Su objetivo es persistir un nuevo contrato publicitario en el sistema.
+
+\begin{enumerate}
+    \item \textbf{Inicio de Transacción.}
+    \item \textbf{Validación de Datos (Aplicación):} Se verifica que la fecha de fin sea posterior a la fecha actual y que el coste sea un valor positivo.
+    \item \textbf{Operación DML (INSERT):} Se ejecuta la sentencia \texttt{INSERT INTO ANUNCIO...} con los datos proporcionados por el formulario.
+    \item \textbf{Confirmación (COMMIT):} Si la inserción es exitosa, se confirman los cambios permanentemente en el SGBD.
+    \item \textbf{Gestión de Errores (ROLLBACK):} En caso de error (ej. violación de la restricción \texttt{CHK\_FECHAS\_VALIDAS} o fallo de conexión), se deshacen los cambios y se notifica al usuario sin dejar registros parciales.
+\end{enumerate}
+
+\subsection{Transacción: Baja de Anuncio}
+Correspondiente al \textbf{RF3.3}. Permite retirar un anuncio antes de su vencimiento o eliminarlo del histórico.
+
+\begin{enumerate}
+    \item \textbf{Inicio de Transacción.}
+    \item \textbf{Lectura de Bloqueo (SELECT ... FOR UPDATE):} (Opcional) Se verifica que el anuncio exista y no esté siendo modificado por otro administrador concurrentemente.
+    \item \textbf{Operación DML (DELETE):} Se elimina el registro de la tabla \texttt{ANUNCIO}.
+    \item \textbf{Disparo de Integridad (Cascada):} El SGBD elimina automáticamente las filas dependientes en la tabla \texttt{CARACTERISTICA} (gracias a la FK definida), asegurando que no queden metadatos huérfanos.
+    \item \textbf{Confirmación (COMMIT):} Se hacen efectivos los cambios.
+\end{enumerate}
+
+\subsection{Transacción: Modificación de Vigencia}
+Permite extender o recortar la duración de una campaña (\textbf{RF3.4}).
+
+\begin{enumerate}
+    \item \textbf{Inicio de Transacción.}
+    \item \textbf{Operación DML (UPDATE):} Se actualiza el campo \texttt{FECHA\_FIN} del anuncio seleccionado.
+    \item \textbf{Auditoría (Trigger):} Esta operación dispara automáticamente el trigger \texttt{TRG\_AUDIT\_FECHAS} (descrito en el siguiente capítulo) que registra el cambio histórico.
+    \item \textbf{Confirmación (COMMIT).}
+\end{enumerate}

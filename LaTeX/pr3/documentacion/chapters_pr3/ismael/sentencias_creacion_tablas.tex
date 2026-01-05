@@ -1,0 +1,44 @@
+\section{Sentencias DDL del Subsistema de Publicidad (Ismael)}
+
+A continuación se detallan las sentencias de definición de datos para la persistencia del subsistema de Publicidad. El diseño físico se ha realizado buscando la optimización del almacenamiento y la integridad de los datos mediante el uso estricto de tipos de datos adecuados y restricciones.
+
+\subsection{Tabla: ANUNCIO}
+Esta tabla almacena la información central de las campañas publicitarias. Se ha optado por una clave primaria subrogada (\texttt{ID}) generada mediante secuencia/autoincremento para facilitar la referencialidad.
+
+\begin{lstlisting}[language=SQL, caption={Creación de la tabla ANUNCIO}]
+-- Creación de la tabla principal de anuncios
+CREATE TABLE ANUNCIO (
+    ID          INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    TITULO      VARCHAR2(100) NOT NULL,
+    CUERPO      VARCHAR2(1000) NOT NULL,
+    FECHA_INI   DATE DEFAULT SYSDATE NOT NULL,
+    FECHA_FIN   DATE NOT NULL,
+    COSTO       NUMBER(10, 2) CHECK (COSTO >= 0),
+    CLIENTE_ID  INTEGER NOT NULL,
+    -- Restricción de integridad de fechas a nivel de tabla
+    CONSTRAINT CHK_FECHAS_VALIDAS CHECK (FECHA_FIN >= FECHA_INI),
+    -- Clave foránea hacia el usuario/cliente que contrata
+    CONSTRAINT FK_ANUNCIO_CLIENTE FOREIGN KEY (CLIENTE_ID) 
+        REFERENCES USUARIO(ID) ON DELETE CASCADE
+);
+\end{lstlisting}
+
+\textbf{Justificación de diseño:}
+\begin{itemize}
+    \item \textbf{Restricción CHECK (CHK\_FECHAS\_VALIDAS):} Se implementa una regla de negocio fundamental a nivel de esquema para impedir que un anuncio finalice antes de haber empezado, garantizando la consistencia temporal.
+    \item \textbf{Integridad Referencial (ON DELETE CASCADE):} Se ha decidido que, si un cliente se da de baja del sistema, sus anuncios asociados sean eliminados automáticamente para evitar registros huérfanos.
+\end{itemize}
+
+\subsection{Tabla auxiliar: CARACTERISTICA (Segmentación)}
+Tabla destinada a almacenar los tags o características para segmentar el público objetivo del anuncio.
+
+\begin{lstlisting}[language=SQL, caption={Creación de la tabla CARACTERISTICA}]
+CREATE TABLE CARACTERISTICA (
+    ID_ANUNCIO  INTEGER NOT NULL,
+    ETIQUETA    VARCHAR2(50) NOT NULL,
+    VALOR       VARCHAR2(50),
+    PRIMARY KEY (ID_ANUNCIO, ETIQUETA),
+    CONSTRAINT FK_CARAC_ANUNCIO FOREIGN KEY (ID_ANUNCIO) 
+        REFERENCES ANUNCIO(ID) ON DELETE CASCADE
+);
+\end{lstlisting}

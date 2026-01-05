@@ -1,0 +1,60 @@
+\begin{figure}[h!]
+    \centering
+    \shorthandoff{<>}
+    \resizebox{\textwidth}{!}{
+    \begin{tikzpicture}[node distance=2.2cm, auto]
+    
+        % ======================================================
+        % === COLUMNA IZQUIERDA: AGENTE ========================
+        % ======================================================
+        \node[agente, minimum width=1cm, minimum height=1.2cm] (Usuario) {Usuario};
+
+        % ======================================================
+        % === COLUMNA CENTRAL: PROCESOS ========================
+        % ======================================================
+        
+        \node[proceso, right of=Usuario, node distance = 8cm, minimum width=5cm] (P1) {RF5.1: Enviar mensaje};
+        \node[proceso, below of=P1,      node distance = 3cm, minimum width=5cm] (P2) {RF5.2: Eliminar mensaje};
+        \node[proceso, below of=P2,      node distance = 3cm, minimum width=5cm] (P3) {RF5.3: Listar usuarios};
+        \node[proceso, below of=P3,      node distance = 3cm, minimum width=5cm] (P4) {RF5.4: Visualizar mensajes};
+        \node[proceso, below of=P4,      node distance = 3cm, minimum width=5cm] (P5) {RF5.5: Des/Archivar usuario};
+    
+        % ======================================================
+        % === COLUMNA DERECHA: ALMACENES ==================
+        % ======================================================
+        \node[almacen, right of=P3, node distance=10cm, minimum width=5cm] (Convers) {Conversaciones};
+    
+        % ======================================================
+        % === FLUJOS DE DATOS ==================================
+        % ======================================================
+    
+        % -- Usuario → Procesos --
+        \draw[flujo] (Usuario) -- node[midway, above] {RDE5.1} (P1);
+        \draw[flujo] ($(Usuario.south)+(+0.75, 0)$) |- node[pos=0.8, above] {RDE5.2} (P2);
+        \draw[flujo] ($(Usuario.south)+(+0.45,0)$) |- node[pos=0.8, above] {RDE5.3} ($(P3.west)+(0, 0.1)$);
+        \draw[flujo] ($(Usuario.south)+(-0.15,0)$) |- node[pos=0.8, above] {RDE5.4} ($(P4.west)+(0, 0.1)$);
+        \draw[flujo] ($(Usuario.south)+(-0.75,0)$) |- node[pos=0.8, below] {RDE5.5} (P5);
+    
+        % -- Procesos → Usuario --
+        \draw[flujo] ($(P3.west)+(0,-0.1)$) -| node[pos=0.2, below] {RDS5.1} ($(Usuario.south)+(+0.15,0)$);
+        \draw[flujo] ($(P4.west)+(0,-0.1)$) -| node[pos=0.2, below] {RDS5.2} ($(Usuario.south)+(-0.45,0)$);
+
+        % -- Procesos -> Almacenes --
+        \draw[flujo] ($(P1.east)+(0,0.25)$) -| node[pos=0.2, above] {RDW5.1} ($(Convers.north)+(1.5,0)$);
+        \draw[flujo] ($(P2.east)+(0,0.25)$) -| node[pos=0.2, above] {RDW5.2} ($(Convers.north)+(-0.5,0)$);
+        \draw[flujo] ($(P4.east)+(0,-0.25)$) -| node[pos=0.2, below] {RDW5.3} ($(Convers.south)+(-0.5,0)$);
+        \draw[flujo] ($(P5.east)+(0,-0.25)$) -| node[pos=0.2, below] {RDW5.4} ($(Convers.south)+(1.5,0)$);
+
+        % -- Procesos <- Almacenes --
+        \draw[flujo] ($(Convers.north)+(0.5,0)$) |- node[pos=0.8, below] {RDR5.1} ($(P1.east)+(0,-0.25)$);
+        \draw[flujo] ($(Convers.north)+(-1.5,0)$) |- node[pos=0.8, below]{RDR5.2} ($(P2.east)+(0,-0.25)$);
+        \draw[flujo] (Convers) -- node[pos=0.5, below] {RDR5.3} (P3);
+        \draw[flujo] ($(Convers.south)+(-1.5,0)$) |- node[pos=0.8, above] {RDR5.4} ($(P4.east)+(0,0.25)$);
+        \draw[flujo] ($(Convers.south)+(0.5,0)$) |- node[pos=0.8, above] {RDR5.5} ($(P5.east)+(0,0.25)$);
+
+    \end{tikzpicture}
+    }
+    \caption{DFD1 — Subsistema de mensajería privada}
+    \label{fig:dfd_mensajeria}
+    \end{figure}
+    
