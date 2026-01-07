@@ -1,4 +1,9 @@
+from . import cifrado
+
 def enviar_mensaje(conn, id1, id2, mensaje):
+    # Comprobamos que el mensaje no exceda el limite
+    if len(mensaje) > 300:
+        return False, "El mensaje excede los 300 caracteres permitidos"
     cursor = conn.cursor()
     try:
         cursor.execute("SELECT 1 FROM AMISTAD WHERE (IDUSUARIO1 = :1 AND IDUSUARIO2 = :2)", [id1, id2])
@@ -8,24 +13,25 @@ def enviar_mensaje(conn, id1, id2, mensaje):
         u2esamigo = cursor.fetchone() is not None
         
         if u1esamigo and u2esamigo:
-            cursor.execute("""
-                SELECT 1 FROM CONVERSA 
-                WHERE (IDUSUARIO1 = :1 AND IDUSUARIO2 = :2) OR (IDUSUARIO1 = :3 AND IDUSUARIO2 = :4)
-            """, [id1, id2, id2, id1])
-            hayconver = cursor.fetchone() is not None
-
-            if not hayconver:
-                cursor.execute("INSERT INTO CONVERSA (IDUSUARIO1, IDUSUARIO2) VALUES(:1,:2)", [id1, id2])
-                cursor.execute("INSERT INTO CONVERSA (IDUSUARIO1, IDUSUARIO2) VALUES(:1,:2)", [id2, id1])
-                
-            cursor.execute("INSERT INTO MENSAJE (IDUSUARIO1, IDUSUARIO2, MENSAJE) VALUES(:1,:2,:3)", [id1, id2, mensaje])
+            # Ciframos el mensaje
+            mensaje_cifrado = cifrado.cipher_suite.encrypt(mensaje.encode()).decode()
+            #  Aquí, funciona el trigger, si no existe la conversación, la crea
+            cursor.execute("INSERT INTO MENSAJE (IDUSUARIO1, IDUSUARIO2, MENSAJE) VALUES(:1,:2,:3)", [id1, id2, mensaje_cifrado])
             conn.commit()
             return True, "Mensaje enviado"
         else:
             return False, "No sois amigos recíprocamente"
         
     except Exception as e: 
-        return False, f"Error SQL: {e}"
+        # ESTO ES LO IMPORTANTE: Muestra el error exacto en la consola
+        print("\n--- ERROR AL ENVIAR MENSAJE ---")
+        print(f"Tipo de error: {type(e).__name__}")
+        print(f"Detalle del error: {e}")
+        print("-------------------------------\n")
+        
+        # Hacemos rollback por seguridad si hubo error en la base de datos
+        conn.rollback() 
+        return False, str(e)
     finally:
         cursor.close()
 
@@ -78,6 +84,7 @@ def listar_usuarios(conn, idusuarioactivo, archivados=False):
 def visualizar_conversacion(conn, idusuarioactivo, idusuario2):
     cursor = conn.cursor()
     try:
+        # Actualizamos los mensajes a visto
         query_update = """
             UPDATE MENSAJE 
             SET BITVISTO = 'Y' 
@@ -86,6 +93,7 @@ def visualizar_conversacion(conn, idusuarioactivo, idusuario2):
         cursor.execute(query_update, [idusuario2, idusuarioactivo])
         conn.commit()
 
+        # Obtenemos los mensajes cifrados
         query = """
             SELECT m.IDMENSAJE, m.IDUSUARIO1, u.NOMBREUSUARIO, m.MENSAJE, m.FECHAENVIO, m.BITVISTO
             FROM MENSAJE m
@@ -95,7 +103,26 @@ def visualizar_conversacion(conn, idusuarioactivo, idusuario2):
             ORDER BY m.FECHAENVIO ASC
         """
         cursor.execute(query, [idusuarioactivo, idusuario2, idusuario2, idusuarioactivo])
-        return cursor.fetchall() 
+        filas = cursor.fetchall()
+        
+        # Desciframos los mensajes
+        conversacion_final = []
+        for row in filas:
+            id_msg, id_u1, nombre, msg_db, fecha, visto = row
+            
+            try:
+                # Intentamos descifrar el contenido
+                # .encode() pasa el string a bytes, decrypt descifra, .decode() vuelve a string
+                msg_descifrado = cifrado.cipher_suite.decrypt(msg_db.encode()).decode()
+            except Exception:
+                # Si no se puede descifrar (mensaje antiguo en texto plano o error de llave)
+                # mantenemos el texto original para no perder la historia
+                msg_descifrado = msg_db 
+
+            # Añadimos la información del mensaje ya descifrada
+            conversacion_final.append((id_msg, id_u1, nombre, msg_descifrado, fecha, visto))
+
+        return conversacion_final 
     except Exception as e: 
         print(f"Error: {e}")
         return []
