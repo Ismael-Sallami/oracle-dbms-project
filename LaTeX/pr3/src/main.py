@@ -419,7 +419,7 @@ class App(ctk.CTk):
 
     def mostrar_publicaciones(self):
         self.limpiar_panel()
-        ventana_publicaciones = VentanaPublicaciones(self.frame_contenido, self.conn)
+        ventana_publicaciones = VentanaPublicaciones(self.frame_contenido, self.conn, self.id_usuario_activo, self.es_admin)
         ventana_publicaciones.pack(fill="both", expand=True)
 
     def mostrar_tendencias(self):

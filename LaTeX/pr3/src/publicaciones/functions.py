@@ -139,7 +139,8 @@ def listar_publicaciones(connection,id_usuario,privado=False):
                 CASE 
                     WHEN ul.IDPUBLICACION IS NOT NULL THEN 1 
                     ELSE 0 
-                END AS DIO_LIKE
+                END AS DIO_LIKE,
+                p.IDUSUARIO
                 FROM PUBLICACION p 
                 LEFT JOIN (
                     SELECT IDPUBLICACION, COUNT(*) AS num_likes
