@@ -58,38 +58,44 @@ def listar_usuarios(conn, idusuarioactivo, archivados=False):
         # Definimos si buscamos en ARCHIVADOS o no
         filtro_archivado = "IN" if archivados else "NOT IN"
         
+        # Esta consulta hace lo siguiente:
+        # Cogemos idusuario, nombreusuario, fecha y numero de mensajes sin leer de cada usuario que tenga una conversación con el activo
+        # Lo unimos con los datos de los usuarios que sean amigos del usuario conversa implica amistad, pero no a la inversa
+        # (Para poder enviar el primer mensaje, se muestran los usuarios amigos, no los que tengan una conversación)
+        # Unidos por el id del usuario que mantiene la conversación con el activo
+        # Filtamos aquellos que estén en la elección: archivados si/no
+        # Todo ordenado por nº de mensajes pendientes, fecha y nombre de usuario (en ese orden)
         query = f"""
-            SELECT 
+            SELECT DISTINCT
                 u.IDUSUARIO, 
                 u.NOMBREUSUARIO,
-                -- Si no hay mensajes, ponemos una fecha antigua para que vayan al final
-                NVL(um.ULTIMA_FECHA, TO_DATE('01-01-1900', 'DD-MM-YYYY')) as FECHA_ORDEN,
-                -- Contamos cuántos mensajes tiene sin leer el usuario activo de este contacto
-                NVL(um.MENSAJES_SIN_LEER, 0) as PENDIENTES
+                -- Obtenemos la fecha del último mensaje (si existe)
+                NVL((SELECT MAX(FECHAENVIO) 
+                    FROM MENSAJE m 
+                    WHERE (m.IDUSUARIO1 = :1 AND m.IDUSUARIO2 = u.IDUSUARIO)
+                        OR (m.IDUSUARIO1 = u.IDUSUARIO AND m.IDUSUARIO2 = :1)
+                ), TO_DATE('01-01-1900', 'DD-MM-YYYY')) as FECHA_ORDEN,
+                -- Contamos mensajes no vistos
+                NVL((SELECT COUNT(*) 
+                    FROM MENSAJE m 
+                    WHERE m.IDUSUARIO1 = u.IDUSUARIO 
+                    AND m.IDUSUARIO2 = :1 
+                    AND m.BITVISTO = 'N'), 0) as PENDIENTES
             FROM USUARIO u
-            -- Subconsulta para obtener estadísticas de la conversación
-            LEFT JOIN (
-                SELECT 
-                    CASE WHEN IDUSUARIO1 = :1 THEN IDUSUARIO2 ELSE IDUSUARIO1 END as ID_CONTACTO,
-                    MAX(FECHAENVIO) as ULTIMA_FECHA,
-                    SUM(CASE WHEN IDUSUARIO2 = :1 AND BITVISTO = 'N' THEN 1 ELSE 0 END) as MENSAJES_SIN_LEER
-                FROM MENSAJE
-                WHERE IDUSUARIO1 = :1 OR IDUSUARIO2 = :1
-                GROUP BY CASE WHEN IDUSUARIO1 = :1 THEN IDUSUARIO2 ELSE IDUSUARIO1 END
-            ) um ON u.IDUSUARIO = um.ID_CONTACTO
-            -- 2. Filtros de amistad recíproca y archivados
-            WHERE u.IDUSUARIO IN (
-                SELECT a1.IDUSUARIO2 
+            JOIN (
+                SELECT a1.IDUSUARIO2 as ID_AMIGO
                 FROM AMISTAD a1
-                JOIN AMISTAD a2 ON a1.IDUSUARIO1 = a2.IDUSUARIO2 AND a1.IDUSUARIO2 = a2.IDUSUARIO1
+                JOIN AMISTAD a2 ON a1.IDUSUARIO1 = a2.IDUSUARIO2 
+                            AND a1.IDUSUARIO2 = a2.IDUSUARIO1
                 WHERE a1.IDUSUARIO1 = :1
-            )
-            AND u.IDUSUARIO {filtro_archivado} (SELECT IDUSUARIO2 FROM ARCHIVADO WHERE IDUSUARIO1 = :1)
-            -- ORDEN: Primero los que tienen mensajes sin leer, luego por fecha más reciente
-            ORDER BY PENDIENTES DESC, FECHA_ORDEN DESC
-        """
+            ) amigos ON u.IDUSUARIO = amigos.ID_AMIGO
+            -- Filtro de archivados
+            WHERE u.IDUSUARIO {filtro_archivado} (SELECT IDUSUARIO2 FROM ARCHIVADO WHERE IDUSUARIO1 = :1)
+            -- Orden jerárquico
+            ORDER BY PENDIENTES DESC, FECHA_ORDEN DESC, u.NOMBREUSUARIO ASC
+            """
 
-        cursor.execute(query, [idusuarioactivo]*7)
+        cursor.execute(query, [idusuarioactivo]*5)
         resultado = cursor.fetchall()
         
         # Devolvemos ID, Nombre y el contador de Pendientes
