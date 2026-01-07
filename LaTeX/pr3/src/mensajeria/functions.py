@@ -55,28 +55,48 @@ def eliminar_mensaje(conn, id_usuario_activo, id_mensaje):
 def listar_usuarios(conn, idusuarioactivo, archivados=False):
     cursor = conn.cursor()
     try:
-        base_query = """    
-            SELECT u.IDUSUARIO, u.NOMBREUSUARIO
+        # Definimos si buscamos en ARCHIVADOS o no
+        filtro_archivado = "IN" if archivados else "NOT IN"
+        
+        query = f"""
+            SELECT 
+                u.IDUSUARIO, 
+                u.NOMBREUSUARIO,
+                -- Si no hay mensajes, ponemos una fecha antigua para que vayan al final
+                NVL(um.ULTIMA_FECHA, TO_DATE('01-01-1900', 'DD-MM-YYYY')) as FECHA_ORDEN,
+                -- Contamos cuántos mensajes tiene sin leer el usuario activo de este contacto
+                NVL(um.MENSAJES_SIN_LEER, 0) as PENDIENTES
             FROM USUARIO u
+            -- Subconsulta para obtener estadísticas de la conversación
+            LEFT JOIN (
+                SELECT 
+                    CASE WHEN IDUSUARIO1 = :1 THEN IDUSUARIO2 ELSE IDUSUARIO1 END as ID_CONTACTO,
+                    MAX(FECHAENVIO) as ULTIMA_FECHA,
+                    SUM(CASE WHEN IDUSUARIO2 = :1 AND BITVISTO = 'N' THEN 1 ELSE 0 END) as MENSAJES_SIN_LEER
+                FROM MENSAJE
+                WHERE IDUSUARIO1 = :1 OR IDUSUARIO2 = :1
+                GROUP BY CASE WHEN IDUSUARIO1 = :1 THEN IDUSUARIO2 ELSE IDUSUARIO1 END
+            ) um ON u.IDUSUARIO = um.ID_CONTACTO
+            -- 2. Filtros de amistad recíproca y archivados
             WHERE u.IDUSUARIO IN (
                 SELECT a1.IDUSUARIO2 
                 FROM AMISTAD a1
                 JOIN AMISTAD a2 ON a1.IDUSUARIO1 = a2.IDUSUARIO2 AND a1.IDUSUARIO2 = a2.IDUSUARIO1
                 WHERE a1.IDUSUARIO1 = :1
             )
+            AND u.IDUSUARIO {filtro_archivado} (SELECT IDUSUARIO2 FROM ARCHIVADO WHERE IDUSUARIO1 = :1)
+            -- ORDEN: Primero los que tienen mensajes sin leer, luego por fecha más reciente
+            ORDER BY PENDIENTES DESC, FECHA_ORDEN DESC
         """
-        
-        if archivados:
-            query = base_query + " AND u.IDUSUARIO IN (SELECT IDUSUARIO2 FROM ARCHIVADO WHERE IDUSUARIO1 = :2)"
-        else:
-            query = base_query + " AND u.IDUSUARIO NOT IN (SELECT IDUSUARIO2 FROM ARCHIVADO WHERE IDUSUARIO1 = :2)"
 
-        cursor.execute(query, [idusuarioactivo, idusuarioactivo])
+        cursor.execute(query, [idusuarioactivo]*7)
         resultado = cursor.fetchall()
-        return [(row[0], row[1]) for row in resultado]
+        
+        # Devolvemos ID, Nombre y el contador de Pendientes
+        return [(row[0], row[1], row[3]) for row in resultado]
 
     except Exception as e:
-        print(f"Error en listar_usuarios: {e}")
+        print(f"Error en listar_usuarios SQL: {e}")
         return []
     finally:
         cursor.close()

@@ -32,25 +32,40 @@ class VentanaMensajeria(ctk.CTkFrame):
         for widget in self.scroll_usuarios.winfo_children():
             widget.destroy()
         try:
+            # Ahora listar_usuarios devuelve: (id, nombre, pendientes)
             usuarios = functions.listar_usuarios(self.conn, self.id_usuario_actual, self.viendo_archivados)
+            
             if not usuarios:
                 ctk.CTkLabel(self.scroll_usuarios, text="No hay contactos.").pack(pady=20)
                 return
 
-            for uid, nombre in usuarios:
+            for uid, nombre, pendientes in usuarios:
                 fila = ctk.CTkFrame(self.scroll_usuarios, fg_color="transparent")
                 fila.pack(fill="x", pady=2)
 
-                btn_user = ctk.CTkButton(fila, text=f"👤 {nombre}", anchor="w",
-                                         fg_color=("#E5E7E9", "#2E4053"), text_color=("black", "white"),
+                # --- LÓGICA DE NOTIFICACIÓN ---
+                # Si hay mensajes pendientes, añadimos un círculo rojo y cambiamos el color
+                texto_nombre = f"👤 {nombre}"
+                color_boton = ("#E5E7E9", "#2E4053") # Colores normales
+                
+                if pendientes > 0:
+                    texto_nombre += f"  ● {pendientes}" # Añade un indicador visual
+                    # Color opcional para resaltar chats con mensajes nuevos (un azul más vibrante)
+                    color_boton = ("#AED6F1", "#1F618D") 
+
+                btn_user = ctk.CTkButton(fila, text=texto_nombre, anchor="w",
+                                         fg_color=color_boton, 
+                                         text_color=("black", "white"),
                                          command=lambda u=uid, n=nombre: self.abrir_chat(u, n))
                 btn_user.pack(side="left", fill="x", expand=True, padx=(0, 5))
 
+                # Botón de Archivar/Desarchivar (se mantiene igual)
                 texto_icon = "📦" if not self.viendo_archivados else "📤"
                 ctk.CTkButton(fila, text=texto_icon, width=40, fg_color="#AAB7B8",
                               command=lambda u=uid: self.gestionar_archivo(u)).pack(side="right")
+                              
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Error al cargar lista de usuarios: {e}")
 
     def toggle_archivados(self):
         self.viendo_archivados = not self.viendo_archivados
@@ -63,6 +78,7 @@ class VentanaMensajeria(ctk.CTkFrame):
 
     def abrir_chat(self, id_destino, nombre_destino):
         VentanaChat(self, self.conn, self.id_usuario_actual, id_destino, nombre_destino)
+        self.cargar_usuarios()
 
 
 class VentanaChat(ctk.CTkToplevel):
