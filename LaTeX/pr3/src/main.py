@@ -65,6 +65,7 @@ import sys
 from publicidad.menu import VentanaPublicidad
 from publicaciones.menu import VentanaPublicaciones
 from tendencias.menu import VentanaTendencias
+from mensajeria.menu import VentanaMensajeria
 from usuarios.functions import crear_usuario
 from usuarios.menu import VentanaUsuario
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
@@ -302,12 +303,15 @@ class App(ctk.CTk):
         self.btn_usuarios = ctk.CTkButton(self.sidebar_frame, text="Usuarios", command=self.mostrar_menu_usuarios)
         self.btn_usuarios.grid(row=5, column=0, padx=20, pady=10)
 
+        self.btn_mensajeria = ctk.CTkButton(self.sidebar_frame, text="Mensajería", command=self.mostrar_mensajeria)
+        self.btn_mensajeria.grid(row=6, column=0, padx=20, pady=10)
+
         # Logout
         self.btn_logout = ctk.CTkButton(self.sidebar_frame, text="Cerrar sesión", command=self.cerrar_sesion)
-        self.btn_logout.grid(row=6, column=0, padx=20, pady=10)
+        self.btn_logout.grid(row=7, column=0, padx=20, pady=10)
 
         self.btn_salir = ctk.CTkButton(self.sidebar_frame, text="Salir", fg_color="red", command=self.salir)
-        self.btn_salir.grid(row=8, column=0, padx=20, pady=20)
+        self.btn_salir.grid(row=9, column=0, padx=20, pady=20)
 
         # --- CONTENIDO ---
         self.frame_contenido = ctk.CTkFrame(self.root_frame)
@@ -346,6 +350,12 @@ class App(ctk.CTk):
         self.limpiar_panel()
         ventana_tendencias = VentanaTendencias(self.frame_contenido, self.conn)
         ventana_tendencias.pack(fill="both", expand=True)
+    
+    def mostrar_mensajeria(self):
+        self.limpiar_panel()
+        ventana_mensajeria = VentanaMensajeria(self.frame_contenido, self.conn, self.id_usuario_activo)
+        ventana_mensajeria.pack(fill="both", expand=True)
+
     def mostrar_menu_usuarios(self):
         self.limpiar_panel()
         view = VentanaUsuario(self.frame_contenido, self.conn, self.id_usuario_activo, on_user_deleted=self.cerrar_sesion)

@@ -1,6 +1,12 @@
 # Driver ODBC para conectar con Oracle (Vital para la práctica)
 pyodbc>=5.0.0
 
+# Librería para el cifrado de mensajes (AES/Fernet)
+cryptography>=42.0.0
+
+# Permite leer variables de entorno desde un archivo .env
+python-dotenv>=1.0.0
+
 # (Opcional) Menús bonitos con colores como en el ejemplo
 # colorama
 # rich
