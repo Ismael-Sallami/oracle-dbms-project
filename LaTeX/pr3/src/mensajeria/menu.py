@@ -142,6 +142,13 @@ class VentanaChat(ctk.CTkToplevel):
 
         es_mio = int(id_remit) == int(self.id_origen)
         
+        if es_mio:
+            fila.columnconfigure(0, weight=1)
+            fila.columnconfigure(2, weight=0)
+        else:
+            fila.columnconfigure(0, weight=0)
+            fila.columnconfigure(2, weight=1)
+
         burbuja = ctk.CTkFrame(fila, fg_color="#2E86C1" if es_mio else "#515A5A", corner_radius=12)
         burbuja.grid(row=0, column=1, padx=5, sticky="e" if es_mio else "w")
         
