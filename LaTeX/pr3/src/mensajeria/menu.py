@@ -2,6 +2,7 @@ import customtkinter as ctk
 from tkinter import messagebox
 from mensajeria import functions
 from datetime import datetime
+from aspectoslegales.functions import enviar_reporte 
 
 class VentanaMensajeria(ctk.CTkFrame):
     def __init__(self, master, conn, id_usuario_actual):
@@ -42,22 +43,20 @@ class VentanaMensajeria(ctk.CTkFrame):
                 fila = ctk.CTkFrame(self.scroll_usuarios, fg_color="transparent")
                 fila.pack(fill="x", pady=2)
 
-                # Si hay mensajes pendientes, añadimos un círculo rojo y cambiamos el color
                 texto_nombre = f"👤 {nombre}"
-                color_boton = ("#E5E7E9", "#2E4053") # Colores normales
+                color_boton = ("#E5E7E9", "#2E4053") 
                 
                 if pendientes > 0:
                     texto_nombre += f"  ● {pendientes}"
-                    # Color resaltar chats con mensajes nuevos (un azul más vibrante)
                     color_boton = ("#AED6F1", "#1F618D") 
 
+                # PASAMOS 'pendientes' A LA FUNCIÓN ABRIR_CHAT
                 btn_user = ctk.CTkButton(fila, text=texto_nombre, anchor="w",
                                          fg_color=color_boton, 
                                          text_color=("black", "white"),
-                                         command=lambda u=uid, n=nombre: self.abrir_chat(u, n))
+                                         command=lambda u=uid, n=nombre, p=pendientes: self.abrir_chat(u, n, p))
                 btn_user.pack(side="left", fill="x", expand=True, padx=(0, 5))
 
-                # Botón de Archivar/Desarchivar
                 texto_icon = "📦" if not self.viendo_archivados else "📤"
                 ctk.CTkButton(fila, text=texto_icon, width=40, fg_color="#AAB7B8",
                               command=lambda u=uid: self.gestionar_archivo(u)).pack(side="right")
@@ -74,52 +73,55 @@ class VentanaMensajeria(ctk.CTkFrame):
         functions.des_archivar_usuario(self.conn, self.id_usuario_actual, id_destino)
         self.cargar_usuarios() 
 
-    def abrir_chat(self, id_destino, nombre_destino):
-        VentanaChat(self, self.conn, self.id_usuario_actual, id_destino, nombre_destino)
+    def abrir_chat(self, id_destino, nombre_destino, pendientes=0):
+        VentanaChat(self, self.conn, self.id_usuario_actual, id_destino, nombre_destino, pendientes)
         self.cargar_usuarios()
 
 
 class VentanaChat(ctk.CTkToplevel):
-    def __init__(self, parent, conn, id_origen, id_destino, nombre_destino):
+    def __init__(self, parent, conn, id_origen, id_destino, nombre_destino, pendientes=0):
         super().__init__(parent)
         self.conn = conn
         self.id_origen = id_origen
         self.id_destino = id_destino
+        self.mensajes_nuevos_count = pendientes # Guardamos cuántos mensajes separar
         
-        # --- ESTADO Y CONFIGURACIÓN ---
+        self.ICONO_BANDERA = "!"
         self.MAX_CHARS_INPUT = 300 
         self.modo_seleccion = False
+        self.modo_reporte = False 
         self.seleccionados = set()
         self.ultima_fecha_cargada = None
+        self.separador_visto = False 
         self.lista_checkboxes = [] 
+        self.lista_btn_reporte = [] 
 
         self.title(f"Chat con {nombre_destino}")
         self.geometry("600x720")
-        
-        # Mantiene la ventana por encima
         self.attributes("-topmost", True)
         
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
 
-        # 1. PANEL DE ACCIONES (SUPERIOR)
         self.frame_top = ctk.CTkFrame(self)
         self.frame_top.grid(row=0, column=0, padx=20, pady=10, sticky="ew")
 
-        self.btn_modo = ctk.CTkButton(self.frame_top, text="Seleccionar Mensajes", 
+        self.btn_modo = ctk.CTkButton(self.frame_top, text="Borrar Mensajes", 
                                       fg_color="#5D6D7E", command=self.toggle_modo_seleccion)
         self.btn_modo.pack(side="left", padx=10, pady=10)
+
+        self.btn_reporte_toggle = ctk.CTkButton(self.frame_top, text="Reportar", 
+                                               width=100, fg_color="#A04000", command=self.toggle_modo_reporte)
+        self.btn_reporte_toggle.pack(side="right", padx=10, pady=10)
 
         self.btn_confirmar = ctk.CTkButton(self.frame_top, text="Eliminar (0)", 
                                            fg_color="#E74C3C", command=self.ejecutar_borrado_multiple)
         self.btn_cancelar = ctk.CTkButton(self.frame_top, text="Cancelar", 
                                           fg_color="#95A5A6", command=self.toggle_modo_seleccion)
 
-        # 2. ÁREA DE MENSAJES (Nombre dinámico aplicado aquí)
         self.frame_mensajes = ctk.CTkScrollableFrame(self, label_text=f"{nombre_destino}")
         self.frame_mensajes.grid(row=1, column=0, padx=20, pady=10, sticky="nsew")
 
-        # 3. ENTRADA DE TEXTO
         self.frame_input = ctk.CTkFrame(self, fg_color="transparent")
         self.frame_input.grid(row=2, column=0, padx=20, pady=(0, 20), sticky="ew")
         self.frame_input.columnconfigure(0, weight=1)
@@ -138,7 +140,7 @@ class VentanaChat(ctk.CTkToplevel):
 
         self.cargar_mensajes()
 
-    def insertar_burbuja(self, id_msj, id_remit, texto, fecha_raw):
+    def insertar_burbuja(self, id_msj, id_remit, texto, fecha_raw, es_nuevo=False):
         f_obj = fecha_raw if isinstance(fecha_raw, datetime) else datetime.now()
         fecha_str = f_obj.strftime("%d/%m/%Y")
         hora_str = f_obj.strftime("%H:%M")
@@ -148,20 +150,19 @@ class VentanaChat(ctk.CTkToplevel):
                          text_color="gray", font=("Arial", 11, "bold")).pack(pady=10)
             self.ultima_fecha_cargada = fecha_str
 
+        # SEPARADOR DE MENSAJES SIN LEER (Basado en el flag es_nuevo)
+        if es_nuevo and not self.separador_visto:
+            ctk.CTkLabel(self.frame_mensajes, text="— MENSAJES SIN LEER —", 
+                         text_color="green", font=("Arial", 11, "bold")).pack(pady=10)
+            self.separador_visto = True
+
         fila = ctk.CTkFrame(self.frame_mensajes, fg_color="transparent")
         fila.pack(fill="x", pady=2)
-        fila.columnconfigure(0, weight=1) 
-        fila.columnconfigure(1, weight=0) 
-        fila.columnconfigure(2, weight=0) 
+        fila.columnconfigure(0, weight=0)
+        fila.columnconfigure(1, weight=1)
+        fila.columnconfigure(2, weight=0)
 
         es_mio = int(id_remit) == int(self.id_origen)
-        
-        if es_mio:
-            fila.columnconfigure(0, weight=1)
-            fila.columnconfigure(2, weight=0)
-        else:
-            fila.columnconfigure(0, weight=0)
-            fila.columnconfigure(2, weight=1)
 
         burbuja = ctk.CTkFrame(fila, fg_color="#2E86C1" if es_mio else "#515A5A", corner_radius=12)
         burbuja.grid(row=0, column=1, padx=5, sticky="e" if es_mio else "w")
@@ -169,6 +170,13 @@ class VentanaChat(ctk.CTkToplevel):
         lbl = ctk.CTkLabel(burbuja, text=texto, padx=12, pady=6, 
                            wraplength=280, justify="left", anchor="w")
         lbl.pack(fill="both", expand=True)
+
+        if not es_mio and id_msj:
+            btn_rep = ctk.CTkButton(fila, text=self.ICONO_BANDERA, width=35, fg_color="#E67E22", hover_color="#A04000",
+                                   command=lambda mid=id_msj, t=texto: self.confirmar_reporte(mid, t))
+            self.lista_btn_reporte.append(btn_rep)
+            if self.modo_reporte:
+                btn_rep.grid(row=0, column=0, padx=(10, 5))
 
         if es_mio and id_msj:
             cb = ctk.CTkCheckBox(fila, text="", width=20, 
@@ -180,8 +188,35 @@ class VentanaChat(ctk.CTkToplevel):
         ctk.CTkLabel(fila, text=hora_str, font=("Arial", 8), 
                      text_color="gray").grid(row=1, column=1, sticky="e" if es_mio else "w", padx=10)
 
+    def toggle_modo_reporte(self):
+        self.modo_reporte = not self.modo_reporte
+        if self.modo_reporte and self.modo_seleccion:
+            self.toggle_modo_seleccion()
+
+        texto_btn = "Reportar" if not self.modo_reporte else "Cancelar"
+        self.btn_reporte_toggle.configure(text=texto_btn,
+                                         fg_color="#A04000" if not self.modo_reporte else "#273746")
+        for btn in self.lista_btn_reporte:
+            if self.modo_reporte:
+                btn.grid(row=0, column=0, padx=(10, 5))
+            else:
+                btn.grid_forget()
+
+    def confirmar_reporte(self, id_mensaje, texto_cifrado):
+        if messagebox.askyesno("Reportar", "¿Deseas denunciar este mensaje?", parent=self):
+            diag = ctk.CTkInputDialog(text="Motivo de la denuncia:", title="Reportar")
+            motivo = diag.get_input()
+            if motivo:
+                if enviar_reporte(self.conn, id_mensaje, 'MENSAJE', self.id_destino, motivo, texto_cifrado):
+                    messagebox.showinfo("Enviado", "El reporte ha sido enviado con éxito.", parent=self)
+                    self.toggle_modo_reporte()
+                else:
+                    messagebox.showerror("Error", "No se pudo procesar el reporte.", parent=self)
+
     def toggle_modo_seleccion(self):
         self.modo_seleccion = not self.modo_seleccion
+        if self.modo_seleccion and self.modo_reporte:
+            self.toggle_modo_reporte()
         self.seleccionados.clear()
         self.btn_confirmar.configure(text="Eliminar (0)", state="disabled")
         
@@ -203,31 +238,31 @@ class VentanaChat(ctk.CTkToplevel):
         for widget in self.frame_mensajes.winfo_children():
             widget.destroy()
         self.lista_checkboxes.clear()
+        self.lista_btn_reporte.clear()
         self.ultima_fecha_cargada = None
-
+        self.separador_visto = False 
         try:
             mensajes = functions.visualizar_conversacion(self.conn, self.id_origen, self.id_destino)
-            for m in mensajes:
-                self.insertar_burbuja(m[0], m[1], m[3], m[4])
+            
+            # Lógica de cálculo de mensajes nuevos
+            punto_corte = len(mensajes) - self.mensajes_nuevos_count
+            
+            for i, m in enumerate(mensajes):
+                # Es nuevo si está en el rango final y el remitente no soy yo
+                es_nuevo_msj = (i >= punto_corte and self.mensajes_nuevos_count > 0 and int(m[1]) != int(self.id_origen))
+                self.insertar_burbuja(m[0], m[1], m[3], m[4], es_nuevo=es_nuevo_msj)
+                
             self.after(100, self.bajar_scroll)
         except Exception as e:
             print(f"Error: {e}")
 
     def ejecutar_borrado_multiple(self):
         if not self.seleccionados: return
-
-        # parent=self para que salga encima de la ventana topmost
         if messagebox.askyesno("Confirmar", f"¿Eliminar {len(self.seleccionados)} mensajes?", parent=self):
             for mid in self.seleccionados:
                 functions.eliminar_mensaje(self.conn, self.id_origen, mid)
-            
             self.seleccionados.clear()
-            self.modo_seleccion = False
-            self.btn_confirmar.configure(text="Eliminar (0)", state="disabled")
-            self.btn_confirmar.pack_forget()
-            self.btn_cancelar.pack_forget()
-            self.btn_modo.pack(side="left", padx=10, pady=10)
-            
+            self.toggle_modo_seleccion()
             self.cargar_mensajes()
 
     def actualizar_conteo(self, id_mensaje):
@@ -235,7 +270,6 @@ class VentanaChat(ctk.CTkToplevel):
             self.seleccionados.remove(id_mensaje)
         else:
             self.seleccionados.add(id_mensaje)
-        
         cant = len(self.seleccionados)
         self.btn_confirmar.configure(text=f"Eliminar ({cant})", 
                                      state="normal" if cant > 0 else "disabled")
@@ -248,7 +282,6 @@ class VentanaChat(ctk.CTkToplevel):
                 self.entry_msj.delete(0, "end")
                 self.insertar_burbuja(None, self.id_origen, texto, datetime.now())
                 self.after(10, self.bajar_scroll)
-                
                 if hasattr(self.master, 'cargar_usuarios'):
                     self.master.cargar_usuarios()
 

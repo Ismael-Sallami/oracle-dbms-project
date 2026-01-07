@@ -60,10 +60,10 @@ def listar_usuarios(conn, idusuarioactivo, archivados=False):
         
         # Esta consulta hace lo siguiente:
         # Cogemos idusuario, nombreusuario, fecha y numero de mensajes sin leer de cada usuario que tenga una conversación con el activo
-        # Lo unimos con los datos de los usuarios que sean amigos del usuario conversa implica amistad, pero no a la inversa
+        # Lo unimos con los datos de los usuarios que sean amigos del usuario (conversa implica amistad, pero no a la inversa)
         # (Para poder enviar el primer mensaje, se muestran los usuarios amigos, no los que tengan una conversación)
         # Unidos por el id del usuario que mantiene la conversación con el activo
-        # Filtamos aquellos que estén en la elección: archivados si/no
+        # Filtamos aquellos que estén en la elección: archivados si/no y solo los no borrados
         # Todo ordenado por nº de mensajes pendientes, fecha y nombre de usuario (en ese orden)
         query = f"""
             SELECT DISTINCT
@@ -89,9 +89,11 @@ def listar_usuarios(conn, idusuarioactivo, archivados=False):
                             AND a1.IDUSUARIO2 = a2.IDUSUARIO1
                 WHERE a1.IDUSUARIO1 = :1
             ) amigos ON u.IDUSUARIO = amigos.ID_AMIGO
-            -- Filtro de archivados
-            WHERE u.IDUSUARIO {filtro_archivado} (SELECT IDUSUARIO2 FROM ARCHIVADO WHERE IDUSUARIO1 = :1)
-            -- Orden jerárquico
+            -- Filtro borrados
+            WHERE u.BORRADO = 'N'
+            -- Filtro archivado
+            and u.IDUSUARIO {filtro_archivado} (SELECT IDUSUARIO2 FROM ARCHIVADO WHERE IDUSUARIO1 = :1)
+            -- Orden
             ORDER BY PENDIENTES DESC, FECHA_ORDEN DESC, u.NOMBREUSUARIO ASC
             """
 

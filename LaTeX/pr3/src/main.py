@@ -74,6 +74,9 @@ import customtkinter as ctk
 from usuarios.auth import login
 from publicidad.functions import es_admin_bd # parte de fer
 
+# Terminos y servicios
+from aspectoslegales.terminosyservicios import TEXTO_TERMINOS
+
 class LoginFrame(ctk.CTkFrame):
     def __init__(self, master, conn, on_login_ok):
         super().__init__(master)
@@ -108,6 +111,19 @@ class LoginFrame(ctk.CTkFrame):
         )
         self.pass_reg_entry = ctk.CTkEntry(
             self, placeholder_text="Contraseña", show="*", width=320
+        )
+
+        # ---------- TÉRMINOS Y CONDICIONES ----------
+        self.check_terminos = ctk.CTkCheckBox(self, text="He leído y acepto los")
+        
+        self.btn_ver_terminos = ctk.CTkButton(
+            self, 
+            text="Términos y Condiciones de EKIS",
+            fg_color="transparent", 
+            text_color="#1F618D", 
+            hover_color=None,
+            font=ctk.CTkFont(size=12, underline=True),
+            command=self.mostrar_ventana_terminos
         )
 
         # ---------- MENSAJES ----------
@@ -150,20 +166,38 @@ class LoginFrame(ctk.CTkFrame):
             self.nombre_entry.grid(row=1, column=0, pady=10)
             self.email_reg_entry.grid(row=2, column=0, pady=10)
             self.pass_reg_entry.grid(row=3, column=0, pady=10)
+            
+            # --- Ubicar términos ---
+            self.check_terminos.grid(row=4, column=0, pady=(10, 0))
+            self.btn_ver_terminos.grid(row=5, column=0, pady=(0, 10))
 
             self.titulo.configure(text="EKIS - Registro")
+            
+            # Ubicamos el mensaje y botones en filas inferiores
+            self.msg.grid(row=6, column=0, pady=(5, 10))
+            self.btn_principal.grid(row=7, column=0, pady=10)
+            self.btn_cambiar.grid(row=8, column=0, pady=(5, 30))
+            
             self.btn_principal.configure(text="Crear usuario")
             self.btn_cambiar.configure(text="Volver a login")
-
             self.registro_activo = True
         else:
             # Volver a login
             self.nombre_entry.grid_remove()
             self.email_reg_entry.grid_remove()
             self.pass_reg_entry.grid_remove()
+            
+            # --- Ocultar términos ---
+            self.check_terminos.grid_remove()
+            self.btn_ver_terminos.grid_remove()
 
             self.email_entry.grid(row=1, column=0, pady=10)
             self.pass_entry.grid(row=2, column=0, pady=10)
+            
+            # Ubicamos mensaje y botones a su sitio original
+            self.msg.grid(row=4, column=0, pady=(5, 10))
+            self.btn_principal.grid(row=5, column=0, pady=10)
+            self.btn_cambiar.grid(row=6, column=0, pady=(5, 30))
 
             self.titulo.configure(text="EKIS - Acceso")
             self.btn_principal.configure(text="Entrar")
@@ -186,7 +220,7 @@ class LoginFrame(ctk.CTkFrame):
         password = self.pass_entry.get()
 
         if not email or not password:
-            self.msg.configure(text="Complete email y contraseña.")
+            self.msg.configure(text="Complete email y contraseña.", text_color="red")
             return
 
         ok, res = login(self.conn, email, password)
@@ -199,6 +233,10 @@ class LoginFrame(ctk.CTkFrame):
 
     # ---------------- REGISTRO ----------------
     def crear_usuario_gui(self):
+        # --- VALIDACIÓN DE TÉRMINOS ---
+        if not hasattr(self, 'check_terminos') or not self.check_terminos.get():
+            self.msg.configure(text="Debe aceptar los términos y condiciones.", text_color="red")
+            return
         nombre = self.nombre_entry.get().strip()
         email = self.email_reg_entry.get().strip()
         password = self.pass_reg_entry.get()
@@ -217,6 +255,44 @@ class LoginFrame(ctk.CTkFrame):
             self.toggle_registro()
         else:
             self.msg.configure(text=msg)
+    
+    def mostrar_ventana_terminos(self):
+        ventana = ctk.CTkToplevel(self)
+        ventana.title("Términos y Privacidad")
+        ventana.geometry("700x1000")
+        
+        ventana.wait_visibility()
+        ventana.grab_set()
+        ventana.attributes("-topmost", True)
+
+        btn_ok = ctk.CTkButton(ventana, text="Aceptar y Continuar", command=ventana.destroy)
+
+        def chequear_periodicamente():
+            # Verificamos si la ventana aún existe para evitar errores al cerrar
+            if not ventana.winfo_exists():
+                return
+
+            # Obtenemos la posición (0.0 a 1.0)
+            # Accedemos al widget de texto interno para máxima precisión
+            posicion = txt_box._textbox.yview()
+            
+            # Si el final de lo visible es >= 0.9 (90% del texto)
+            if posicion[1] >= 0.9:
+                if not btn_ok.winfo_manager():
+                    btn_ok.pack(pady=20)
+                    # Una vez aparece el botón, dejamos de chequear para ahorrar CPU
+                    return 
+
+            # Se vuelve a llamar a sí misma cada 100ms (0.1 segundos)
+            ventana.after(100, chequear_periodicamente)
+
+        txt_box = ctk.CTkTextbox(ventana, width=650, height=800)
+        txt_box.insert("0.0", TEXTO_TERMINOS)
+        txt_box.configure(state="disabled")
+        txt_box.pack(padx=20, pady=20)
+
+        # Iniciamos el bucle de chequeo
+        chequear_periodicamente()
        
 
 
@@ -256,7 +332,7 @@ class App(ctk.CTk):
     def on_login_ok(self, id_usuario):
         self.id_usuario_activo = id_usuario
         
-        
+        self.conn.id_usuario_actual = id_usuario
         # parte añadida para probar la parte de publicidad
         #----------------------------------------------------------------------
         self.es_admin = es_admin_bd(self.conn, id_usuario)
