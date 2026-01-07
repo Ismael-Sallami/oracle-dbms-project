@@ -32,7 +32,6 @@ class VentanaMensajeria(ctk.CTkFrame):
         for widget in self.scroll_usuarios.winfo_children():
             widget.destroy()
         try:
-            # Ahora listar_usuarios devuelve: (id, nombre, pendientes)
             usuarios = functions.listar_usuarios(self.conn, self.id_usuario_actual, self.viendo_archivados)
             
             if not usuarios:
@@ -43,14 +42,13 @@ class VentanaMensajeria(ctk.CTkFrame):
                 fila = ctk.CTkFrame(self.scroll_usuarios, fg_color="transparent")
                 fila.pack(fill="x", pady=2)
 
-                # --- LÓGICA DE NOTIFICACIÓN ---
                 # Si hay mensajes pendientes, añadimos un círculo rojo y cambiamos el color
                 texto_nombre = f"👤 {nombre}"
                 color_boton = ("#E5E7E9", "#2E4053") # Colores normales
                 
                 if pendientes > 0:
-                    texto_nombre += f"  ● {pendientes}" # Añade un indicador visual
-                    # Color opcional para resaltar chats con mensajes nuevos (un azul más vibrante)
+                    texto_nombre += f"  ● {pendientes}"
+                    # Color resaltar chats con mensajes nuevos (un azul más vibrante)
                     color_boton = ("#AED6F1", "#1F618D") 
 
                 btn_user = ctk.CTkButton(fila, text=texto_nombre, anchor="w",
@@ -59,7 +57,7 @@ class VentanaMensajeria(ctk.CTkFrame):
                                          command=lambda u=uid, n=nombre: self.abrir_chat(u, n))
                 btn_user.pack(side="left", fill="x", expand=True, padx=(0, 5))
 
-                # Botón de Archivar/Desarchivar (se mantiene igual)
+                # Botón de Archivar/Desarchivar
                 texto_icon = "📦" if not self.viendo_archivados else "📤"
                 ctk.CTkButton(fila, text=texto_icon, width=40, fg_color="#AAB7B8",
                               command=lambda u=uid: self.gestionar_archivo(u)).pack(side="right")
@@ -168,7 +166,6 @@ class VentanaChat(ctk.CTkToplevel):
         burbuja = ctk.CTkFrame(fila, fg_color="#2E86C1" if es_mio else "#515A5A", corner_radius=12)
         burbuja.grid(row=0, column=1, padx=5, sticky="e" if es_mio else "w")
         
-        # Texto alineado a la izquierda
         lbl = ctk.CTkLabel(burbuja, text=texto, padx=12, pady=6, 
                            wraplength=280, justify="left", anchor="w")
         lbl.pack(fill="both", expand=True)
@@ -251,6 +248,9 @@ class VentanaChat(ctk.CTkToplevel):
                 self.entry_msj.delete(0, "end")
                 self.insertar_burbuja(None, self.id_origen, texto, datetime.now())
                 self.after(10, self.bajar_scroll)
+                
+                if hasattr(self.master, 'cargar_usuarios'):
+                    self.master.cargar_usuarios()
 
     def validar_longitud(self, texto_nuevo):
         if len(texto_nuevo) <= self.MAX_CHARS_INPUT:
