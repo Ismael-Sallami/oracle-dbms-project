@@ -27,7 +27,6 @@ def enviar_reporte(conn, id_objetivo, tipo, id_denunciado, motivo, contenido_ori
     
     cursor = None
     try:
-        # CORRECCIÓN: Usar conn directamente, no conn.conexion
         cursor = conn.cursor()
         cursor.execute(sql, (
             conn.id_usuario_actual,
@@ -50,3 +49,84 @@ def enviar_reporte(conn, id_objetivo, tipo, id_denunciado, motivo, contenido_ori
     finally:
         if cursor:
             cursor.close()
+
+def listar_todos_los_reportes(conn):
+    sql = """
+    SELECT 
+        r.IDREPORTE,
+        u1.NOMBREUSUARIO AS DENUNCIANTE,
+        u2.NOMBREUSUARIO AS DENUNCIADO_NOMBRE, -- Nombre para mostrar
+        r.TIPO_CONTENIDO,
+        r.MOTIVO,
+        r.CONTENIDO_PRUEBA,
+        r.ID_PUB,
+        r.ID_MENSAJE,
+        r.ID_DENUNCIADO  -- <--- AÑADIMOS EL ID NUMÉRICO AQUÍ (índice 8)
+    FROM REPORTE r
+    JOIN USUARIO u1 ON r.ID_DENUNCIANTE = u1.IDUSUARIO
+    JOIN USUARIO u2 ON r.ID_DENUNCIADO = u2.IDUSUARIO
+    ORDER BY r.IDREPORTE DESC
+    """
+    cursor = None
+    try:
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        reportes = cursor.fetchall()
+        return reportes
+    except Exception as e:
+        print(f"Error al listar reportes: {e}")
+        return []
+    finally:
+        if cursor:
+            cursor.close()
+
+def obtener_detalle_publicacion(conn, id_p):
+    sql = "SELECT NOMBRE, DESCRIPCION, CATEGORIA, IMAGEN, FECHACREACION FROM PUBLICACION WHERE IDPUBLICACION = :1"
+    cursor = None
+    try:
+        cursor = conn.cursor()
+        cursor.execute(sql, (id_p,))
+        return cursor.fetchone()
+    except Exception as e:
+        print(f"Error al obtener detalle de publicación: {e}")
+        return None
+    finally:
+        if cursor:
+            cursor.close()
+            
+def eliminar_publicacion_bd(conn, id_u, id_p):
+    try:
+        from publicaciones import functions as pub_funcs
+        
+        cursor = conn.cursor()
+        
+        exito = pub_funcs.eliminar_publicacion(cursor, id_u, id_p)
+        
+        if exito:
+            conn.commit()
+            return True
+        else:
+            conn.rollback()
+            return False
+    except Exception as e:
+        print(f"Error en eliminar_publicacion_bd: {e}")
+        if conn: conn.rollback()
+        return False
+    finally:
+        if 'cursor' in locals(): cursor.close()
+
+def eliminar_reporte(conn, id_r):
+
+    sql = "DELETE FROM REPORTE WHERE IDREPORTE = :1"
+    cursor = None
+    try:
+        cursor = conn.cursor()
+        cursor.execute(sql, [id_r])
+        conn.commit()
+        return cursor.rowcount > 0
+    except Exception as e:
+        print(f"Error al eliminar reporte: {e}")
+        conn.rollback()
+        return False
+    finally:
+        if cursor: cursor.close()

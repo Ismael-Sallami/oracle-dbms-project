@@ -189,18 +189,53 @@ class VentanaGestionPublicacion(ctk.CTkToplevel):
     def __init__(self, parent, conn, id_u):
         super().__init__(parent)
         self.conn, self.id_u, self.parent = conn, id_u, parent
-        self.title("Nueva Publicación"); self.geometry("400x450")
-        self.grab_set(); self.attributes("-topmost", True)
+        self.title("Nueva Publicación")
+        self.geometry("400x450")
+
+        # 1. Preparar widgets antes de mostrar
+        self._crear_widgets()
+
+        # 2. Manejo de la visibilidad y el grab para evitar el error "window not viewable"
+        self.withdraw()
+        self.after(10, self._lanzar_modal)
+
+    def _crear_widgets(self):
+        """Organiza la creación de los elementos de la interfaz"""
+        ctk.CTkLabel(self, text="Título", font=(DEFAULT_FONT, 14, "bold")).pack(pady=(20, 5))
+        self.en = ctk.CTkEntry(self, width=300)
+        self.en.pack(pady=5)
         
-        ctk.CTkLabel(self, text="Título").pack(pady=5)
-        self.en = ctk.CTkEntry(self, width=300); self.en.pack()
-        ctk.CTkLabel(self, text="Descripción").pack(pady=5)
-        self.ed = ctk.CTkTextbox(self, width=300, height=100); self.ed.pack()
-        ctk.CTkButton(self, text="Publicar", command=self.guardar).pack(pady=20)
+        ctk.CTkLabel(self, text="Descripción", font=(DEFAULT_FONT, 14, "bold")).pack(pady=(10, 5))
+        self.ed = ctk.CTkTextbox(self, width=300, height=150)
+        self.ed.pack(pady=5)
+        
+        ctk.CTkButton(self, text="🚀 Publicar", fg_color="#D35400", 
+                      command=self.guardar, width=200).pack(pady=30)
+
+    def _lanzar_modal(self):
+        self.deiconify()          
+        self.wait_visibility()   
+        self.grab_set()          
+        self.attributes("-topmost", True)
+        self.focus_set()
 
     def guardar(self):
-        n, d = self.en.get(), self.ed.get("0.0", "end").strip()
+        n = self.en.get()
+        d = self.ed.get("0.0", "end").strip()
+        
+        if not n:
+            messagebox.showwarning("Atención", "El título es obligatorio.")
+            return
+
         cursor = self.conn.cursor()
-        if functions.crear_publicacion(cursor, self.id_u, n, None, d, "General"):
-            self.conn.commit(); self.destroy(); self.parent.mostrar_feed_general()
-        cursor.close()
+        try:
+            if functions.crear_publicacion(cursor, self.id_u, n, None, d, "General"):
+                self.conn.commit()
+                self.destroy()
+                self.parent.mostrar_feed_general()
+            else:
+                messagebox.showerror("Error", "No se pudo crear la publicación.")
+        except Exception as e:
+            print(f"Error al guardar: {e}")
+        finally:
+            cursor.close()

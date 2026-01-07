@@ -60,22 +60,25 @@
 import customtkinter as ctk
 from db_connection import DBConnection
 import sys
+import faulthandler
 
-# Importamos los módulos (Aquí irán los de tus compañeros también)
+# Habilitar el rastreador de fallos de segmentación
+faulthandler.enable()
+
+# --- IMPORTACIÓN DE SUBSISTEMAS ---
 from publicidad.menu import VentanaPublicidad
 from publicaciones.menu import VentanaPublicaciones
 from tendencias.menu import VentanaTendencias
 from mensajeria.menu import VentanaMensajeria
 from usuarios.functions import crear_usuario
 from usuarios.menu import VentanaUsuario
-ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
-ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
-import customtkinter as ctk
 from usuarios.auth import login
-from publicidad.functions import es_admin_bd # parte de fer
-
-# Terminos y servicios
+from publicidad.functions import es_admin_bd
 from aspectoslegales.terminosyservicios import TEXTO_TERMINOS
+from aspectoslegales.menu import VentanaReportes
+
+ctk.set_appearance_mode("Dark")
+ctk.set_default_color_theme("blue")
 
 class LoginFrame(ctk.CTkFrame):
     def __init__(self, master, conn, on_login_ok):
@@ -86,14 +89,12 @@ class LoginFrame(ctk.CTkFrame):
         
         self.grid_columnconfigure(0, weight=1)
 
-        # ---------- TÍTULO ----------
         self.titulo = ctk.CTkLabel(
             self, text="EKIS - Acceso",
             font=ctk.CTkFont(size=26, weight="bold")
         )
         self.titulo.grid(row=0, column=0, pady=(40, 20))
 
-        # ---------- LOGIN ----------
         self.email_entry = ctk.CTkEntry(self, placeholder_text="Email", width=320)
         self.email_entry.grid(row=1, column=0, pady=10)
 
@@ -102,222 +103,108 @@ class LoginFrame(ctk.CTkFrame):
         )
         self.pass_entry.grid(row=2, column=0, pady=10)
 
-        # ---------- REGISTRO (ocultos al inicio) ----------
-        self.nombre_entry = ctk.CTkEntry(
-            self, placeholder_text="Nombre de usuario", width=320
-        )
-        self.email_reg_entry = ctk.CTkEntry(
-            self, placeholder_text="Email", width=320
-        )
-        self.pass_reg_entry = ctk.CTkEntry(
-            self, placeholder_text="Contraseña", show="*", width=320
-        )
-
-        # ---------- TÉRMINOS Y CONDICIONES ----------
+        # Widgets de registro (se ocultan inicialmente)
+        self.nombre_entry = ctk.CTkEntry(self, placeholder_text="Nombre de usuario", width=320)
+        self.email_reg_entry = ctk.CTkEntry(self, placeholder_text="Email", width=320)
+        self.pass_reg_entry = ctk.CTkEntry(self, placeholder_text="Contraseña", show="*", width=320)
         self.check_terminos = ctk.CTkCheckBox(self, text="He leído y acepto los")
         
         self.btn_ver_terminos = ctk.CTkButton(
-            self, 
-            text="Términos y Condiciones de EKIS",
-            fg_color="transparent", 
-            text_color="#1F618D", 
-            hover_color=None,
+            self, text="Términos y Condiciones de EKIS",
+            fg_color="transparent", text_color="#1F618D", hover_color=None,
             font=ctk.CTkFont(size=12, underline=True),
             command=self.mostrar_ventana_terminos
         )
 
-        # ---------- MENSAJES ----------
         self.msg = ctk.CTkLabel(self, text="", text_color="tomato")
         self.msg.grid(row=4, column=0, pady=(5, 10))
 
-        # ---------- BOTÓN PRINCIPAL ----------
-        self.btn_principal = ctk.CTkButton(
-            self, text="Entrar", width=320, command=self.accion_principal
-        )
+        self.btn_principal = ctk.CTkButton(self, text="Entrar", width=320, command=self.accion_principal)
         self.btn_principal.grid(row=5, column=0, pady=10)
 
-        # ---------- BOTÓN CAMBIO MODO ----------
         self.btn_cambiar = ctk.CTkButton(
-            self,
-            text="Crear cuenta",
-            fg_color="gray",
-            hover_color="#555555",
-            width=320,
-            command=self.toggle_registro
+            self, text="Crear cuenta", fg_color="gray", hover_color="#555555",
+            width=320, command=self.toggle_registro
         )
         self.btn_cambiar.grid(row=6, column=0, pady=(5, 30))
 
-        # Enter = acción principal
-        self.pass_entry.bind("<Return>", lambda e: self.accion_principal())
-        self.pass_reg_entry.bind("<Return>", lambda e: self.accion_principal())
-
-    # ======================================================
-    # CAMBIAR ENTRE LOGIN / REGISTRO
-    # ======================================================
     def toggle_registro(self):
         self.msg.configure(text="")
-
         if not self.registro_activo:
-            # Ocultar login
             self.email_entry.grid_remove()
             self.pass_entry.grid_remove()
-
-            # Mostrar registro
             self.nombre_entry.grid(row=1, column=0, pady=10)
             self.email_reg_entry.grid(row=2, column=0, pady=10)
             self.pass_reg_entry.grid(row=3, column=0, pady=10)
-            
-            # --- Ubicar términos ---
             self.check_terminos.grid(row=4, column=0, pady=(10, 0))
             self.btn_ver_terminos.grid(row=5, column=0, pady=(0, 10))
-
-            self.titulo.configure(text="EKIS - Registro")
-            
-            # Ubicamos el mensaje y botones en filas inferiores
-            self.msg.grid(row=6, column=0, pady=(5, 10))
-            self.btn_principal.grid(row=7, column=0, pady=10)
-            self.btn_cambiar.grid(row=8, column=0, pady=(5, 30))
-            
             self.btn_principal.configure(text="Crear usuario")
             self.btn_cambiar.configure(text="Volver a login")
             self.registro_activo = True
         else:
-            # Volver a login
             self.nombre_entry.grid_remove()
             self.email_reg_entry.grid_remove()
             self.pass_reg_entry.grid_remove()
-            
-            # --- Ocultar términos ---
             self.check_terminos.grid_remove()
             self.btn_ver_terminos.grid_remove()
-
             self.email_entry.grid(row=1, column=0, pady=10)
             self.pass_entry.grid(row=2, column=0, pady=10)
-            
-            # Ubicamos mensaje y botones a su sitio original
-            self.msg.grid(row=4, column=0, pady=(5, 10))
-            self.btn_principal.grid(row=5, column=0, pady=10)
-            self.btn_cambiar.grid(row=6, column=0, pady=(5, 30))
-
-            self.titulo.configure(text="EKIS - Acceso")
             self.btn_principal.configure(text="Entrar")
             self.btn_cambiar.configure(text="Crear cuenta")
-
             self.registro_activo = False
 
-    # ======================================================
-    # ACCIÓN PRINCIPAL (LOGIN O REGISTRO)
-    # ======================================================
     def accion_principal(self):
         if self.registro_activo:
             self.crear_usuario_gui()
         else:
             self.login_gui()
 
-    # ---------------- LOGIN ----------------
     def login_gui(self):
         email = self.email_entry.get().strip()
         password = self.pass_entry.get()
-
         if not email or not password:
             self.msg.configure(text="Complete email y contraseña.", text_color="red")
             return
-
         ok, res = login(self.conn, email, password)
         if not ok:
             self.msg.configure(text=str(res))
             return
+        self.on_login_ok(res)
 
-        self.msg.configure(text="")
-        self.on_login_ok(res)  # id_usuario
-
-    # ---------------- REGISTRO ----------------
     def crear_usuario_gui(self):
-        # --- VALIDACIÓN DE TÉRMINOS ---
-        if not hasattr(self, 'check_terminos') or not self.check_terminos.get():
-            self.msg.configure(text="Debe aceptar los términos y condiciones.", text_color="red")
+        if not self.check_terminos.get():
+            self.msg.configure(text="Debe aceptar los términos.", text_color="red")
             return
-        nombre = self.nombre_entry.get().strip()
-        email = self.email_reg_entry.get().strip()
-        password = self.pass_reg_entry.get()
-
-        if not nombre or not email or not password:
-            self.msg.configure(text="Complete todos los campos.")
-            return
-
-        msg = crear_usuario(self.conn, nombre, email, password)
-
+        msg = crear_usuario(self.conn, self.nombre_entry.get(), self.email_reg_entry.get(), self.pass_reg_entry.get())
         if "creado" in msg.lower():
-            self.msg.configure(
-                text="Usuario creado. Inicie sesión.",
-                text_color="green"
-            )
+            self.msg.configure(text="Creado. Inicie sesión.", text_color="green")
             self.toggle_registro()
         else:
             self.msg.configure(text=msg)
-    
+
     def mostrar_ventana_terminos(self):
         ventana = ctk.CTkToplevel(self)
-        ventana.title("Términos y Privacidad")
-        ventana.geometry("700x1000")
-        
-        ventana.wait_visibility()
-        ventana.grab_set()
-        ventana.attributes("-topmost", True)
-
-        btn_ok = ctk.CTkButton(ventana, text="Aceptar y Continuar", command=ventana.destroy)
-
-        def chequear_periodicamente():
-            # Verificamos si la ventana aún existe para evitar errores al cerrar
-            if not ventana.winfo_exists():
-                return
-
-            # Obtenemos la posición (0.0 a 1.0)
-            # Accedemos al widget de texto interno para máxima precisión
-            posicion = txt_box._textbox.yview()
-            
-            # Si el final de lo visible es >= 0.9 (90% del texto)
-            if posicion[1] >= 0.9:
-                if not btn_ok.winfo_manager():
-                    btn_ok.pack(pady=20)
-                    # Una vez aparece el botón, dejamos de chequear para ahorrar CPU
-                    return 
-
-            # Se vuelve a llamar a sí misma cada 100ms (0.1 segundos)
-            ventana.after(100, chequear_periodicamente)
-
-        txt_box = ctk.CTkTextbox(ventana, width=650, height=800)
+        ventana.title("Términos")
+        ventana.geometry("600x700")
+        txt_box = ctk.CTkTextbox(ventana, width=550, height=600)
         txt_box.insert("0.0", TEXTO_TERMINOS)
         txt_box.configure(state="disabled")
         txt_box.pack(padx=20, pady=20)
 
-        # Iniciamos el bucle de chequeo
-        chequear_periodicamente()
-       
-
-
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
-
         self.title("Sistema EKIS - Práctica 3")
-        self.geometry("900x600")
+        self.geometry("1000x700")
 
-        # Conexión DB
         self.db = DBConnection()
         self.conn = self.db.connect()
         if not self.conn:
-            print("❌ Error fatal: No hay conexión a Oracle.")
             sys.exit(1)
 
-        # Estado de sesión
         self.id_usuario_activo = None
-
-        # Contenedor único (para cambiar de pantalla)
         self.root_frame = ctk.CTkFrame(self)
         self.root_frame.pack(fill="both", expand=True)
-
-        # Pantalla inicial: Login
         self.mostrar_login()
 
     def limpiar_root(self):
@@ -326,72 +213,54 @@ class App(ctk.CTk):
 
     def mostrar_login(self):
         self.limpiar_root()
-        login_frame = LoginFrame(self.root_frame, self.conn, self.on_login_ok)
-        login_frame.pack(fill="both", expand=True)
+        LoginFrame(self.root_frame, self.conn, self.on_login_ok).pack(fill="both", expand=True)
 
     def on_login_ok(self, id_usuario):
         self.id_usuario_activo = id_usuario
-        
         self.conn.id_usuario_actual = id_usuario
-        # parte añadida para probar la parte de publicidad
-        #----------------------------------------------------------------------
         self.es_admin = es_admin_bd(self.conn, id_usuario)
-        role_str = "ADMINISTRADOR" if self.es_admin else "USUARIO ESTÁNDAR"
-        print(f"Login exitoso. Usuario: {id_usuario} | Rol: {role_str}")
-        #----------------------------------------------------------------------
-
-
-        self.mostrar_dashboard()
-        self.mostrar_home()
-        
+        # Usamos after para dejar que el frame de login se destruya totalmente antes de crear el Dashboard
+        self.after(100, self.mostrar_dashboard)
 
     def mostrar_dashboard(self):
         self.limpiar_root()
-
-        # Layout Principal (Grid 2 columnas)
+        
+        # Grid para el layout principal
         self.root_frame.grid_columnconfigure(1, weight=1)
         self.root_frame.grid_rowconfigure(0, weight=1)
 
-        # --- BARRA LATERAL ---
         self.sidebar_frame = ctk.CTkFrame(self.root_frame, width=200, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, sticky="nsew")
-        self.sidebar_frame.grid_rowconfigure(7, weight=1)
-
-        self.logo_label = ctk.CTkLabel(
-            self.sidebar_frame,
-            text=f"EKIS\nUsuario ID: {self.id_usuario_activo}",
-            font=ctk.CTkFont(size=18, weight="bold")
-        )
-        self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
-
-        self.btn_home = ctk.CTkButton(self.sidebar_frame, text="Inicio", command=self.mostrar_home)
-        self.btn_home.grid(row=1, column=0, padx=20, pady=10)
-
-        self.btn_publicidad = ctk.CTkButton(self.sidebar_frame, text="Publicidad", command=self.mostrar_publicidad)
-        self.btn_publicidad.grid(row=2, column=0, padx=20, pady=10)
-
-        self.btn_publicaciones = ctk.CTkButton(self.sidebar_frame, text="Publicaciones", command=self.mostrar_publicaciones)
-        self.btn_publicaciones.grid(row=3, column=0, padx=20, pady=10)
-
-        self.btn_tendencias = ctk.CTkButton(self.sidebar_frame, text="Tendencias", command=self.mostrar_tendencias)
-        self.btn_tendencias.grid(row=4, column=0, padx=20, pady=10)
-
-        self.btn_usuarios = ctk.CTkButton(self.sidebar_frame, text="Usuarios", command=self.mostrar_menu_usuarios)
-        self.btn_usuarios.grid(row=5, column=0, padx=20, pady=10)
-
-        self.btn_mensajeria = ctk.CTkButton(self.sidebar_frame, text="Mensajería", command=self.mostrar_mensajeria)
-        self.btn_mensajeria.grid(row=6, column=0, padx=20, pady=10)
-
-        # Logout
-        self.btn_logout = ctk.CTkButton(self.sidebar_frame, text="Cerrar sesión", command=self.cerrar_sesion)
-        self.btn_logout.grid(row=7, column=0, padx=20, pady=10)
-
-        self.btn_salir = ctk.CTkButton(self.sidebar_frame, text="Salir", fg_color="red", command=self.salir)
-        self.btn_salir.grid(row=9, column=0, padx=20, pady=20)
-
-        # --- CONTENIDO ---
+        
         self.frame_contenido = ctk.CTkFrame(self.root_frame)
         self.frame_contenido.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
+
+        self._crear_widgets_sidebar()
+
+    def _crear_widgets_sidebar(self):
+        # Título lateral
+        ctk.CTkLabel(self.sidebar_frame, text=f"EKIS\nID: {self.id_usuario_activo}", 
+                     font=ctk.CTkFont(size=18, weight="bold")).grid(row=0, column=0, padx=20, pady=20)
+
+        # Botones estáticos (sin bucles complejos para evitar inestabilidad en X11)
+        common = {"corner_radius": 0, "width": 160}
+        
+        ctk.CTkButton(self.sidebar_frame, text="Inicio", command=self.mostrar_home, **common).grid(row=1, column=0, pady=5)
+        ctk.CTkButton(self.sidebar_frame, text="Publicidad", command=self.mostrar_publicidad, **common).grid(row=2, column=0, pady=5)
+        ctk.CTkButton(self.sidebar_frame, text="Publicaciones", command=self.mostrar_publicaciones, **common).grid(row=3, column=0, pady=5)
+        ctk.CTkButton(self.sidebar_frame, text="Tendencias", command=self.mostrar_tendencias, **common).grid(row=4, column=0, pady=5)
+        ctk.CTkButton(self.sidebar_frame, text="Usuarios", command=self.mostrar_menu_usuarios, **common).grid(row=5, column=0, pady=5)
+        ctk.CTkButton(self.sidebar_frame, text="Mensajería", command=self.mostrar_mensajeria, **common).grid(row=6, column=0, pady=5)
+
+        if self.es_admin:
+            ctk.CTkButton(self.sidebar_frame, text="🚩 Reportes", fg_color="#A04000", 
+                          command=self.mostrar_reportes, **common).grid(row=7, column=0, pady=5)
+
+        # Empujar botones de abajo hacia el final
+        self.sidebar_frame.grid_rowconfigure(8, weight=1)
+
+        ctk.CTkButton(self.sidebar_frame, text="Cerrar sesión", command=self.cerrar_sesion, **common).grid(row=9, column=0, pady=5)
+        ctk.CTkButton(self.sidebar_frame, text="Salir", fg_color="#943126", command=self.salir, **common).grid(row=10, column=0, pady=(5, 20))
 
         self.mostrar_home()
 
@@ -401,41 +270,32 @@ class App(ctk.CTk):
 
     def mostrar_home(self):
         self.limpiar_panel()
-        lbl = ctk.CTkLabel(self.frame_contenido, text="Bienvenido a EKIS", font=("Arial", 30))
-        lbl.pack(pady=80)
-        lbl2 = ctk.CTkLabel(self.frame_contenido, text="Selecciona un módulo en el menú lateral.")
-        lbl2.pack()
+        ctk.CTkLabel(self.frame_contenido, text="Panel de Control EKIS", font=("Arial", 24)).pack(pady=40)
+        ctk.CTkLabel(self.frame_contenido, text="Bienvenido. Selecciona un módulo para comenzar.").pack()
 
     def mostrar_publicidad(self):
         self.limpiar_panel()
-        
-        ventana_pub = VentanaPublicidad(
-            self.frame_contenido, 
-            self.conn, 
-            self.id_usuario_activo,  
-            es_admin=self.es_admin
-        )
-        ventana_pub.pack(fill="both", expand=True)
+        VentanaPublicidad(self.frame_contenido, self.conn, self.id_usuario_activo, self.es_admin).pack(fill="both", expand=True)
 
     def mostrar_publicaciones(self):
         self.limpiar_panel()
-        ventana_publicaciones = VentanaPublicaciones(self.frame_contenido, self.conn, self.id_usuario_activo, self.es_admin)
-        ventana_publicaciones.pack(fill="both", expand=True)
+        VentanaPublicaciones(self.frame_contenido, self.conn, self.id_usuario_activo, self.es_admin).pack(fill="both", expand=True)
 
     def mostrar_tendencias(self):
         self.limpiar_panel()
-        ventana_tendencias = VentanaTendencias(self.frame_contenido, self.conn)
-        ventana_tendencias.pack(fill="both", expand=True)
+        VentanaTendencias(self.frame_contenido, self.conn).pack(fill="both", expand=True)
     
     def mostrar_mensajeria(self):
         self.limpiar_panel()
-        ventana_mensajeria = VentanaMensajeria(self.frame_contenido, self.conn, self.id_usuario_activo)
-        ventana_mensajeria.pack(fill="both", expand=True)
+        VentanaMensajeria(self.frame_contenido, self.conn, self.id_usuario_activo).pack(fill="both", expand=True)
 
     def mostrar_menu_usuarios(self):
         self.limpiar_panel()
-        view = VentanaUsuario(self.frame_contenido, self.conn, self.id_usuario_activo, on_user_deleted=self.cerrar_sesion)
-        view.pack(fill="both", expand=True)
+        VentanaUsuario(self.frame_contenido, self.conn, self.id_usuario_activo, on_user_deleted=self.cerrar_sesion).pack(fill="both", expand=True)
+
+    def mostrar_reportes(self):
+        self.limpiar_panel()
+        VentanaReportes(self.frame_contenido, self.conn).pack(fill="both", expand=True)
 
     def cerrar_sesion(self):
         self.id_usuario_activo = None
@@ -443,7 +303,11 @@ class App(ctk.CTk):
 
     def salir(self):
         self.db.close()
-        self.destroy()
+        self.quit()
+
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()
 
 
 
@@ -536,6 +400,3 @@ class App(ctk.CTk):
         self.db.close()
         self.destroy()
 '''
-if __name__ == "__main__":
-    app = App()
-    app.mainloop()
