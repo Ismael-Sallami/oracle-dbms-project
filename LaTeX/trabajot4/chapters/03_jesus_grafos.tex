@@ -1,9 +1,186 @@
-% Escribe aquí tu parte. NO toques el main.
-% Usa \section{}, \subsection{}, etc.
-% Para imágenes usa: \includegraphics[width=\linewidth]{figures/TU_CARPETA/imagen.png}
-
-\chapter{Modelo de Grafos (Jesús)}
+\chapter{NoSQL Orientadas a Grafos (Jesús)}
 \label{ch:jesus}
 
-% Contenido de Jesús aquí...
+Para implementar un modelo NoSQL orientado a grafos se ha optado por Neo4j como SGBD, pues es el más popular para este tipo de modelos además de ser de código abierto.
 
+\section{Instalación y Configuración del Entorno}
+
+La forma más sencilla de instalación es la versión Neo4j Desktop, paquete que incluye el servidor de la base de datos, las herramientas de gestión y el entorno para ejecutar las sentencias de Cypher (lenguaje de consultad declarativo diseñado específicamente para Neo4j).
+
+\begin{enumerate}
+    \item \textbf{Descarga de Neo4j Desktop:} Desde la web oficial de descargas de Neo4j Deployment Center, buscar la selección de Neo4j Desktop y descargar para tu sistema operativo (en este caso Linux). Se debe rellenar un formulario para obtener una clave de activación, la cual es gratuita para desarrolladores y estudiantes.
+    \item \textbf{Instalación:} Dar permisos de ejecución al archivo AppImage (con chmod +x ...) y ejecutar. En caso de tener un error del estilo: \textit{AppImages require FUSE to run}, instalar manualmente la librería \textit{libfuse2} y volver a ejecutar. También hay veces que da error de compatibilidad con sandbox, sistema de seguridad de Chrome que tiene conflicto con los permisos de usuario en algunas distribuciones, para lo que basta con ejecutar con la opción \textit{- -no-sandbox}.
+    \item \textbf{Configuración inicial:} Hacer click en \textit{Create instance} y asignarle un nombre y una contraseña. De esta forma, se crea un SGBD de forma local. La instacia estará activa cuando aparezca la etiqueta verde \textit{running}, aunque se puede parar con el botón de \textit{stop}. Una vez la instancia esté en estado \textit{running}, estará lista para trabajar con ella. En el panel de la izquierda podremos ver las herramientas de \textit{Query}, para ejecutar código Cypher; \textit{Explore} para navegar por el grafo de forma fluida y estética y así poder ver más rápidamente los distintos hilos del sistema; y \textit{Dashboards}, que sirve para crear cuadros de mando con gráficos que se actualizan en tiempo real para poder monitorizar o tomar decisiones de una forma rápida.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/jesus/cap1.png}
+    \caption{Entrada en el entorno}
+    \label{fig:entrada_entorno_node4jdesktop}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/jesus/cap2.png}
+    \caption{Herramientas disponibles.}
+    \label{fig:herramientas_disponibles}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/jesus/cap3.png}
+    \caption{Estado Running.}
+    \label{fig:running}
+\end{figure}
+
+\section{Implementación DDL y DML}
+
+Primero se debe entender que en NoSQL orientado a grafos, no existen tablas ni relaciones como tal. Lo equivalente a las tablas son las etiquetas, que definen el tipo de objeto (por ejemplo, :Usuario o :Publicacion), mientras que cada fila o registro son los nodos, cada uno de los cuales contiene una serie de propiedades (columnas) y tendrán asociada una etiqueta. Las relaciones serán flechas físicas entre nodos, como por ejemplo (Usuario)-[:SIGUE]->(Usuario).
+
+\subsection{DDL (Data Definition Language)}
+
+En Neo4j el DDL no se usa para crear lo que serían tablas, sino que se usa para definir reglas de integridad y optimización:
+\begin{enumerate}
+    \item \textbf{CREATE CONSTRAINT:} Se usa para garantizar la integridad referencial, es decir, lo que usaríamos en SQL para decir que uno o más atributos son clave primaria y, por tanto, no se pueden repetir.
+    \item \textbf{CREATE INDEX:} Permite hacer búsquedas más eficientes, creando una estructura que permite encontrar nodos rápidamente por una propiedad específica.
+    \item \textbf{SHOW CONSTRAINTS:} Muestra las restrecciones creadas anteriormente con su id (también sirve para otros elementos, como \textit{INDEXES}, si se quiere mostrar los índices creados previamente).
+    \item \textbf{DROP:} Para eliminar restricciones o indices creados anteriormente.
+\end{enumerate}
+
+\subsection{DML (Data Manipulation Language)}
+
+Para interactuar con el grafo que representa el sistema de información, se ha usado:
+\begin{enumerate}
+    \item \textbf{CREATE:} Se utiliza para crear nodos y relaciones. Es el equivalente al \textit{INSERT} de SQL. 
+    \item \textbf{MATCH:} Es el equivalente a \textit{SELECT}, utilizado para búsquedas. Se utiliza con \textbf{RETURN}, que permite mostrar en pantalla los datos encontrados.
+    \item \textbf{SET:} Es el equivalente a \textit{UPDATE}, pues sirve para actualizar o añadir propiedades a nodos o relaciones ya existentes.
+    \item \textbf{DELETE / DETACH DELETE:} Permite eliminar datos. DELETE elimina un nodo, mientras que DETACH DELETE elimina ese nodo y todas las relaciones conectadas con él.
+\end{enumerate}
+
+\section{Sentencias empleadas}
+
+Se comienza con la definición de reglas:
+\begin{listing}[H]
+\begin{minted}[frame=lines, framesep=2mm, baselinestretch=1.2, bgcolor=lightgray!10, fontsize=\footnotesize]{cypher}
+// 1. Asegurar que el ID de usuario sea único (PK)
+CREATE CONSTRAINT idUsuarioPK IF NOT EXISTS FOR (u:Usuario) REQUIRE u.idUsuario IS UNIQUE;
+
+// 2. Asegurar que el ID de publicación sea único
+CREATE CONSTRAINT idPublicacionPK IF NOT EXISTS FOR (p:Publicacion) REQUIRE p.idPublicacion IS UNIQUE;
+
+// 3. Crear un índice para buscar rápido por nick
+CREATE INDEX indiceNombreUsuario IF NOT EXISTS FOR (u:Usuario) ON (u.nombreUsuario);
+
+// 4. Asegurar que el hashtag sea único
+CREATE CONSTRAINT hashtagPK IF NOT EXISTS FOR (h:Hashtag) REQUIRE h.hashtag IS UNIQUE;
+\end{minted}
+\end{listing}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/jesus/cap4.png}
+    \caption{Definición de reglas.}
+    \label{fig:def_reglas}
+\end{figure}
+
+A continuación, se procede a insertar datos de prueba. Sería lo equivalente a crear las tablas de \textit{Usuarios}, \textit{Publicaciones} y \textit{Hashtags} de nuestra práctica (en versión simplificada) y algunas de sus relaciones entre ellas:
+\begin{listing}[H]
+\begin{minted}[frame=lines, framesep=2mm, baselinestretch=1.2, bgcolor=lightgray!10, fontsize=\footnotesize]{cypher}
+// Crear Usuarios
+CREATE (u1:Usuario {idUsuario: 'U01', nombreUsuario: 'IsmaelSM', email: 'isma@ugr.es',
+ biografia: 'Estudiante de Doble Grado'})
+CREATE (u2:Usuario {idUsuario: 'U02', nombreUsuario: 'JesusRG', email: 'jesus@ugr.es'})
+CREATE (u3:Usuario {idUsuario: 'U03', nombreUsuario: 'SergioCG', email: 'sergio@ugr.es'})
+
+// Crear Publicaciones
+CREATE (p1:Publicacion {idPublicacion: 'P101', nombre: 'Duda con Neo4j', descripcion: 
+'¿Es mejor que SQL?', fechaDeCreacion: '2026-01-07'})
+CREATE (p2:Publicacion {idPublicacion: 'P102', nombre: 'Práctica 2 terminada', descripcion: 
+'Ya tenemos el PDF de DDSI', fechaDeCreacion: '2026-01-07'})
+
+// Crear Hashtags (Tendencias)
+CREATE (h1:Hashtag {hashtag: '#informatica'})
+CREATE (h2:Hashtag {hashtag: '#UGR'})
+
+// Crear Relaciones
+// Ismael y Sergio publican cosas
+CREATE (u1)-[:CREAR_PUBLICACION]->(p1)
+CREATE (u3)-[:CREAR_PUBLICACION]->(p2)
+
+// Jesús sigue a Ismael y a Sergio
+CREATE (u2)-[:SIGUE {fechaAmistad: '2026-01-01'}]->(u1)
+CREATE (u2)-[:SIGUE {fechaAmistad: '2026-01-02'}]->(u3)
+
+// Publicaciones mencionan hashtags
+CREATE (p1)-[:MENCIONA_HASHTAG]->(h1)
+CREATE (p2)-[:MENCIONA_HASHTAG]->(h1)
+CREATE (p2)-[:MENCIONA_HASHTAG]->(h2)
+\end{minted}
+\end{listing}
+
+
+Cabe destacar que, mientras que en SQL para la relación \textit{CREAR\_PUBLICACION} habría que fusionar tablas al ser una relación 1:m, en los modelos orientados a grafos no se hace ningún tipo de fusión para ganar velocidad en las consultas.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/jesus/cap5.png}
+    \caption{Ejecución de la inserción de datos.}
+    \label{fig:insercion}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/jesus/cap6.png}
+    \caption{Grafo generado.}
+    \label{fig:grafo}
+\end{figure}
+
+Posteriormente se probaron distintas consultas:
+\begin{listing}[H]
+\begin{minted}[frame=lines, framesep=2mm, baselinestretch=1.2, bgcolor=lightgray!10, fontsize=\footnotesize]{cypher}
+// Ver las publicaciones realizadas por los usuarios a los que sigue el usuario 'JesusRG'
+MATCH (u:Usuario {nombreUsuario: 'JesusRG'})-[:SIGUE]->(seguido)-[:CREAR_PUBLICACION]->(post) 
+RETURN seguido.nombreUsuario AS Autor, post.nombre AS Titulo, post.descripcion AS Texto
+\end{minted}
+\end{listing}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/jesus/cap7.png}
+    \caption{Resultado de la primera consulta.}
+    \label{fig:primera_consulta}
+\end{figure}
+
+\begin{listing}[H]
+\begin{minted}[frame=lines, framesep=2mm, baselinestretch=1.2, bgcolor=lightgray!10, fontsize=\footnotesize]{cypher}
+// Contar cuántas veces aparece cada hashtag, (es decir, cuantas publicaciones lo mencionan) y
+// mostrar los hashtags de mayor a menor número de ocurrencias.
+MATCH (h:Hashtag)<-[:MENCIONA_HASHTAG]-(p:Publicacion) RETURN h.hashtag AS Tendencia, count(p) 
+AS NumeroDePosts ORDER BY NumeroDePosts DESC
+\end{minted}
+\end{listing}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/jesus/cap8.png}
+    \caption{Resultado de la segunda consulta.}
+    \label{fig:segunda_consulta}
+\end{figure}
+
+Finalmente, se probó lo equivalente a un \textit{UPDATE}:
+\begin{listing}[H]
+\begin{minted}[frame=lines, framesep=2mm, baselinestretch=1.2, bgcolor=lightgray!10, fontsize=\footnotesize]{cypher}
+MATCH (u:Usuario {nombreUsuario: 'IsmaelSM'})SET u.biografia = 'Experto en bases de datos NoSQL'
+RETURN u
+\end{minted}
+\end{listing}
+
+
+\section{Adecuación al Sistema EKIS}
+
+El uso de un modelo orientado a graficos es perfecto para nuestro sistema EKIS, una red social. A mayor escala, habría una gran cantidad de relaciones en nuestro sistema, lo que haría que mediante SQL la recuperación de todos los datos relacionados con un usuario fuera muy costosa debido a la necesidad de hacer muchos JOIN entre tablas. Sin embargo, el uso de grafos permite navegar entre los nodos a través de punteros, siendo el rendimiento constante para mil usuarios o para un millón de ellos.
+
+Además, nos aporta una flexibilidad que SQL no, pues si necesitásemos ampliar las interacciones o funcionalidades de los usuarios, no seria necesario reestructurar tablas enteras, sino que bastaría con añadir nuevos nodos conectados a los anteriores.
+
+Finalmente, cabe mencionar que el uso de grafos elimina la impedancia de desajuste que sufríamos en el modelo relacional, ya que la estructura de los datos en la base de datos coincide exactamente con los objetos y relaciones lógicas de nuestra aplicación EKIS, facilitando así el desarrollo de la misma.
