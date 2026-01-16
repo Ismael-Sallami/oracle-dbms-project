@@ -17,6 +17,7 @@ class VentanaPublicaciones(ctk.CTkFrame):
         self.conn = conn
         self.id_usuario = id_usuario
         self.es_admin = es_admin
+        self.offset_actual = 0
         
         # IMPORTANTE: No creamos widgets aquí para evitar el SegFault inmediato.
         # Solo preparamos el esqueleto y delegamos la creación al 'after'.
@@ -45,6 +46,8 @@ class VentanaPublicaciones(ctk.CTkFrame):
                                            command=self.abrir_ventana_crear, fg_color="#D35400", width=100)
             self.btn_crear.pack(side="right", padx=5)
 
+            self.btn_cargar_mas = None
+
             # --- ÁREA SCROLLABLE ---
             self.scroll_frame = ctk.CTkScrollableFrame(self, label_text="Iniciando...", label_font=(DEFAULT_FONT, 18))
             self.scroll_frame.pack(fill="both", expand=True, padx=20, pady=10)
@@ -61,6 +64,12 @@ class VentanaPublicaciones(ctk.CTkFrame):
             self.update_idletasks()
 
     def mostrar_feed_general(self):
+        self.limpiar_lista()
+        self.offset_actual = 0
+        self.scroll_frame.configure(label_text="Cargando feed...")
+        self.cargar_lote_publicaciones(privado=False)
+
+    def mostrar_feed_general_antiguo(self):
         self.limpiar_lista()
         self.scroll_frame.configure(label_text="Cargando feed...")
         
@@ -101,6 +110,12 @@ class VentanaPublicaciones(ctk.CTkFrame):
 
     def mostrar_mis_publicaciones(self):
         self.limpiar_lista()
+        self.offset_actual=0
+        self.scroll_frame.configure(label_text="Cargando mis publicaciones...")
+        self.cargar_lote_publicaciones(privado=True)
+
+    def mostrar_mis_publicaciones_antiguo(self):
+        self.limpiar_lista()
         self.scroll_frame.configure(label_text="Mis Publicaciones")
         try:
             publicaciones = functions.listar_publicaciones(self.conn, self.id_usuario, privado=True)
@@ -113,6 +128,50 @@ class VentanaPublicaciones(ctk.CTkFrame):
                 self.crear_tarjeta_publicacion(id_pub, nombre, desc, img, likes, "Yo", es_propia=True)
         except Exception as e:
             print(f"Error: {e}")
+    
+    def cargar_lote_publicaciones(self, privado=False):
+        if self.btn_cargar_mas:
+            self.btn_cargar_mas.destroy()
+            self.btn_cargar_mas = None
+
+        try:
+            publicaciones = functions.listar_publicaciones(self.conn, self.id_usuario,
+                                                           offset=self.offset_actual,
+                                                           limit=NUM_PUBLICACIONES_MOSTRAR,
+                                                           privado=privado)
+            if not publicaciones and self.offset_actual == 0:
+                ctk.CTkLabel(self.scroll_frame, text="No hay publicaciones.").pack(pady=20)
+                self.scroll_frame.configure(label_text="Muro vacío")
+                return
+
+            anuncios = None if privado else obtener_anuncios(self.conn, self.id_usuario, self.es_admin)
+            for i, p in enumerate(publicaciones):
+                if not privado:
+                    nombre, desc, img, likes, autor, id_pub, le_ha_dado_like = p[:7]
+                    id_autor = p[7] if len(p) > 7 else None
+
+                    if anuncios and (self.offset_actual +i) % NUM_PUBLICACIONES_MOSTRAR == 0:
+                        anuncio_data = functions.cargar_anuncio_en_publicacion(anuncios, self.conn)
+                        if anuncio_data: self.crear_tarjeta_anuncio(anuncio_data)
+                    
+                    self.crear_tarjeta_publicacion(id_pub,nombre, desc, img, likes, autor,
+                                                   es_propia=False, like_inicial=bool(le_ha_dado_like),
+                                                   id_autor=id_autor)
+                else:
+                    nombre, desc, img, likes, id_pub = p[:5]
+                    self.crear_tarjeta_publicacion(id_pub, nombre,desc,img,likes, "Yo", es_propia=True)
+            self.offset_actual += len(publicaciones)
+
+            if len(publicaciones) == NUM_PUBLICACIONES_MOSTRAR:
+                self.btn_cargar_mas = ctk.CTkButton(
+                        self.scroll_frame, text="Cargar más publicaciones ⬇", 
+                        command=lambda: self.cargar_lote_publicaciones(privado),
+                        fg_color="#566573", hover_color="#2C3E50"
+                        )
+                self.btn_cargar_mas.pack(pady=15)
+            self.scroll_frame.configure(label_text="Feed Global" if not privado else "Mis Publicaciones")
+        except Exception as e:
+            print(f"Error en carga de lote: {e}")
 
     def crear_tarjeta_publicacion(self, id_pub, nombre, desc, img, likes, autor, es_propia, like_inicial=False, id_autor=None):
         card = ctk.CTkFrame(self.scroll_frame, fg_color=("#E5E7E9", "#34495E"))

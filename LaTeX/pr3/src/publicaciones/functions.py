@@ -1,4 +1,4 @@
-import pyodbc 
+import oracledb 
 import random
 from publicidad.functions import listar_activos_bd 
 from .utils import conversion_a_int_seguro, vacio_a_none
@@ -126,8 +126,66 @@ def modificar_publicacion(cursor, id_usuario, id_publicacion, nombre, descripcio
     except Exception as e:
         print(f"Un error ha ocurrido: {e}")
         return False
+
+def listar_publicaciones(connection, id_usuario, offset=0, limit=10, privado=False):
+    resultados = []
+    # Parametros base
+    parametros = [id_usuario]
     
-def listar_publicaciones(connection,id_usuario,privado=False):
+    cursor = connection.cursor()
+    try:
+        # Nota: Se añade ORDER BY IDPUBLICACION DESC para que salgan las nuevas primero
+        # Se añade la sintaxis de paginación estándar de SQL (funciona en Oracle 12c+, SQL Server, Postgre)
+        paginacion_sql = " ORDER BY p.IDPUBLICACION DESC OFFSET :2 ROWS FETCH NEXT :3 ROWS ONLY"
+        
+        if not privado:
+            sql_query = """
+                SELECT p.NOMBRE, p.DESCRIPCION, p.IMAGEN,
+                NVL(l.num_likes,0) AS NUM_LIKES, u.NOMBREUSUARIO, p.IDPUBLICACION,
+                CASE 
+                    WHEN ul.IDPUBLICACION IS NOT NULL THEN 1 
+                    ELSE 0 
+                END AS DIO_LIKE,
+                p.IDUSUARIO
+                FROM PUBLICACION p 
+                LEFT JOIN (
+                    SELECT IDPUBLICACION, COUNT(*) AS num_likes
+                    FROM ME_GUSTA
+                    GROUP BY IDPUBLICACION
+                ) l ON l.IDPUBLICACION = p.IDPUBLICACION
+                LEFT JOIN USUARIO u ON u.IDUSUARIO = p.IDUSUARIO
+                LEFT JOIN (
+                    SELECT IDPUBLICACION FROM ME_GUSTA WHERE IDUSUARIO = :1
+                ) ul ON ul.IDPUBLICACION = p.IDPUBLICACION
+                WHERE p.ELIMINADO = 'N'
+                """ + paginacion_sql
+        else:
+            sql_query = """
+                SELECT p.NOMBRE, p.DESCRIPCION, p.IMAGEN,
+                NVL(l.num_likes,0) AS NUM_LIKES, p.IDPUBLICACION
+                FROM PUBLICACION p 
+                LEFT JOIN (
+                    SELECT IDPUBLICACION, COUNT(*) AS num_likes
+                    FROM ME_GUSTA
+                    GROUP BY IDPUBLICACION
+                ) l on l.IDPUBLICACION = p.IDPUBLICACION
+                WHERE p.ELIMINADO = 'N' AND p.IDUSUARIO = :1
+                """ + paginacion_sql
+
+        # Añadimos los parámetros de paginación a la lista
+        parametros.append(offset)
+        parametros.append(limit)
+        
+        cursor.execute(sql_query, parametros)
+        resultados = cursor.fetchall()
+        return resultados
+    except Exception as e:
+        print(f"Un error ha ocurrido: {e}")
+        return [] # Retornar lista vacía en error para evitar crash
+    finally:
+        cursor.close()
+
+def listar_publicaciones_antiguo(connection,id_usuario,privado=False):
     resultados=[]
     parametros=[id_usuario]
     cursor = connection.cursor()
