@@ -127,6 +127,9 @@ class VentanaPublicaciones(ctk.CTkFrame):
         if desc:
             ctk.CTkLabel(info, text=desc, font=(DEFAULT_FONT, 13), wraplength=300, justify="left").pack(fill="x", pady=5)
 
+        if img:
+            ctk.CTkLabel(info, text=f"🖼️ [Imagen adjunta]: {img}", font=(DEFAULT_FONT, 14), text_color="#5DADE2", anchor="w").pack(fill="x", pady=5)
+
         actions = ctk.CTkFrame(card, fg_color="transparent")
         actions.pack(side="right", padx=10)
 
@@ -134,6 +137,10 @@ class VentanaPublicaciones(ctk.CTkFrame):
         lbl_l.pack()
 
         if es_propia:
+            btn_edit = ctk.CTkButton(actions, text="✏️", width=40, fg_color="#F39C12",
+                                     command=lambda:self.abrir_ventana_editar(id_pub,nombre,desc,img))
+            btn_edit.pack(pady=2)
+
             ctk.CTkButton(actions, text="🗑️", width=35, fg_color="#C0392B",
                           command=lambda i=id_pub: self.accion_eliminar(i)).pack(pady=2)
         else:
@@ -141,8 +148,9 @@ class VentanaPublicaciones(ctk.CTkFrame):
             b_frame.pack()
             
             c_l = LIKED_GREEN_COLOR if like_inicial else LIKE_RED_COLOR
-            ctk.CTkButton(b_frame, text="❤️", width=35, fg_color=c_l,
-                          command=lambda i=id_pub, l=lbl_l: self.accion_like(i, l)).pack(side="left", padx=2)
+            btn_like = ctk.CTkButton(b_frame, text="❤️", width=35, fg_color=c_l)
+            btn_like.configure(command=lambda: self.accion_like(id_pub, btn_like, lbl_l))
+            btn_like.pack()
             
             if id_autor != self.id_usuario:
                 ctk.CTkButton(b_frame, text="!", width=35, fg_color=REPORT_ORANGE_COLOR, font=(DEFAULT_FONT, 14, "bold"),
@@ -154,11 +162,21 @@ class VentanaPublicaciones(ctk.CTkFrame):
         ctk.CTkLabel(card, text=f"📢 {d[0]}", font=(DEFAULT_FONT, 14, "bold")).pack(pady=5)
         ctk.CTkLabel(card, text=d[1], font=(DEFAULT_FONT, 12), wraplength=350).pack(pady=5)
 
-    def accion_like(self, id_p, lbl):
+    def accion_like(self, id_p, btn_widget, lbl):
         try:
             functions.toggle_like(id_p, self.id_usuario, self.conn)
-            # Como el botón cambia de color al recargar, simplemente actualizamos el número o refrescamos
-            self.mostrar_feed_general() 
+            #Refrescar solo el contador
+            color_actual = btn_widget.cget("fg_color")
+            likes_actuales = int(lbl.cget("text"))
+
+            if color_actual == LIKE_RED_COLOR:
+                nuevo_color = LIKED_GREEN_COLOR
+                nuevos_likes = likes_actuales + 1
+            else:
+                nuevo_color = LIKE_RED_COLOR
+                nuevos_likes = max(0, likes_actuales-1)
+            btn_widget.configure(fg_color=nuevo_color)
+            lbl.configure(text=str(nuevos_likes))
         except: pass
 
     def accion_reportar(self, id_p, id_a):
@@ -183,33 +201,55 @@ class VentanaPublicaciones(ctk.CTkFrame):
             cursor.close()
 
     def abrir_ventana_crear(self):
-        VentanaGestionPublicacion(self, self.conn, self.id_usuario)
+        VentanaGestionPublicacion(self, self.conn, self.id_usuario, modo="crear")
+
+    def abrir_ventana_editar(self, id_pub, nombre, desc, img):
+        datos_actuales = {"nombre": nombre, "desc": desc, "img": img}
+        VentanaGestionPublicacion(self, self.conn, self.id_usuario, 
+                                  modo="editar", id_publicacion=id_pub, datos = datos_actuales)
 
 class VentanaGestionPublicacion(ctk.CTkToplevel):
-    def __init__(self, parent, conn, id_u):
+    def __init__(self, parent, conn, id_u, modo="crear", id_publicacion=None, datos=None):
         super().__init__(parent)
-        self.conn, self.id_u, self.parent = conn, id_u, parent
-        self.title("Nueva Publicación")
-        self.geometry("400x450")
+        self.conn, self.id_u, self.parent, self.modo = conn, id_u, parent, modo
+        self.id_p = id_publicacion
+        self.title("Nueva Publicación" if modo == "crear" else "Editar Publicación")
+        self.geometry("400x600")
+        self.attributes("-topmost", True)
 
         # 1. Preparar widgets antes de mostrar
-        self._crear_widgets()
+        self._crear_widgets(datos=datos)
 
         # 2. Manejo de la visibilidad y el grab para evitar el error "window not viewable"
         self.withdraw()
         self.after(10, self._lanzar_modal)
 
-    def _crear_widgets(self):
+    def _crear_widgets(self,datos=None):
         """Organiza la creación de los elementos de la interfaz"""
-        ctk.CTkLabel(self, text="Título", font=(DEFAULT_FONT, 14, "bold")).pack(pady=(20, 5))
+        ctk.CTkLabel(self, text="Título (Obligatorio)", font=(DEFAULT_FONT, 14, "bold")).pack(pady=(20, 5))
         self.en = ctk.CTkEntry(self, width=300)
         self.en.pack(pady=5)
         
-        ctk.CTkLabel(self, text="Descripción", font=(DEFAULT_FONT, 14, "bold")).pack(pady=(10, 5))
+        ctk.CTkLabel(self, text="Descripción", font=(DEFAULT_FONT, 14)).pack(pady=(10, 5))
         self.ed = ctk.CTkTextbox(self, width=300, height=150)
         self.ed.pack(pady=5)
+
+        ctk.CTkLabel(self, text="URL Imagen / Texto", font=(DEFAULT_FONT, 14)).pack(pady=(10, 5))
+        self.en_img = ctk.CTkEntry(self, width=300)
+        self.en_img.pack(pady=5)
         
-        ctk.CTkButton(self, text="🚀 Publicar", fg_color="#D35400", 
+        ctk.CTkLabel(self, text="Categoría", font=(DEFAULT_FONT, 14)).pack(pady=(10, 5))
+        self.en_cat = ctk.CTkEntry(self, width=300)
+        self.en_cat.pack(pady=5)
+
+        if self.modo == "editar" and datos:
+            self.en.insert(0, datos["nombre"])
+            if datos["desc"]: self.ed.insert("0.0", datos["desc"])
+            if datos["img"]: self.en_img.insert("0.0", datos["img"])
+
+        
+        btn_text = "🚀 Publicar" if self.modo == "crear" else "Guardar cambios"
+        ctk.CTkButton(self, text=btn_text, fg_color="#D35400", 
                       command=self.guardar, width=200).pack(pady=30)
 
     def _lanzar_modal(self):
@@ -222,6 +262,8 @@ class VentanaGestionPublicacion(ctk.CTkToplevel):
     def guardar(self):
         n = self.en.get()
         d = self.ed.get("0.0", "end").strip()
+        img = self.en_img.get()
+        cat = self.en_cat.get()
         
         if not n:
             messagebox.showwarning("Atención", "El título es obligatorio.")
@@ -229,13 +271,24 @@ class VentanaGestionPublicacion(ctk.CTkToplevel):
 
         cursor = self.conn.cursor()
         try:
-            if functions.crear_publicacion(cursor, self.id_u, n, None, d, "General"):
-                self.conn.commit()
-                self.destroy()
-                self.parent.mostrar_feed_general()
+            exito = False
+            if self.modo == "crear":
+                exito = functions.crear_publicacion(cursor, self.id_u,n,img,d,cat)
             else:
-                messagebox.showerror("Error", "No se pudo crear la publicación.")
+                exito = functions.modificar_publicacion(cursor, self.id_u,self.id_p,n,d,img,cat)
+
+            if exito:
+                self.conn.commit()
+                messagebox.showinfo("Éxito", "Operación realizada correctamente.")
+                self.destroy()
+                
+                if self.modo == "crear":
+                    self.parent.mostrar_feed_general()
+                else:
+                    self.parent.mostrar_mis_publicaciones()
+            else:
+                messagebox.showerror("Error", "No se pudo crear/modificar la publicación.")
         except Exception as e:
-            print(f"Error al guardar: {e}")
+            print(f"Error Crítico: {e}")
         finally:
             cursor.close()
