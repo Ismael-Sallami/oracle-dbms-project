@@ -5,5 +5,147 @@
 \chapter{Modelo Clave-Valor (Fer)}
 \label{ch:fer}
 
-% Contenido de Fer aquí...
+El modelo \textbf{clave-valor} es una de las aproximaciones NoSQL más simples y eficientes: cada dato lo almacena como un par (\textit{key}, \textit{value}). A diferencia del modelo relacional, no existe un esquema rígido con tablas y columnas, sino un espacio de claves donde se consultan valores mediante accesos directos. Este enfoque resulta especialmente útil en sistemas con alta concurrencia, datos temporales y operaciones muy frecuentes, como los escenarios típicos de una red social.
 
+Para este trabajo se ha seleccionado \textbf{Redis} como SGBD clave-valor de referencia, ya que combina velocidad (principalmente en memoria), facilidad de despliegue y un conjunto de estructuras de datos que permiten modelar relaciones y estados de forma sencilla.
+
+\section{SGBD recomendado: Redis}
+
+Redis (REmote DIctionary Server) es un sistema NoSQL clave-valor orientado a \textbf{rendimiento} y \textbf{baja latencia}, ampliamente utilizado como caché, gestor de sesiones, colas, contadores y almacenamiento temporal. Su valor añadido frente a un almacén clave-valor básico es que no solo almacena cadenas (\texttt{string}), sino también estructuras de datos de alto nivel como \texttt{hashes}, \texttt{sets}, \texttt{lists} o \texttt{sorted sets}, muy útiles para sistemas de interacción social.
+
+\section{Instalación y Configuración del Entorno}
+
+Redis es sencillo de desplegar en Linux y permite comenzar a trabajar en pocos minutos.
+
+\subsection{Instalación en Ubuntu/Debian}
+\begin{minted}{bash}
+sudo apt update
+sudo apt install redis-server
+sudo systemctl enable --now redis-server
+redis-cli ping
+\end{minted}
+
+Si todo es correcto, el comando \texttt{PING} responde con \texttt{PONG}.
+
+\subsection{Instalación mediante Docker (alternativa)}
+\begin{minted}{bash}
+docker run -d --name redis-ekis -p 6379:6379 redis:latest
+redis-cli -h 127.0.0.1 -p 6379 ping
+\end{minted}
+
+\section{Diseño Clave-Valor del Subsistema de Usuarios}
+
+En una red social como EKIS, Redis se adapta especialmente bien a la gestión de:
+\begin{itemize}
+    \item \textbf{Sesiones y tokens} con caducidad (TTL).
+    \item \textbf{Relaciones rápidas} (amistades, bloqueos) mediante conjuntos.
+    \item \textbf{Contadores} (likes, seguidores) mediante incrementos atómicos.
+    \item \textbf{Caché de perfiles} para acelerar lecturas frecuentes.
+\end{itemize}
+
+\subsection{Estrategia de claves}
+Se define unas reglas simples para garantizar consistencia en el diseño:
+\begin{itemize}
+    \item \texttt{user:<id>} $\rightarrow$ datos del usuario en \texttt{HASH}
+    \item \texttt{friends:<id>} $\rightarrow$ conjunto de amistades en \texttt{SET}
+    \item \texttt{blocked:<id>} $\rightarrow$ conjunto de bloqueados en \texttt{SET}
+    \item \texttt{session:<token>} $\rightarrow$ sesión activa en \texttt{STRING} con TTL
+\end{itemize}
+
+\section{Equivalencias DDL y DML en Redis}
+
+\subsection{DDL (definición de estructura)}
+Redis no requiere DDL tradicional (no existen \texttt{CREATE TABLE}). La estructura se define por el tipo de dato asociado a cada clave. En entornos reales, la consistencia del diseño se garantiza por convención de claves y por el código de la aplicación.
+
+\subsection{DML (operaciones típicas)}
+Redis se maneja con comandos directos:
+\begin{itemize}
+    \item \texttt{SET / GET} para valores simples (sesiones, flags).
+    \item \texttt{HSET / HGETALL} para perfiles y datos agrupados en \texttt{HASH}.
+    \item \texttt{SADD / SISMEMBER / SMEMBERS} para relaciones en \texttt{SET}.
+    \item \texttt{INCR} para contadores atómicos.
+    \item \texttt{EXPIRE / TTL} para caducidad (sesiones).
+\end{itemize}
+
+\section{Implementación y Pruebas}
+
+A continuación se muestran operaciones reales que representan el subsistema de usuarios en EKIS usando \texttt{redis-cli}.
+
+\subsection{Inserción de un usuario (HASH)}
+\begin{minted}{bash}
+HSET user:10 nombre "Fernando" email "fer@email.com" rol "user"
+HSET user:20 nombre "Ismael"   email "isma@ugr.es"   rol "user"
+HGETALL user:10
+\end{minted}
+
+\subsection{Creación de relación de amistad (SET)}
+Para modelar amistad se usan conjuntos. Una amistad bidireccional se representa añadiendo cada usuario al conjunto del otro:
+
+\begin{minted}{bash}
+SADD friends:10 20
+SADD friends:20 10
+SMEMBERS friends:10
+\end{minted}
+
+\subsection{Control de coherencia: evitar auto-relación}
+Redis no tiene \textit{triggers}. La regla “no puedo ser amigo de mí mismo” se controla desde la lógica de aplicación (o mediante scripts Lua). Por ejemplo, la aplicación tiene que impedir:
+\begin{minted}{bash}
+SADD friends:10 10
+\end{minted}
+
+\subsection{Bloqueo de usuario (SET) con consistencia}
+Cuando un usuario bloquea a otro, es coherente eliminar la amistad previa y registrar el bloqueo. Redis nos permite agrupar operaciones con \texttt{MULTI/EXEC}:
+
+\begin{minted}{bash}
+MULTI
+SREM friends:10 20
+SREM friends:20 10
+SADD blocked:10 20
+EXEC
+\end{minted}
+
+\subsection{Gestión de sesión con caducidad (TTL)}
+Las sesiones son un caso ideal para Redis porque permite caducidad automática:
+
+\begin{minted}{bash}
+SET session:token_abc "10"
+EXPIRE session:token_abc 3600
+TTL session:token_abc
+GET session:token_abc
+\end{minted}
+
+\subsection{Ejemplo práctico con Python (redis-py)}
+Redis se integra fácilmente con Python para automatizar pruebas y lógica de negocio:
+
+\begin{minted}{python}
+import redis
+
+r = redis.Redis(host="127.0.0.1", port=6379, decode_responses=True)
+
+# Crear usuario (HASH)
+r.hset("user:10", mapping={"nombre": "Fernando", "email": "fer@email.com", "rol": "user"})
+
+# Añadir amistad (SET)
+r.sadd("friends:10", "20")
+r.sadd("friends:20", "10")
+
+# Crear sesión con TTL
+r.set("session:token_abc", "10")
+r.expire("session:token_abc", 3600)
+
+print("Usuario 10:", r.hgetall("user:10"))
+print("Amigos de 10:", r.smembers("friends:10"))
+print("TTL sesión:", r.ttl("session:token_abc"))
+\end{minted}
+
+\section{Adecuación al Sistema EKIS}
+
+El modelo clave-valor con Redis es especialmente adecuado en EKIS como soporte de alto rendimiento para el subsistema de usuarios:
+
+\begin{itemize}
+    \item \textbf{Baja latencia y alta concurrencia:} ideal para operaciones muy frecuentes como consultas de estado, contadores y relaciones.
+    \item \textbf{Sesiones y expiración automática:} permite gestionar tokens de autenticación y sesiones sin necesidad de procesos de limpieza.
+    \item \textbf{Relaciones rápidas con SET:} amistades, bloqueos y listas de seguimiento se resuelven con operaciones eficientes.
+    \item \textbf{Soporte natural para caché:} reduce carga en el SGBD relacional principal cuando se consultan perfiles repetidamente.
+\end{itemize}
+sin embargo, Redis no sustituye completamente al modelo relacional cuando se requieren consultas complejas, \texttt{JOIN}, o garantías transaccionales fuertes a nivel de múltiples entidades.
