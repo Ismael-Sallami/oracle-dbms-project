@@ -121,7 +121,7 @@ import customtkinter as ctk
 from db_connection import DBConnection
 
 import sys
-
+# Engañamos a Python para que crea que el modo Thick no existe
 import faulthandler
 
 
@@ -129,8 +129,6 @@ import faulthandler
 # Habilitar el rastreador de fallos de segmentación
 
 faulthandler.enable()
-
-
 
 # --- IMPORTACIÓN DE SUBSISTEMAS ---
 
@@ -157,7 +155,8 @@ from aspectoslegales.menu import VentanaReportes
 
 
 ctk.set_appearance_mode("Dark")
-
+ctk.set_widget_scaling(1.0)
+ctk.set_window_scaling(1.0)
 ctk.set_default_color_theme("blue")
 
 
@@ -436,6 +435,8 @@ class App(ctk.CTk):
 
         self.mostrar_login()
 
+        self.protocol("WM_DELETE_WINDOW", self.salir)
+
 
 
     def limpiar_root(self):
@@ -496,8 +497,7 @@ class App(ctk.CTk):
         self.frame_contenido.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
 
 
-        self.update()
-        self._crear_widgets_sidebar()
+        self.after(50, self._crear_widgets_sidebar)
 
 
 
@@ -634,6 +634,10 @@ class App(ctk.CTk):
         self.db.close()
 
         self.quit()
+        self.destroy()
+
+        import os
+        os._exit(0)
 
 
 
