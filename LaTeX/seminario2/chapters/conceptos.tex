@@ -1,0 +1,22 @@
+Para la implementación del sistema \textit{EKIS}, se ha seleccionado un stack tecnológico centrado en el ecosistema Oracle, priorizando la integridad de datos y la rapidez de desarrollo mediante el uso de Oracle APEX y PL/SQL.
+
+\textbf{Diseño y Modelado de Datos}
+
+El fundamento de la aplicación reside en un esquema de base de datos relacional robusto. En la transición del modelo conceptual al lógico, se aplicó la técnica de \textbf{fusión de tablas}, combinando estructuralmente múltiples tablas conceptuales para optimizar el rendimiento: las relacionadas con la gestión publicitaria se unificaron en la tabla \texttt{PUBLICACION}, y las de agrupación de comunicaciones en la tabla \texttt{MENSAJE}. El esquema final integra tablas clave como \textit{Usuarios}, \textit{Anuncios}, \textit{Publicaciones} y \textit{Hashtags}. Para garantizar la calidad de los datos, se configuraron restricciones de clave foránea con borrado en cascada y se implementaron validaciones tipo \texttt{CHECK} (valores 'Y'/'N') para suplir la ausencia de un tipo de dato booleano nativo.
+
+\textbf{Lógica y Desarrollo en APEX}
+
+La lógica del servidor se construyó utilizando el lenguaje PL/SQL, empleando procedimientos almacenados para operaciones transaccionales complejas y estandarizando la nomenclatura de variables (prefijo \texttt{p\_}) para asegurar el correcto funcionamiento. El desarrollo en Oracle APEX presentó desafíos técnicos específicos que definieron la arquitectura final:
+\begin{itemize}
+    \item \textbf{Procesamiento de Datos:} Inicialmente se intentó el uso de llamadas AJAX vía JavaScript, pero debido a fallos en la ejecución, se migró hacia procesos nativos del servidor (\textit{Processes}). Se configuró la ejecución de código SQL directo en lugar de \textit{Form Automatic Row Processing}, solucionando conflictos de persistencia y errores al modificar claves primarias.
+    \item \textbf{Gestión de Memoria:} Se utilizaron cursores para iterar conjuntos de datos y \textbf{Colecciones APEX} (\texttt{APEX\_COLLECTION}) para la gestión temporal en memoria, vital para el algoritmo de listado de tendencias. Esto requirió una inicialización explícita de las colecciones para evitar errores en tiempo de ejecución.
+    \item \textbf{Interfaz:} Se empleó el \textit{Universal Theme} para garantizar la adaptabilidad y se usaron componentes como \textit{List of Values} mapeadas para la asignación de anuncios.
+\end{itemize}
+
+\textbf{Seguridad y Control de Acceso}
+
+La seguridad se gestionó mediante una arquitectura de roles (Usuario y Administrador) implementada a través de esquemas de autenticación y autorización personalizados:
+\begin{description}
+    \item[Autenticación:] Se desarrolló el paquete \texttt{PKG\_AUTH\_EKIS} para validar credenciales contra la tabla \texttt{USUARIO}, integrándolo en los componentes compartidos de la aplicación.
+    \item[Autorización:] Se restringió el acceso a funcionalidades críticas, como la asignación de anuncios, mediante lógica condicional en la interfaz y redirecciones de URL personalizadas. Esto asegura que los requisitos funcionales administrativos permanezcan ocultos para los usuarios estándar.
+\end{description}

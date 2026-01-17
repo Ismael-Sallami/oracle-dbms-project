@@ -1,0 +1,34 @@
+
+La realización de este proyecto ha seguido una metodología colaborativa para el diseño conceptual y lógico, dividiendo posteriormente la implementación técnica y el desarrollo en Oracle APEX por módulos funcionales. A continuación, se detalla la intervención de cada miembro del equipo:
+
+\begin{enumerate}
+    \item \textbf{Diseño Conceptual y Lógico (Intervención Conjunta):} \\
+    Todos los miembros del grupo \textit{(Ismael Sallami Moreno, Jesús Rodríguez González, Fernando José Gracia Choin, Sergio Calvo González y Javier Niño Sánchez)} participaron activamente en la fase de análisis inicial. Esta etapa incluyó:
+    \begin{itemize}
+        \item La toma de decisiones respecto a la fusión de tablas para optimizar el modelo, destacando la fusión de las tablas 3, 6, 14 y 15 en la tabla \texttt{PUBLICACION} y la fusión de las tablas 5 y 12 en la estructura de \texttt{MENSAJE}.
+    \end{itemize}
+
+    \item \textbf{Implementación del Sistema para el Login:} \\
+    \textbf{Ismael Sallami Moreno} fueron los encargados del desarrollo de la tabla \texttt{USUARIO} (tabla 1). Su trabajo abarcó la creación de la Página 2 (\textit{Modificar Usuario}), la configuración de los esquemas de autenticación personalizados (\textit{Login Tabla Usuario}) y el diseño de la Página 9999 (\textit{Login}).
+
+    \item \textbf{Gestión de Contenido y Publicaciones:} \\
+    \textbf{Jesús Rodríguez González} asumió la responsabilidad de la tabla \texttt{PUBLICACION} (tabla 2). Implementó la lógica para la gestión de contenido multimedia y desarrolló la Página 3 (\textit{Crear publicaciones}).
+
+    \item \textbf{Módulo de Publicidad y Fusiones Complejas:} \\
+    \textbf{Fernando José Gracia Choin} se ocupó de la implementación de la tabla resultante \texttt{PUBLICACION}, producto de la fusión estratégica de las tablas 3, 6, 14 y 15. Desarrolló la Página 11 (\textit{Asignar Anuncio a Publicación}).
+
+    \item \textbf{Sistema de Mensajería y Comunicaciones:} \\
+    \textbf{Sergio Calvo González} desarrolló el módulo de comunicación asíncrona, implementando las tablas \texttt{MENSAJE} y \texttt{CONVERSA} (fusión de tablas 5 y 12). Además, finalizó con la creación de la Página 12 (\textit{Enviar Mensajes}) y la gestión de conversaciones.
+
+    \item \textbf{Analítica, Reportes y Redacción de la Memoria:} \\
+    \textbf{Javier Niño Sánchez} implementó la Página 4 (\textit{Listar Tendencias}) y la lógica PL/SQL. Asimismo, ha sido el encargado principal de la redacción, estructuración y compilación final de la memoria del proyecto, integrando las documentaciones técnicas aportadas por cada miembro.
+\end{enumerate}
+
+\section*{Cambios Realizados}
+
+Durante el desarrollo, se han identificado y realizado los siguientes cambios relevantes respecto a la práctica anterior:
+
+\begin{itemize}
+    \item El proyecto parte de la base de la Práctica 2, sobre la cual ya se habían realizado modificaciones previas antes de iniciar este desarrollo.
+    \item En la funcionalidad de \textit{Enviar Mensajes}, no se ha tenido en cuenta la restricción de que los usuarios deban ser amigos para poder intercambiar mensajes. Esto supone una diferencia respecto a posibles requisitos de control de acceso más estrictos.
+\end{itemize}
