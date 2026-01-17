@@ -63,12 +63,9 @@ class VentanaReportes(ctk.CTkFrame):
         Muestra la información extendida de un reporte seleccionado.
         reporte esperado: (id_rep, denunciante, denun_nombre, tipo, motivo, prueba, id_p, id_m, id_denunciado_num)
         """
-        # 1. Limpiar el panel de detalles anterior
         for widget in self.detalle_frame.winfo_children():
             widget.destroy()
 
-        # 2. Desempaquetar los datos (el orden debe coincidir con listar_todos_los_reportes)
-        # Asegúrate de que tu función de base de datos devuelva estos 9 campos.
         id_rep, denunciante, denun_nombre, tipo, motivo, prueba, id_p, id_m, id_denunciado_num = reporte
 
         # Título del reporte
@@ -78,7 +75,6 @@ class VentanaReportes(ctk.CTkFrame):
             font=ctk.CTkFont(size=20, weight="bold")
         ).pack(pady=10)
 
-        # Crear un scroll por si el contenido es muy largo
         scroll_contenido = ctk.CTkScrollableFrame(self.detalle_frame, fg_color="transparent")
         scroll_contenido.pack(fill="both", expand=True, padx=10, pady=5)
 
@@ -86,7 +82,6 @@ class VentanaReportes(ctk.CTkFrame):
         info_f = ctk.CTkFrame(scroll_contenido)
         info_f.pack(fill="x", padx=10, pady=10)
         
-        # Usamos denun_nombre para mostrarlo al admin, pero guardamos id_denunciado_num para las funciones
         detalles = [
             ("Denunciante:", denunciante), 
             ("Denunciado:", f"{denun_nombre} (ID: {id_denunciado_num})"), 
@@ -120,7 +115,6 @@ class VentanaReportes(ctk.CTkFrame):
                 txt_desc.configure(state="disabled")
 
                 # BOTÓN DE ACCIÓN: Eliminar Publicación
-                # Pasamos id_p (ID publicación), id_denunciado_num (ID usuario numérico) e id_rep (para cerrar reporte)
                 ctk.CTkButton(
                     pub_frame, 
                     text="Eliminar Publicación Definitivamente", 
@@ -132,7 +126,7 @@ class VentanaReportes(ctk.CTkFrame):
                 ctk.CTkLabel(scroll_contenido, text="⚠️ La publicación ya no existe o no se pudo cargar.", text_color="orange").pack(pady=10)
         
         else:
-            # Para MENSAJES u otros tipos, mostrar el texto de prueba directamente
+            # Para MENSAJES u otros tipos, mostramos el texto de prueba directamente
             txt_evidencia = ctk.CTkTextbox(scroll_contenido, height=150)
             txt_evidencia.pack(fill="x", padx=10, pady=10)
             txt_evidencia.insert("0.0", prueba if prueba else "No hay evidencia de texto disponible.")

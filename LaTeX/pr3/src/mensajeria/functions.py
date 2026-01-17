@@ -23,7 +23,6 @@ def enviar_mensaje(conn, id1, id2, mensaje):
             return False, "No sois amigos recíprocamente"
         
     except Exception as e: 
-        # ESTO ES LO IMPORTANTE: Muestra el error exacto en la consola
         print("\n--- ERROR AL ENVIAR MENSAJE ---")
         print(f"Tipo de error: {type(e).__name__}")
         print(f"Detalle del error: {e}")
@@ -55,7 +54,7 @@ def eliminar_mensaje(conn, id_usuario_activo, id_mensaje):
 def listar_usuarios(conn, idusuarioactivo, archivados=False):
     cursor = conn.cursor()
     try:
-        # Definimos si buscamos en ARCHIVADOS o no
+        # Definimos si buscamos en archivados o no
         filtro_archivado = "IN" if archivados else "NOT IN"
         
         # Esta consulta hace lo siguiente:

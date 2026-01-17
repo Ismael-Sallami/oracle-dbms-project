@@ -42,7 +42,7 @@ def enviar_reporte(conn, id_objetivo, tipo, id_denunciado, motivo, contenido_ori
     except Exception as e:
         print(f"Error al insertar reporte: {e}")
         try:
-            conn.rollback() # CORRECCIÓN: Rollback directo sobre conn
+            conn.rollback() 
         except:
             pass
         return False
