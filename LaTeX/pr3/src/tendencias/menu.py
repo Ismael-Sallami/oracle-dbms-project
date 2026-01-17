@@ -3,15 +3,16 @@ from tkinter import messagebox
 from . import functions
 
 class VentanaTendencias(ctk.CTkFrame):
-    def __init__(self, master, conn):
+    def __init__(self, master, conn, es_admin=False):
         super().__init__(master)
         self.conn = conn
+        self.es_admin = es_admin
         
         # Título Principal
         self.lbl_titulo = ctk.CTkLabel(self, text="ANÁLISIS DE TENDENCIAS", font=("Arial", 24, "bold"))
         self.lbl_titulo.pack(pady=15)
 
-        # --- ZONA SUPERIOR: CONSULTAS (Visualización) ---
+        # --- ZONA SUPERIOR: CONSULTAS (Visualización para TODOS) ---
         self.frame_listas = ctk.CTkFrame(self)
         self.frame_listas.pack(fill="both", expand=True, padx=20, pady=10)
 
@@ -35,24 +36,32 @@ class VentanaTendencias(ctk.CTkFrame):
         self.textbox = ctk.CTkTextbox(self.frame_listas, height=150)
         self.textbox.pack(fill="x", padx=10, pady=10)
 
-        # --- ZONA INFERIOR: GESTIÓN ADMIN (Acciones) ---
-        self.frame_admin = ctk.CTkFrame(self)
-        self.frame_admin.pack(fill="x", padx=20, pady=10)
+        # --- ZONA INFERIOR: GESTIÓN ADMIN (Solo si es_admin es True) ---
+        if self.es_admin:
+            self.frame_admin = ctk.CTkFrame(self)
+            self.frame_admin.pack(fill="x", padx=20, pady=10)
 
-        ctk.CTkLabel(self.frame_admin, text="Gestión de Administrador", font=("Arial", 16, "bold"), text_color="orange").pack(pady=5)
+            ctk.CTkLabel(self.frame_admin, text="Gestión de Administrador", font=("Arial", 16, "bold"), text_color="orange").pack(pady=5)
 
-        # Formulario Asignar Categoría
-        self.entry_tag = ctk.CTkEntry(self.frame_admin, placeholder_text="Hashtag (ej: #Python)")
-        self.entry_tag.pack(side="left", padx=5, pady=10, expand=True, fill="x")
-        self.entry_cat_nueva = ctk.CTkEntry(self.frame_admin, placeholder_text="Nueva Categoría")
-        self.entry_cat_nueva.pack(side="left", padx=5, pady=10, expand=True, fill="x")
-        
-        self.btn_asignar = ctk.CTkButton(self.frame_admin, text="Asignar", width=80, command=self.asignar_categoria)
-        self.btn_asignar.pack(side="left", padx=5)
+            # Formulario Asignar Categoría
+            # Nota: Necesitamos definir self.entry_tag aquí porque también lo usa el botón de resetear
+            self.entry_tag = ctk.CTkEntry(self.frame_admin, placeholder_text="Hashtag (ej: #Python)")
+            self.entry_tag.pack(side="left", padx=5, pady=10, expand=True, fill="x")
+            
+            self.entry_cat_nueva = ctk.CTkEntry(self.frame_admin, placeholder_text="Nueva Categoría")
+            self.entry_cat_nueva.pack(side="left", padx=5, pady=10, expand=True, fill="x")
+            
+            self.btn_asignar = ctk.CTkButton(self.frame_admin, text="Asignar", width=80, command=self.asignar_categoria)
+            self.btn_asignar.pack(side="left", padx=5)
 
-        # Botón Eliminar (Resetear)
-        self.btn_reset = ctk.CTkButton(self, text="Resetear Contador de Tendencia", fg_color="#E74C3C", hover_color="#C0392B", command=self.resetear_tendencia)
-        self.btn_reset.pack(pady=10)
+            # Botón Eliminar (Resetear) - Solo visible para admins
+            # Lo he movido visualmente cerca de la zona admin para mantener coherencia
+            self.btn_reset = ctk.CTkButton(self, 
+                                           text="Resetear Contador de Tendencia", 
+                                           fg_color="#E74C3C", 
+                                           hover_color="#C0392B", 
+                                           command=self.resetear_tendencia)
+            self.btn_reset.pack(pady=10)
 
     # --- LÓGICA DE LA INTERFAZ ---
 
@@ -80,12 +89,12 @@ class VentanaTendencias(ctk.CTkFrame):
             self.textbox.insert("end", "No se encontraron datos.")
         else:
             for i, row in enumerate(filas, 1):
-                # row[0] = Hashtag, row[1] = Menciones
                 self.textbox.insert("end", f"{i}. {row[0]} -> {row[1]} menciones\n")
         
         self.textbox.configure(state="disabled")
 
     def asignar_categoria(self):
+        # Esta función solo será llamada si el botón existe (es decir, si es admin)
         tag = self.entry_tag.get().strip()
         cat = self.entry_cat_nueva.get().strip()
         
@@ -105,9 +114,10 @@ class VentanaTendencias(ctk.CTkFrame):
             messagebox.showerror("Error", msg)
 
     def resetear_tendencia(self):
-        tag = self.entry_tag.get().strip() # Reutilizamos el campo de texto del hashtag
+        # Esta función solo será llamada si el botón existe (es decir, si es admin)
+        tag = self.entry_tag.get().strip()
         if not tag:
-            messagebox.showwarning("Atención", "Escribe el hashtag que deseas resetear en el campo de texto.")
+            messagebox.showwarning("Atención", "Escribe el hashtag que deseas resetear en el campo de texto del Hashtag (zona admin).")
             return
         
         if messagebox.askyesno("Confirmar", f"¿Estás seguro de resetear el contador de {tag} a cero?"):
@@ -121,7 +131,6 @@ class VentanaTendencias(ctk.CTkFrame):
 
     def mostrar_categorias(self):
         cursor = self.conn.cursor()
-        # Llamamos a la nueva función de lógica
         categorias = functions.obtener_categorias_unicas(cursor)
         
         self.textbox.configure(state="normal")
@@ -132,7 +141,6 @@ class VentanaTendencias(ctk.CTkFrame):
             self.textbox.insert("end", "Aún no se han asignado categorías a ningún hashtag.")
         else:
             for i, cat in enumerate(categorias, 1):
-                # cat[0] es el nombre de la categoría
                 nombre_cat = cat[0] if cat[0] else "Sin nombre"
                 self.textbox.insert("end", f"{i}. {nombre_cat}\n")
         

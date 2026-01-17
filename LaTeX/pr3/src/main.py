@@ -593,7 +593,7 @@ class App(ctk.CTk):
 
         self.limpiar_panel()
 
-        VentanaTendencias(self.frame_contenido, self.conn).pack(fill="both", expand=True)
+        VentanaTendencias(self.frame_contenido, self.conn, self.es_admin).pack(fill="both", expand=True)
 
     
 
