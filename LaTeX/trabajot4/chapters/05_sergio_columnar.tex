@@ -132,26 +132,34 @@ Creamos varios usuarios:
 \begin{minted}{sql}
 INSERT INTO usuario 
     (idusuario, nombreusuario,email, contrasenia) 
-    VALUES (00000000-0000-0000-0000-000000000001, 'Sergio', 'sergio@gmail.com', 'finisterre');
+    VALUES (00000000-0000-0000-0000-000000000001, 'Sergio', 
+        'sergio@gmail.com', 'finisterre');
 
 INSERT INTO usuario 
     (idusuario, nombreusuario,email, contrasenia) 
-    VALUES (00000000-0000-0000-0000-000000000002, 'Javier', 'javier@gmail.com', 'finisterre');
+    VALUES (00000000-0000-0000-0000-000000000002, 'Javier', 
+        'javier@gmail.com', 'finisterre');
 \end{minted}
 
 Creamos mensajes entre los usuarios (los ids se generan con uuid()):
 \begin{minted}{sql}
     INSERT INTO mensaje 
         (idusuario1, idusuario2, fecha, idmensaje, mensaje) 
-        VALUES (00000000-0000-0000-0000-000000000001, 00000000-0000-0000-0000-000000000002, toTimestamp(now()), uuid(), 'Hola');
+        VALUES (00000000-0000-0000-0000-000000000001, 
+            00000000-0000-0000-0000-000000000002, 
+            toTimestamp(now()), uuid(), 'Hola');
 
     INSERT INTO mensaje 
         (idusuario1, idusuario2, fecha, idmensaje, mensaje) 
-        VALUES (00000000-0000-0000-0000-000000000001, 00000000-0000-0000-0000-000000000002, toTimestamp(now()), uuid(), 'Que tal');
+        VALUES (00000000-0000-0000-0000-000000000001, 
+            00000000-0000-0000-0000-000000000002, 
+            toTimestamp(now()), uuid(), 'Que tal');
 
     INSERT INTO mensaje 
         (idusuario1, idusuario2, fecha, idmensaje, mensaje) 
-        VALUES (00000000-0000-0000-0000-000000000002, 00000000-0000-0000-0000-000000000001, toTimestamp(now()), uuid(), 'Bien, ¿tú que tal?');
+        VALUES (00000000-0000-0000-0000-000000000002, 
+            00000000-0000-0000-0000-000000000001, 
+            toTimestamp(now()), uuid(), 'Bien, ¿tú que tal?');
 \end{minted}
 
 Para la consulta, al igual que en sql usaremos \textbf{SELECT}, sin embargo, si usamos la cláusula where, solo podremos realizar 
@@ -195,7 +203,55 @@ Para eliminar filas, se usa \textbf{DELETE}, de nuevo, la cláusula where es obl
 \end{minted}
 
 \subsection{Imágenes de la ejecución}
-\includegraphics[width=\linewidth]{figures/TU_CARPETA/imagen.png}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{figures/sergio/01_crear_keyspace_tablas.png}
+    \caption{Creación de keyspace y de las tablas.}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{figures/sergio/02_alter_drop.png}
+    \caption{Eliminación y añadido de atributos que no pertenecen a la clave primaria.}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{figures/sergio/03_tabla_modificada.png}
+    \caption{Comprobación de que la tabla se ha cambiado.}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{figures/sergio/04_insert.png}
+    \caption{Insert de valores en las tablas.}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{figures/sergio/05_select.png}
+    \caption{Consulta.}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{figures/sergio/06_update.png}
+    \caption{Actualización de filas en la tabla usuario.}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{figures/sergio/07_update2.png}
+    \caption{Actualización de filas en la tabla mensaje.}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{figures/sergio/08_delete.png}
+    \caption{Eliminación de filas.}
+\end{figure}
+
 
 
 \section{Adecuación al Sistema EKIS}
