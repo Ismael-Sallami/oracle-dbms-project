@@ -2,14 +2,19 @@ import customtkinter as ctk
 from tkinter import messagebox
 from . import functions
 import random
-from publicidad.functions import listar_activos_bd as obtener_anuncios
 from aspectoslegales.functions import enviar_reporte 
 
-NUM_PUBLICACIONES_MOSTRAR = 5
+NUM_PUBLICACIONES_MOSTRAR_ANUNCIO = 5
+NUM_PUBLICACIONES_MOSTRAR = NUM_PUBLICACIONES_MOSTRAR_ANUNCIO*2
+
 DEFAULT_FONT="Arial"
 LIKE_RED_COLOR="#E74C3C"
 LIKED_GREEN_COLOR="#2ECC71"
 REPORT_ORANGE_COLOR="#F39C12"
+
+MAX_TITLE = 30
+MAX_DESC = 256
+MAX_IMG = 255
 
 class VentanaPublicaciones(ctk.CTkFrame):
     def __init__(self, master, conn, id_usuario, es_admin = False):
@@ -21,7 +26,7 @@ class VentanaPublicaciones(ctk.CTkFrame):
         
         # IMPORTANTE: No creamos widgets aquí para evitar el SegFault inmediato.
         # Solo preparamos el esqueleto y delegamos la creación al 'after'.
-        self.after(100, self._inicializar_interfaz)
+        self.after(200, self._inicializar_interfaz)
 
     def _inicializar_interfaz(self):
         """Crea los componentes base con la ventana ya asentada"""
@@ -61,7 +66,7 @@ class VentanaPublicaciones(ctk.CTkFrame):
         if hasattr(self, 'scroll_frame'):
             for widget in self.scroll_frame.winfo_children():
                 widget.destroy()
-            self.update_idletasks()
+            self.update()
 
     def mostrar_feed_general(self):
         self.limpiar_lista()
@@ -69,66 +74,12 @@ class VentanaPublicaciones(ctk.CTkFrame):
         self.scroll_frame.configure(label_text="Cargando feed...")
         self.cargar_lote_publicaciones(privado=False)
 
-    def mostrar_feed_general_antiguo(self):
-        self.limpiar_lista()
-        self.scroll_frame.configure(label_text="Cargando feed...")
-        
-        try:
-            publicaciones = functions.listar_publicaciones(self.conn, self.id_usuario, privado=False)
-            if not publicaciones:
-                ctk.CTkLabel(self.scroll_frame, text="No hay publicaciones aún.").pack(pady=20)
-                return
-
-            anuncios = obtener_anuncios(self.conn, self.id_usuario, self.es_admin)
-            self._cargar_progresivamente(publicaciones, anuncios, 0)
-        except Exception as e:
-            print(f"Error: {e}")
-
-    def _cargar_progresivamente(self, lista, anuncios, idx):
-        # Lotes muy pequeños (2 en 2) para máquinas virtuales lentas
-        batch_size = 2
-        fin = min(idx + batch_size, len(lista))
-        
-        for i in range(idx, fin):
-            p = lista[i]
-            # p: (nombre, desc, img, likes, autor_nombre, id_pub, dio_like, id_autor)
-            nombre, desc, img, likes, autor, id_pub, le_ha_dado_like = p[:7]
-            id_autor = p[7] if len(p) > 7 else None
-
-            if anuncios and i % NUM_PUBLICACIONES_MOSTRAR == 0:
-                anuncio_data = functions.cargar_anuncio_en_publicacion(anuncios, self.conn)
-                if anuncio_data: self.crear_tarjeta_anuncio(anuncio_data)
-
-            self.crear_tarjeta_publicacion(id_pub, nombre, desc, img, likes, autor, 
-                                           es_propia=False, like_inicial=bool(le_ha_dado_like), 
-                                           id_autor=id_autor)
-        
-        if fin < len(lista):
-            self.after(100, lambda: self._cargar_progresivamente(lista, anuncios, fin))
-        else:
-            self.scroll_frame.configure(label_text="Feed Global")
-
     def mostrar_mis_publicaciones(self):
         self.limpiar_lista()
         self.offset_actual=0
         self.scroll_frame.configure(label_text="Cargando mis publicaciones...")
         self.cargar_lote_publicaciones(privado=True)
 
-    def mostrar_mis_publicaciones_antiguo(self):
-        self.limpiar_lista()
-        self.scroll_frame.configure(label_text="Mis Publicaciones")
-        try:
-            publicaciones = functions.listar_publicaciones(self.conn, self.id_usuario, privado=True)
-            if not publicaciones:
-                ctk.CTkLabel(self.scroll_frame, text="No tienes publicaciones propias.").pack(pady=20)
-                return
-            for p in publicaciones:
-                # En privado: (nombre, desc, img, likes, id_pub, id_autor)
-                nombre, desc, img, likes, id_pub = p[:5]
-                self.crear_tarjeta_publicacion(id_pub, nombre, desc, img, likes, "Yo", es_propia=True)
-        except Exception as e:
-            print(f"Error: {e}")
-    
     def cargar_lote_publicaciones(self, privado=False):
         if self.btn_cargar_mas:
             self.btn_cargar_mas.destroy()
@@ -144,15 +95,28 @@ class VentanaPublicaciones(ctk.CTkFrame):
                 self.scroll_frame.configure(label_text="Muro vacío")
                 return
 
-            anuncios = None if privado else obtener_anuncios(self.conn, self.id_usuario, self.es_admin)
+            anuncios = None if privado else functions.obtener_anuncios_para_publicaciones(self.conn,self.id_usuario)
+            num_publicaciones = len(publicaciones)
+            publicaciones_en_pantalla=min(NUM_PUBLICACIONES_MOSTRAR_ANUNCIO, num_publicaciones)
+
+            min_gap = 2
+            anuncio_en = 0
+
             for i, p in enumerate(publicaciones):
                 if not privado:
                     nombre, desc, img, likes, autor, id_pub, le_ha_dado_like = p[:7]
                     id_autor = p[7] if len(p) > 7 else None
 
-                    if anuncios and (self.offset_actual +i) % NUM_PUBLICACIONES_MOSTRAR == 0:
-                        anuncio_data = functions.cargar_anuncio_en_publicacion(anuncios, self.conn)
-                        if anuncio_data: self.crear_tarjeta_anuncio(anuncio_data)
+                    if anuncios and i % NUM_PUBLICACIONES_MOSTRAR_ANUNCIO == 0:
+                        if anuncio_en + min_gap >= NUM_PUBLICACIONES_MOSTRAR_ANUNCIO:
+                            limite_inferior = (anuncio_en+2) % publicaciones_en_pantalla
+                        else: limite_inferior = 0
+                        if limite_inferior < publicaciones_en_pantalla:
+                            anuncio_en=random.randrange(limite_inferior,publicaciones_en_pantalla)
+                        else: anuncio_en = 0
+                        
+                    if anuncios and i % publicaciones_en_pantalla == anuncio_en: 
+                        self.crear_tarjeta_anuncio(anuncios[random.randrange(0,len(anuncios))])
                     
                     self.crear_tarjeta_publicacion(id_pub,nombre, desc, img, likes, autor,
                                                    es_propia=False, like_inicial=bool(le_ha_dado_like),
@@ -160,9 +124,9 @@ class VentanaPublicaciones(ctk.CTkFrame):
                 else:
                     nombre, desc, img, likes, id_pub = p[:5]
                     self.crear_tarjeta_publicacion(id_pub, nombre,desc,img,likes, "Yo", es_propia=True)
-            self.offset_actual += len(publicaciones)
+            self.offset_actual += num_publicaciones
 
-            if len(publicaciones) == NUM_PUBLICACIONES_MOSTRAR:
+            if num_publicaciones == NUM_PUBLICACIONES_MOSTRAR:
                 self.btn_cargar_mas = ctk.CTkButton(
                         self.scroll_frame, text="Cargar más publicaciones ⬇", 
                         command=lambda: self.cargar_lote_publicaciones(privado),
@@ -285,31 +249,79 @@ class VentanaGestionPublicacion(ctk.CTkToplevel):
 
     def _crear_widgets(self,datos=None):
         """Organiza la creación de los elementos de la interfaz"""
-        ctk.CTkLabel(self, text="Título (Obligatorio)", font=(DEFAULT_FONT, 14, "bold")).pack(pady=(20, 5))
-        self.en = ctk.CTkEntry(self, width=300)
-        self.en.pack(pady=5)
         
-        ctk.CTkLabel(self, text="Descripción", font=(DEFAULT_FONT, 14)).pack(pady=(10, 5))
+        # ---------- TÍTULO ----------
+        ctk.CTkLabel(
+            self, text=f"Título (Obligatorio, máx. {MAX_TITLE})",
+            font=(DEFAULT_FONT, 14, "bold")
+        ).pack(pady=(20, 5))
+
+        self.title_var = ctk.StringVar()
+        self.title_var.trace_add(
+            "write",
+            lambda *args: self._limitar_var(self.title_var, MAX_TITLE)
+        )
+
+        self.en = ctk.CTkEntry(self, width=300, textvariable=self.title_var)
+        self.en.pack(pady=5)
+
+        # ---------- DESCRIPCIÓN ----------
+        ctk.CTkLabel(
+            self, text=f"Descripción (máx. {MAX_DESC})",
+            font=(DEFAULT_FONT, 14)
+        ).pack(pady=(10, 5))
+
         self.ed = ctk.CTkTextbox(self, width=300, height=150)
         self.ed.pack(pady=5)
+        self.ed.bind(
+            "<KeyRelease>",
+            lambda e: self._limitar_textbox(self.ed, MAX_DESC)
+        )
 
-        ctk.CTkLabel(self, text="URL Imagen / Texto", font=(DEFAULT_FONT, 14)).pack(pady=(10, 5))
-        self.en_img = ctk.CTkEntry(self, width=300)
+        # ---------- URL IMAGEN / TEXTO ----------
+        ctk.CTkLabel(
+            self, text="URL Imagen / Texto",
+            font=(DEFAULT_FONT, 14)
+        ).pack(pady=(10, 5))
+
+        self.url_var = ctk.StringVar()
+        self.url_var.trace_add(
+            "write",
+            lambda *args: self._limitar_var(self.url_var, MAX_IMG)
+        )
+
+        self.en_img = ctk.CTkEntry(self, width=300, textvariable=self.url_var)
         self.en_img.pack(pady=5)
-        
-        ctk.CTkLabel(self, text="Categoría", font=(DEFAULT_FONT, 14)).pack(pady=(10, 5))
+
+        # ---------- CATEGORÍA ----------
+        ctk.CTkLabel(
+            self, text="Categoría",
+            font=(DEFAULT_FONT, 14)
+        ).pack(pady=(10, 5))
+
         self.en_cat = ctk.CTkEntry(self, width=300)
         self.en_cat.pack(pady=5)
 
         if self.modo == "editar" and datos:
-            self.en.insert(0, datos["nombre"])
+            self.title_var.set(datos["nombre"])
             if datos["desc"]: self.ed.insert("0.0", datos["desc"])
-            if datos["img"]: self.en_img.insert("0.0", datos["img"])
+            if datos["img"]: self.url_var.set(datos["img"])
 
         
         btn_text = "🚀 Publicar" if self.modo == "crear" else "Guardar cambios"
         ctk.CTkButton(self, text=btn_text, fg_color="#D35400", 
                       command=self.guardar, width=200).pack(pady=30)
+    
+    def _limitar_var(self, var, max_len):
+        value = var.get()
+        if len(value) > max_len:
+            var.set(value[:max_len])
+
+    def _limitar_textbox(self, textbox, max_len):
+        content = textbox.get("0.0", "end-1c")
+        if len(content) > max_len:
+            textbox.delete("0.0", "end")
+            textbox.insert("0.0", content[:max_len])
 
     def _lanzar_modal(self):
         self.deiconify()          

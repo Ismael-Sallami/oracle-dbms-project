@@ -1,7 +1,7 @@
 import oracledb 
+from publicidad.functions import listar_activos_bd as obtener_anuncios
 import random
-from publicidad.functions import listar_activos_bd 
-from .utils import conversion_a_int_seguro, vacio_a_none
+from .utils import vacio_a_none
 
 NUM_PUBLICACIONES_MOSTRAR=5
 
@@ -135,7 +135,7 @@ def listar_publicaciones(connection, id_usuario, offset=0, limit=10, privado=Fal
     cursor = connection.cursor()
     try:
         # Nota: Se añade ORDER BY IDPUBLICACION DESC para que salgan las nuevas primero
-        # Se añade la sintaxis de paginación estándar de SQL (funciona en Oracle 12c+, SQL Server, Postgre)
+        # Se añade la sintaxis de paginación estándar de SQL (funciona en Oracle 12c+)
         paginacion_sql = " ORDER BY p.IDPUBLICACION DESC OFFSET :2 ROWS FETCH NEXT :3 ROWS ONLY"
         
         if not privado:
@@ -185,52 +185,6 @@ def listar_publicaciones(connection, id_usuario, offset=0, limit=10, privado=Fal
     finally:
         cursor.close()
 
-def listar_publicaciones_antiguo(connection,id_usuario,privado=False):
-    resultados=[]
-    parametros=[id_usuario]
-    cursor = connection.cursor()
-    try:
-        if not privado:
-            sql_query="""
-                SELECT p.NOMBRE, p.DESCRIPCION, p.IMAGEN,
-                NVL(l.num_likes,0) AS NUM_LIKES, u.NOMBREUSUARIO, p.IDPUBLICACION,
-                CASE 
-                    WHEN ul.IDPUBLICACION IS NOT NULL THEN 1 
-                    ELSE 0 
-                END AS DIO_LIKE,
-                p.IDUSUARIO
-                FROM PUBLICACION p 
-                LEFT JOIN (
-                    SELECT IDPUBLICACION, COUNT(*) AS num_likes
-                    FROM ME_GUSTA
-                    GROUP BY IDPUBLICACION
-                ) l ON l.IDPUBLICACION = p.IDPUBLICACION
-                LEFT JOIN USUARIO u ON u.IDUSUARIO = p.IDUSUARIO
-                LEFT JOIN (
-                    SELECT IDPUBLICACION FROM ME_GUSTA WHERE IDUSUARIO = :1
-                ) ul ON ul.IDPUBLICACION = p.IDPUBLICACION
-                WHERE p.ELIMINADO = 'N'
-                """
-        else:
-            sql_query="""
-                SELECT p.NOMBRE, p.DESCRIPCION, p.IMAGEN,
-                NVL(l.num_likes,0) AS NUM_LIKES, p.IDPUBLICACION
-                FROM PUBLICACION p 
-                LEFT JOIN (
-                    SELECT IDPUBLICACION, COUNT(*) AS num_likes
-                    FROM ME_GUSTA
-                    GROUP BY IDPUBLICACION
-                ) l on l.IDPUBLICACION = p.IDPUBLICACION
-                WHERE p.ELIMINADO = 'N' AND p.IDUSUARIO = :1
-                """
-        cursor.execute(sql_query,parametros)
-        resultados = cursor.fetchall()
-        return resultados
-    except Exception as e:
-        print(f"Un error ha ocurrido: {e}")
-    finally:
-        cursor.close()
-
 
 def eliminar_publicacion(cursor,id_usuario,id_publicacion):
     try:
@@ -255,3 +209,21 @@ def eliminar_publicacion(cursor,id_usuario,id_publicacion):
     except Exception as e:
         print(f"Error obteniendo el anuncio: {e}")
         return False
+
+def obtener_anuncios_para_publicaciones(conn, id_usuario):
+    cursor = conn.cursor()
+    anuncios = []
+    try:
+        sql = """
+            SELECT A.TITULO, A.CUERPO, A.ENLACE
+            FROM ANUNCIO A
+            WHERE A.ESTADO = 'ACTIVO' AND A.IDPROPIETARIO <> :1
+        """
+        cursor.execute(sql, [id_usuario])
+        anuncios=cursor.fetchall()
+        return anuncios
+    except Exception as e:
+        print(f"Error obteniendo el anuncio {e}")
+        return []
+    finally:
+        cursor.close
