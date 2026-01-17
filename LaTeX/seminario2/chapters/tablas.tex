@@ -1,0 +1,12 @@
+\begin{enumerate}
+    \item \textbf{USUARIO:} Tabla entidad destinada a la gestión de identidades y perfiles dentro del sistema. Almacena credenciales de acceso, información biográfica, imágenes de perfil y metadatos de auditoría del ciclo de vida del usuario. 
+    
+    \item \textbf{PUBLICACION:} Estructura principal para el almacenamiento de contenido generado por los usuarios. Contiene atributos descriptivos (título, descripción, categoría), recursos multimedia asociados y mantiene la integridad referencial con el autor. Tabla resultante de la fusión de las tablas 3, 6, 14 y 15 del diseño original.
+    
+    \item \textbf{ANUNCIO:} Gestiona el contenido publicitario o promocional y permite su vinculación directa con las publicaciones para integrar campañas en el flujo de contenido.
+    
+    \item \textbf{MENSAJE:} Entidad encargada de registrar las comunicaciones directas asíncronas. Almacena el cuerpo del texto, la trazabilidad temporal del envío, el estado de lectura y los identificadores de los usuarios emisor y receptor. Tabla relacional producto de la fusión de las tablas 5 y 12 del diseño original.
+    
+    \item \textbf{CONVERSA:} Se utiliza para agrupar y estructurar los hilos de comunicación entre pares de usuarios, facilitando la organización lógica del historial de interacciones.
+\end{enumerate}
+
