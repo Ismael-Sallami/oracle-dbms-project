@@ -1,9 +1,29 @@
 \section{Sentencias DDL del Subsistema de Tendencias (Jesus)}
 
+\subsection{Tabla: HASHTAG}
+\begin{lstlisting}[language=SQL, caption={Creación de la tabla HASHTAG}]
+CREATE TABLE HASHTAG (
+    HASHTAG             VARCHAR2(32) NOT NULL,
+    MENCIONES           NUMBER DEFAULT 0,
+    CATEGORIA           VARCHAR2(32),
+    
+    CONSTRAINT PK_HASHTAG PRIMARY KEY (HASHTAG)
+);
+\end{lstlisting}
 
-% Incluir aquí las sentencias CREATE TABLE.
-% Asegurarse de incluir Primary Keys (PK), Foreign Keys (FK) y restricciones (CHECK, UNIQUE).
-% Ejemplo:
-% \begin{lstlisting}[language=SQL]
-% CREATE TABLE Ejemplo ( ... );
-% \end{lstlisting}
+\subsection{Tabla: CONTIENE\_HASHTAG}
+\begin{lstlisting}[language=SQL, caption={Creación de la tabla CONTIENE\_HASHTAG}]
+CREATE TABLE CONTIENE_HASHTAG (
+    IDPUBLICACION       NUMBER NOT NULL,
+    HASHTAG           VARCHAR2(32) NOT NULL,
+    
+    CONSTRAINT PK_CONTIENE_HASHTAG PRIMARY KEY (IDPUBLICACION, HASHTAG),
+    CONSTRAINT FK_CH_PUB FOREIGN KEY (IDPUBLICACION) REFERENCES PUBLICACION(IDPUBLICACION) ON DELETE CASCADE,
+    CONSTRAINT FK_CH_TAG FOREIGN KEY (HASHTAG) REFERENCES HASHTAG(HASHTAG) ON DELETE CASCADE
+);
+\end{lstlisting}
+
+\textbf{Justificación de diseño:}
+\begin{itemize}
+    \item \textbf{Integridad Referencial (ON DELETE CASCADE):} Se ha decidido que, si una publicación que referenciaba un hashtag o el propio hashtag en sí han sido borrados físicamente, también se borre la relación entre la publicación y el hashtag.
+\end{itemize}

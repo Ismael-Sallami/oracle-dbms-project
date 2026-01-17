@@ -17,7 +17,7 @@ BEGIN
         -- i -> extraer el iésimo hashtag
         v_hashtag := REGEXP_SUBSTR(:NEW.DESCRIPCION, '#[[:alnum:]_]+', 1, i);
 
-        -- Solo procesamos si el hashtag mide 32 o menos (según tu especificación)
+        -- Solo procesamos si el hashtag mide 32 o menos (según la especificación)
         IF LENGTH(v_hashtag) <= 32 THEN
             
             -- RS2.2: ¿Existe ya en la tabla HASHTAG?

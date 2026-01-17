@@ -1,9 +1,38 @@
-\section{Transacciones del Subsistema de Tendencias (Jesus)}
+\section{Transacciones del Subsistema de Tendencias (Jesús)}
 
+Las transacciones del subsistema de Tendencias se han diseñado para gestionar el ciclo de vida de los hashtags, desde su creación automática al publicar hasta su gestión como administrador. Además, se asegura la consistencia entre la tabla \texttt{HASHTAG} y la tabla de relación \texttt{CONTIENE\_HASHTAG}.
 
-% Describir la secuencia de operaciones lógicas.
-% No es necesario poner todo el código SQL si es muy largo, pero sí la lógica:
-% 1. Inicio transacción
-% 2. Leer dato X
-% 3. Actualizar dato Y
-% 4. Commit/Rollback
+\subsection{Transacción: Procesamiento y vinculación de un hashtag}
+Esta transacción es crítica ya que gestiona la lógica "Upsert" (Insertar o Actualizar) cada vez que se detecta un hashtag en una nueva publicación (función \texttt{crear\_o\_mencionar\_hashtag} en la capa de lógica).
+
+\begin{enumerate}
+    \item \textbf{Inicio de Transacción.}
+    \item \textbf{Validación de Formato (Aplicación):} Se verifica que la cadena de texto comience con el carácter "\#" antes de interactuar con la BD.
+    \item \textbf{Verificación de Existencia (SELECT):} Se consulta si el hashtag ya existe en la base de datos para determinar el flujo a seguir.
+    \item \textbf{Ramificación Lógica (Upsert):}
+    \begin{itemize}
+        \item \textit{Si existe:} Se ejecuta un \texttt{UPDATE} para incrementar el contador de \texttt{menciones} en 1.
+        \item \textit{Si no existe:} Se ejecuta un \texttt{INSERT} en la tabla \texttt{HASHTAG} inicializando el contador a 1.
+    \end{itemize}
+    \item \textbf{Vinculación (INSERT):} Se registra la relación en la tabla intermedia \texttt{CONTIENE\_HASHTAG}, vinculando el \texttt{idpublicacion} con el \texttt{hashtag}.
+    \item \textbf{Confirmación (COMMIT):} Se confirman los cambios para persistir tanto el contador como la relación.
+\end{enumerate}
+\subsection{Transacción: Asignación de categoría a un hashtag} Permite a un administrador clasificar una tendencia existente para mejorar los filtros de búsqueda, invocada desde la interfaz de gestión.
+
+\begin{enumerate} \item \textbf{Inicio de Transacción.} \item \textbf{Lectura de Validación (SELECT):} Se verifica que el hashtag objetivo exista realmente en el sistema antes de intentar modificarlo. Si no existe, la operación se aborta sin cambios. \item \textbf{Operación DML (UPDATE):} Se actualiza el campo \texttt{categoria} de la tabla \texttt{HASHTAG} con el valor proporcionado por el administrador. \item \textbf{Confirmación (COMMIT):} La interfaz gráfica ejecuta la confirmación explícita (\texttt{self.conn.commit()}) tras recibir el éxito de la operación lógica. \item \textbf{Gestión de Errores (ROLLBACK):} En caso de excepción SQL, se capturan los errores y se muestran mediante \texttt{messagebox}, asegurando que no queden transacciones abiertas en estado inválido. \end{enumerate}
+
+\subsection{Transacción: Borrado lógico de una tendencia} A diferencia de una eliminación física tradicional, esta transacción implementa una "baja lógica" o reseteo de visibilidad, poniendo el contador de menciones a cero para sacar el hashtag del "Top 10" sin romper la integridad referencial de publicaciones pasadas.
+
+\begin{enumerate} \item \textbf{Inicio de Transacción.} \item \textbf{Confirmación de Usuario:} La interfaz solicita confirmación explícita (\texttt{messagebox.askyesno}) antes de proceder, para evitar acciones accidentales. \item \textbf{Lectura de Validación (SELECT):} Se comprueba la existencia del hashtag en la base de datos. \item \textbf{Operación DML (UPDATE):} En lugar de \texttt{DELETE}, se ejecuta una actualización estableciendo \texttt{menciones = 0}. Esto preserva el hashtag y su categoría, pero lo elimina efectivamente de los listados de tendencias principales. \item \textbf{Confirmación (COMMIT):} Se hacen efectivos los cambios mediante la conexión de la interfaz. \end{enumerate}
+
+\subsection{Transacción: Consulta del top 10 de tendencias más mencionadas} Operación de lectura intensiva utilizada para generar el dashboard principal.
+
+\begin{enumerate} \item \textbf{Inicio de Transacción (Lectura).} \item \textbf{Operación de Consulta (SELECT):} Se recuperan los hashtags ordenados descendentemente por número de menciones. \item \textbf{Limitación de Resultados (FETCH):} Se utiliza la cláusula \texttt{FETCH FIRST 10 ROWS ONLY} para optimizar la transferencia de datos y mostrar solo los registros relevantes. \item \textbf{Cierre:} Se devuelve el cursor a la interfaz para su renderizado en el componente \texttt{CTkTextbox}. \end{enumerate}
+
+\subsection{Transacción: Consulta del catálogo de categorías} Esta operación de lectura es necesaria para permitir al usuario conocer qué temáticas existen actualmente en el sistema.
+
+\begin{enumerate} \item \textbf{Inicio de Transacción (Lectura).} \item \textbf{Operación de Consulta (SELECT DISTINCT):} Se ejecuta una proyección sobre el atributo \texttt{categoria} de la tabla \texttt{HASHTAG}. \item \textbf{Filtrado de Nulos (WHERE):} Se aplica la condición \texttt{IS NOT NULL} para excluir hashtags sin clasificar, asegurando que la lista solo contenga categorías válidas. \item \textbf{Ordenación (ORDER BY):} El SGBD entrega los resultados ordenados alfabéticamente (\texttt{ASC}) para facilitar la búsqueda visual en el cliente. \item \textbf{Cierre:} Se retorna la lista de tuplas únicas a la capa de presentación. \end{enumerate}
+
+\subsection{Transacción: Consulta de los hashtags de una categoría de forma ordenada} Permite obtener una vista parcial del ranking de tendencias, acotada a una categoría específica introducida por el usuario.
+
+\begin{enumerate} \item \textbf{Inicio de Transacción (Lectura).} \item \textbf{Validación de Entrada (Aplicación):} La interfaz verifica que el campo de búsqueda no esté vacío antes de lanzar la consulta. \item \textbf{Operación de Consulta Parametrizada (SELECT):} Se recuperan los hashtags y sus menciones filtrando por la columna \texttt{categoria} mediante un parámetro vinculado (\texttt{:1}), lo que previene inyección SQL. \item \textbf{Ordenación Relativa (ORDER BY):} Al igual que en el Top global, los resultados filtrados se ordenan descendentemente por número de \texttt{menciones} para mostrar primero los más relevantes dentro de esa temática. \item \textbf{Renderizado:} Los datos se envían al componente de texto de la interfaz para su visualización. \end{enumerate}
