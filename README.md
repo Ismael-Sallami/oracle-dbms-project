@@ -1,6 +1,6 @@
 # Info Pibes S.A
 Contenido de las prácticas:
-## Práctica 1 :gear:
+## Práctica 1 :heavy_check_mark:
 _**Diseño y desarrollo de un Sistema de Información sobre una temática (Red social).**_
 
 - Nombre del sistema
@@ -9,10 +9,7 @@ _**Diseño y desarrollo de un Sistema de Información sobre una temática (Red s
     - Requisitos funcionales con sus requisitos de datos
     - Restricciones semánticas.
 
-> [!WARNING] 
-Falta los requisitos semánticos de la parte de usuarios
-
-## Práctica 2 :gear:
+## Práctica 2 :heavy_check_mark:
 _**Diseño de diagramas de flujo de datos y de esquemas externos para cada subsistema.**_
 - DFDs de cada subsistema (Caja negra, armazón, DFD1 de cada susbsistema)
 -  Esquemas externos de todos los procesos y almacenes de DFD0 y DFD1
@@ -28,38 +25,6 @@ Esquema armazón o DFD0: Cada subsistema representado como un sólo proceso, con
 
 > [!IMPORTANT] 
 Se hacen de más distendido a menos (DFD1, DFD0 y caja negra)
-
-> [!WARNING]
-Comprobar que no haya almacenes que ponga BD y arreglar diagrama usuarios para que no se superpongan las flechas de los flujos
-### Primera parte
-- [X] Caja negra
-- [X] Armazón
-- [X] DFD1
-    - [X] Publicaciones
-    - [X] Tendecias
-    - [X] Publicidad
-    - [X] Usuarios
-    - [X] Mensajería
-### Segunda parte
-- [ ] Paso a tabla
-    - [ ] Publicaciones
-    - [ ] Tendecias
-    - [ ] Publicidad
-    - [ ] Usuarios
-    - [ ] Mensajería
-- [ ] Identificar las dependencias funcionales
-    - [ ] Publicaciones
-    - [ ] Tendecias
-    - [ ] Publicidad
-    - [ ] Usuarios
-    - [ ] Mensajería
-- [ ] Aplicar normalización del tema 3
-    - [ ] Publicaciones
-    - [ ] Tendecias
-    - [ ] Publicidad
-    - [ ] Usuarios
-    - [ ] Mensajería
-
 
 ## Práctica 3 :gear:
 
