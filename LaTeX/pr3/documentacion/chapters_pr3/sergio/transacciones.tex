@@ -1,9 +1,66 @@
 \section{Transacciones del Subsistema de Mensajería Privada (Sergio)}
 
+Las operaciones del subsistema de Mensajería Privada se han estructurado en secuencias atómicas para asegurar que el intercambio de información y el estado de las tablas permanezcan consistentes. Debido al uso de cifrado y la gestión automatizada mediante disparadores, la coordinación entre el código Python y el motor de base de datos es directa.
 
-% Describir la secuencia de operaciones lógicas.
-% No es necesario poner todo el código SQL si es muy largo, pero sí la lógica:
-% 1. Inicio transacción
-% 2. Leer dato X
-% 3. Actualizar dato Y
-% 4. Commit/Rollback
+A continuación se detallan los pasos técnicos de las principales transacciones:
+
+\subsection{Transacción: Envío de Mensaje Cifrado}
+Esta secuencia corresponde al requisito funcional \textbf{RF5.1}. Gestiona la inserción de nuevos registros en la tabla \texttt{MENSAJE}, condicionada a la existencia previa de una relación en la tabla \texttt{AMISTAD}.
+
+\begin{enumerate}
+    \item \textbf{Validación de Parámetros (Aplicación):} Se comprueba que la cadena de texto no supere los 300 caracteres antes de iniciar la conexión, ya que al cifrar, su tamaño crece mucho al cifrarlo.
+    \item \textbf{Consulta de Validación (SELECT):} Se verifica en la tabla \texttt{AMISTAD} que existan los registros en ambos sentidos para los IDs involucrados.
+    \item \textbf{Procesamiento de Datos (Aplicación):} Se cifra el mensaje utilizando la librería de criptografía.
+    \item \textbf{Operación DML (INSERT):} Se ejecuta la sentencia \texttt{INSERT} en la tabla \texttt{MENSAJE}.
+    \item \textbf{Ejecución de Disparador (Trigger):} El SGBD activa automáticamente el trigger \texttt{crear\_conversaciones}, realizando los \texttt{INSERT} necesarios en la tabla \texttt{CONVERSA} si los registros no existen.
+    \item \textbf{Confirmación (COMMIT):} Se consolidan los cambios de forma permanente.
+    \item \textbf{Gestión de Excepciones (ROLLBACK):} Si el SGBD devuelve un error o las consultas de validación fallan, se deshace cualquier cambio parcial.
+\end{enumerate}
+
+\subsection{Transacción: Eliminación de Mensaje}
+Esta operación corresponde al requisito funcional \textbf{RF5.2}. Permite la supresión de registros específicos siempre que el usuario activo coincida con el creador del registro.
+
+\begin{enumerate}
+    \item \textbf{Validación de Propiedad (SELECT):} Se comprueba que el \texttt{IDMENSAJE} esté asociado al \texttt{IDUSUARIO1} del solicitante.
+    \item \textbf{Operación DML (DELETE):} Se elimina la fila de la tabla \texttt{MENSAJE}.
+    \item \textbf{Confirmación (COMMIT).}
+\end{enumerate}
+
+\subsection{Transacción: Listado de Contactos}
+Esta operación corresponde al requisito funcional \textbf{RF5.3}. Realiza una recuperación compleja de datos para presentar la bandeja de entrada, integrando información de múltiples tablas y cálculos en tiempo real sobre el estado de los mensajes.
+
+\begin{enumerate}
+    \item \textbf{Definición de Filtros (Aplicación):} Se determina dinámicamente si la búsqueda debe incluir o excluir los IDs presentes en la tabla \texttt{ARCHIVADO} mediante el operador \texttt{IN} o \texttt{NOT IN}.
+    \item \textbf{Construcción de la Consulta (SQL):}
+    \begin{itemize}
+        \item \textbf{Cálculo de Recencia:} Se utiliza una subconsulta con la función \texttt{MAX(FECHAENVIO)} para determinar el instante del último mensaje intercambiado, asignando una fecha base mediante \texttt{NVL} si no existe histórico.
+        \item \textbf{Conteo de Pendientes:} Se ejecuta una subconsulta correlacionada que contabiliza los registros en la tabla \texttt{MENSAJE} donde \texttt{BITVISTO = 'N'} y el usuario activo es el destinatario.
+        \item \textbf{Validación de Amistad Recíproca:} Se realiza un \texttt{JOIN} con una subconsulta sobre la tabla \texttt{AMISTAD} que filtra únicamente aquellos pares de usuarios que poseen una relación bidireccional activa.
+    \end{itemize}
+    \item \textbf{Filtros de Estado:} Se aplican cláusulas \texttt{WHERE} para omitir usuarios marcados como borrados (\texttt{BORRADO = 'N'}) y para filtrar según la tabla \texttt{ARCHIVADO}.
+    \item \textbf{Lógica de Ordenación:} El SGBD ordena el conjunto de resultados priorizando el volumen de mensajes pendientes (\texttt{DESC}), seguido de la fecha del último mensaje (\texttt{DESC}) y, finalmente, el nombre de usuario (\texttt{ASC}).
+    \item \textbf{Ejecución y Mapeo:} Se devuelven los resultados al entorno de la aplicación.
+\end{enumerate}
+
+\subsection{Transacción: Visualización}
+Esta transacción, corresponde al requisito funcional \textbf{RF5.4}. Actualiza el estado de los registros y recupera el histórico de la base de datos para su tratamiento en la aplicación.
+
+\begin{enumerate}
+    \item \textbf{Operación DML (UPDATE):} Se modifica el campo \texttt{BITVISTO} a 'Y' para todos los registros donde el usuario activo sea el receptor.
+    \item \textbf{Consulta de Datos (SELECT):} Se extraen los mensajes de la tabla \texttt{MENSAJE} aplicando un filtro por los IDs de ambos usuarios y ordenándolos por el campo \texttt{FECHAENVIO}.
+    \item \textbf{Tratamiento de Resultados (Aplicación):} Se realiza el descifrado de los campos de texto recuperados del cursor.
+    \item \textbf{Finalización (COMMIT):} Se confirma la actualización del estado de lectura.
+\end{enumerate}
+
+\subsection{Transacción: Conmutación de Archivados}
+Esta operación corresponde al requisito funcional \textbf{RF5.5}. Gestiona la inserción o eliminación de registros en la tabla \texttt{ARCHIVADO} dependiendo del estado actual.
+
+\begin{enumerate}
+    \item \textbf{Verificación de Existencia (SELECT):} Se busca el registro coincidente con la pareja de IDs en la tabla \texttt{ARCHIVADO}.
+    \item \textbf{Ejecución Condicional (DML):}
+    \begin{itemize}
+        \item Si el registro existe: Se ejecuta una sentencia \texttt{DELETE}.
+        \item Si el registro no existe: Se ejecuta una sentencia \texttt{INSERT}.
+    \end{itemize}
+    \item \textbf{Confirmación (COMMIT).}
+\end{enumerate}

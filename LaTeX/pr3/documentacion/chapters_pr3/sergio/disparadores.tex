@@ -1,7 +1,42 @@
 \section{Disparadores del Subsistema de Mensajería Privada (Sergio)}
 
+Para garantizar la fluidez en la comunicación y la integridad referencial entre conversaciones y mensajes, se ha implementado la siguiente lógica programada en la base de datos:
 
-% Código de los disparadores y breve explicación de qué hacen y por qué son necesarios.
-% \begin{lstlisting}[language=SQL]
-% CREATE TRIGGER ...
-% \end{lstlisting}
+\subsection{Trigger: Creación automática de conversaciones}
+\textbf{Motivación:} Este disparador automatiza la gestión de la tabla \texttt{CONVERSA}. Su objetivo es eliminar la fricción en la aplicación, permitiendo que el envío de un mensaje sea el evento que dispare la creación del canal de comunicación si este no existiera previamente. Dado que la tabla \texttt{MENSAJE} posee una clave ajena compuesta hacia \texttt{CONVERSA}, este trigger asegura que la restricción de integridad se cumpla siempre "justo a tiempo", evitando excepciones por falta de referencia.
+
+\textbf{Descripción:} Se ejecuta mediante un evento \texttt{BEFORE INSERT} a nivel de fila en la tabla \texttt{MENSAJE}. El disparador comprueba si existe una entrada para el par de usuarios involucrados. Si el resultado es negativo, procede a realizar una doble inserción en la tabla \texttt{CONVERSA} para registrar ambos sentidos de la comunicación (\textit{Usuario1 $\rightarrow$ Usuario2} y \textit{Usuario2 $\rightarrow$ Usuario1}), garantizando así la simetría necesaria para que futuros mensajes en cualquier dirección sean válidos.
+
+\begin{lstlisting}[language=SQL, caption={Trigger crear\_conversaciones}]
+CREATE OR REPLACE TRIGGER crear_conversaciones
+    BEFORE INSERT ON MENSAJE 
+    FOR EACH ROW
+DECLARE
+    -- Variable para guardar el resultado del conteo
+    v_cantidad NUMBER;
+BEGIN
+    -- Comprobamos si existe la conversacion en el sentido emisor-receptor
+    SELECT COUNT(*)
+    INTO v_cantidad
+    FROM CONVERSA 
+    WHERE (IDUSUARIO1 = :NEW.IDUSUARIO1 AND IDUSUARIO2 = :NEW.IDUSUARIO2);
+
+    -- Si es 0 no existe la conversacion, insertamos ambos sentidos
+    IF v_cantidad = 0 THEN
+        -- Insertamos las dos direcciones para asegurar la paridad
+        INSERT INTO CONVERSA (IDUSUARIO1, IDUSUARIO2) 
+        VALUES (:NEW.IDUSUARIO1, :NEW.IDUSUARIO2);
+        
+        INSERT INTO CONVERSA (IDUSUARIO1, IDUSUARIO2) 
+        VALUES (:NEW.IDUSUARIO2, :NEW.IDUSUARIO1);
+    END IF;
+END;
+/
+\end{lstlisting}
+
+\textbf{Justificación de diseño:}
+\begin{itemize}
+    \item \textbf{Automatización de la Integridad:} Al delegar la creación de la conversación al motor de la base de datos, se simplifica la lógica en el backend de la aplicación, que solo debe preocuparse de insertar en la tabla \texttt{MENSAJE}.
+    \item \textbf{Gestión de la Simetría:} El diseño de la base de datos requiere que para una conversación entre A y B existan los registros $(A,B)$ y $(B,A)$ en la tabla \texttt{CONVERSA}. Este disparador garantiza que esta regla se cumpla de forma transparente y atómica.
+    \item \textbf{Prevención de Errores:} Al ser un disparador de tipo \texttt{BEFORE}, el sistema garantiza que el "padre" (registro en \texttt{CONVERSA}) siempre nazca antes que el "hijo" (registro en \texttt{MENSAJE}), evitando fallos de clave foránea.
+\end{itemize}

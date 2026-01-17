@@ -1,5 +1,34 @@
 \chapter{Identificación de Datos Sensibles y Aspectos Legales}
 
-En esta sección se identifican los datos sensibles del sistema y se describe el cumplimiento con la normativa vigente (GDPR/LOPD).
-% REQUISITO: Identificar datos (ej. correos, tarjetas) y mencionar la ley.
+En esta sección se detallan los activos de información del sistema EKIS que requieren una protección especial y el marco jurídico que ampara el tratamiento de dichos datos, asegurando la transparencia y la seguridad jurídica en el entorno académico y profesional de 2026.
 
+\section{Identificación de Datos Sensibles}
+Dentro del Subsistema de EKIS, se han identificado los siguientes activos de información que requieren medidas de seguridad técnicas específicas para garantizar su confidencialidad e integridad:
+
+\begin{itemize}
+    \item \textbf{Credenciales de Acceso:} Las contraseñas de los usuarios. Se gestionan mediante algoritmos de \textit{hashing} con salado (\textit{salting}), lo que impide que la clave original sea recuperada, incluso por los administradores con acceso directo a las tablas de la base de datos.
+    \item \textbf{Comunicaciones Privadas:} El contenido de los mensajes entre usuarios. Estos datos están protegidos mediante \textbf{cifrado simétrico Fernet}. Esta medida garantiza que la información en reposo dentro del SGBD sea ininteligible para cualquier tercero, cumpliendo con el principio de privacidad por diseño.
+    \item \textbf{Datos de Identificación Personal (PII):} Direcciones de correo electrónico y nombres de usuario. Estos datos se tratan bajo la base legal de la ejecución del contrato de servicio aceptado por el usuario al registrarse.
+\end{itemize}
+
+\section{Cumplimiento Normativo y Marco Legal}
+La plataforma EKIS se ha diseñado para alinearse con las exigencias del marco legal español y de la Unión Europea vigente:
+
+\subsection{Protección de Datos (RGPD y LOPDGDD)}
+El tratamiento de datos personales en este sistema se rige por el \textbf{Reglamento (UE) 2016/679 (RGPD)} y la \textbf{Ley Orgánica 3/2018 (LOPDGDD)}. Se garantizan los derechos \textbf{ARCO} (Acceso, Rectificación, Cancelación y Oposición). En cumplimiento con la normativa, tras la supresión de una cuenta, el sistema aplica una política de bloqueo de información, conservando los datos de forma inaccesible únicamente para atender posibles requerimientos de autoridades competentes durante los plazos de prescripción legal.
+
+\subsection{Servicios Digitales y Convivencia (Ley 4/2023 y DSA)}
+En cumplimiento con la \textbf{Ley de Servicios Digitales (DSA)} y la \textbf{Ley 4/2023} para la igualdad real y efectiva de las personas, la plataforma prohíbe explícitamente:
+\begin{itemize}
+    \item La difusión de contenidos de odio, racismo, xenofobia o discriminación LGTBIfóbica.
+    \item El acoso digital (\textit{cyberbullying}) y vulneraciones al derecho al honor y la intimidad.
+\end{itemize}
+Para garantizar este entorno seguro, EKIS implementa un sistema de denuncias basado en la intervención humana. Ante el reporte de un usuario, un administrador de la plataforma podrá revisar el contenido denunciado para aplicar las acciones correctivas pertinentes, que pueden incluir la suspensión o baja definitiva de la cuenta.
+
+\section{Seguridad y Alojamiento}
+Los datos se encuentran alojados en la infraestructura de la \textbf{Universidad de Granada (UGR)}, cumpliendo con las directrices del \textbf{Esquema Nacional de Seguridad (ENS)}. El sistema de moderación reactiva permite el descifrado puntual de mensajes bajo denuncia, garantizando un equilibrio proporcional entre el derecho a la privacidad y la protección de la comunidad frente a actos ilícitos.
+
+\vspace{1cm}
+\begin{quote}
+    \textit{Versión de los Términos de Servicio: v1.1 - Enero 2026}
+\end{quote}
