@@ -1,7 +1,42 @@
 \section{Disparadores del Subsistema de Publicaciones (Javi)}
 
+Se han implementado disparadores para automatizar la auditoría de modificaciones y gestionar la integridad referencial lógica en cascada.
 
-% Código de los disparadores y breve explicación de qué hacen y por qué son necesarios.
-% \begin{lstlisting}[language=SQL]
-% CREATE TRIGGER ...
-% \end{lstlisting}
+\subsection{Trigger: Auditoría de Modificaciones}
+\textbf{Motivación:} Es necesario mantener un registro fiable de cuándo fue la última vez que una publicación sufrió cambios (ya sea de contenido o de estado), independiente de la fecha de creación original.
+
+\textbf{Descripción:} Se ejecuta antes de cualquier actualización (\texttt{BEFORE UPDATE}) en la tabla \texttt{PUBLICACION}.
+
+\begin{lstlisting}[language=SQL, caption={Trigger TRG\_PUB\_FECHA\_MOD}]
+CREATE OR REPLACE TRIGGER TRG_PUB_FECHA_MOD
+BEFORE UPDATE ON PUBLICACION
+FOR EACH ROW
+BEGIN
+    -- Actualiza automáticamente la fecha de modificación al momento actual
+    :NEW.FECHAMODIFICACION := SYSDATE;
+END;
+/
+\end{lstlisting}
+
+\subsection{Trigger: Cascada de Borrado Lógico}
+\textbf{Motivación:} Cuando un usuario es marcado como "Borrado" (baja lógica del sistema), todas sus publicaciones deben reflejar este estado para dejar de ser visibles en el feed global, manteniendo la coherencia del sistema sin perder datos.
+
+\textbf{Descripción:} Este trigger monitorea la tabla \texttt{USUARIO} y propaga el estado de borrado a las publicaciones asociadas.
+
+\begin{lstlisting}[language=SQL, caption={Trigger TRG\_PUB\_CASCADE\_LOGIC}]
+CREATE OR REPLACE TRIGGER TRG_PUB_CASCADE_LOGIC
+BEFORE UPDATE OF BORRADO ON USUARIO
+FOR EACH ROW
+BEGIN
+    -- Si el usuario se borra (Y), borramos lógicamente sus publicaciones
+    IF :NEW.BORRADO = 'Y' THEN
+        UPDATE PUBLICACION 
+        SET ELIMINADO = 'Y'
+        WHERE IDUSUARIO = :NEW.IDUSUARIO;
+    END IF;
+    
+    -- Nota: Si el usuario se reactiva, podría requerirse lógica inversa
+    -- dependiendo de la regla de negocio (actualmente solo baja).
+END;
+/
+\end{lstlisting}

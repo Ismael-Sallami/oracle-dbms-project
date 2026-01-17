@@ -1,9 +1,28 @@
 \section{Transacciones del Subsistema de Publicaciones (Javi)}
+Las operaciones críticas del subsistema se gestionan mediante transacciones explícitas para asegurar la consistencia de datos, especialmente en operaciones concurrentes como la gestión de "likes".
 
+\subsection{Transacción: Alternar "Me Gusta" (Toggle Like)}
+Esta transacción corresponde al requisito funcional \textbf{RF1.4}. Gestiona la creación o eliminación de un "like" de forma atómica para evitar duplicados o estados inconsistentes.
 
-% Describir la secuencia de operaciones lógicas.
-% No es necesario poner todo el código SQL si es muy largo, pero sí la lógica:
-% 1. Inicio transacción
-% 2. Leer dato X
-% 3. Actualizar dato Y
-% 4. Commit/Rollback
+\begin{enumerate}
+    \item \textbf{Inicio de Transacción.}
+    \item \textbf{Lectura de Existencia (SELECT):} Se consulta la tabla \texttt{ME\_GUSTA} para verificar si ya existe una tupla con el par \texttt{(IDUSUARIO, IDPUBLICACION)}.
+    \item \textbf{Bifurcación Lógica:}
+    \begin{itemize}
+        \item \textit{Si existe:} Se ejecuta un \texttt{DELETE}, retirando el "me gusta".
+        \item \textit{Si no existe:} Se ejecuta un \texttt{INSERT}, registrando la interacción.
+    \end{itemize}
+    \item \textbf{Manejo de Concurrencia:} La inserción está protegida por un bloque \texttt{TRY-CATCH} adicional para manejar violaciones de clave primaria (\texttt{DUP\_VAL\_ON\_INDEX}) en caso de que dos peticiones lleguen simultáneamente.
+    \item \textbf{Confirmación (COMMIT):} Se hacen efectivos los cambios en la base de datos.
+\end{enumerate}
+
+\subsection{Transacción: Baja lógica de Publicación}
+Correspondiente al \textbf{RF1.5}. Permite al usuario retirar una publicación de su perfil sin perder el registro histórico.
+
+\begin{enumerate}
+    \item \textbf{Inicio de Transacción.}
+    \item \textbf{Operación DML (UPDATE):} Se actualiza el campo \texttt{ELIMINADO} a 'Y' para la publicación seleccionada, validando siempre que el \texttt{IDUSUARIO} coincida con el propietario (seguridad a nivel de consulta).
+    \item \textbf{Verificación (Row Count):} Se comprueba que la fila haya sido afectada. Si no se actualizó ninguna fila (ej. usuario no es dueño), se notifica el error.
+    \item \textbf{Disparo de Trigger:} Esta actualización invoca automáticamente al trigger \texttt{TRG\_PUB\_FECHA\_MOD} para registrar el momento exacto de la baja.
+    \item \textbf{Confirmación (COMMIT):} Si la operación es correcta, se persiste el cambio de estado.
+\end{enumerate}
