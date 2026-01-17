@@ -33,8 +33,7 @@ Requisito de datos de salida: ninguno. \\[12pt]
 \textcolor{azul}{\textbf{RDW5.\theRDW:}} Datos del envío de mensaje. \\
 \hspace*{1cm} ID Usuario Emisor: Cadena de caracteres (40) \\
 \hspace*{1cm} ID Usuario Receptor: Cadena de caracteres (40) \\
-\hspace*{1cm} Fecha del envío: Variable tipo fecha \\
-\hspace*{1cm} Hora de envío: Variable tipo hora \\
+\hspace*{1cm} Fecha y hora del envío: Variable tipo fecha \\
 \hspace*{1cm} Bit de visto: Booleano (1)\\
 \hspace*{1cm} ID mensaje: Cadena de caracteres (50) \\
 \hspace*{1cm} Mensaje: Cadena de caracteres (100) \\[12pt]
@@ -112,7 +111,7 @@ Requisito de datos de salida: ninguno. \\[12pt]
 %  LISTAR CONVERSACIONES  %
 % ======================= %
 \section{Listar usuarios}
-\textbf{\textcolor{rojo}{\underline{RF5.\theRF:}}}. Listar usuarios: Permite a un usuario ver los usuarios con los que tiene mensajes, ordenados temporalmente 
+\textbf{\textcolor{rojo}{\underline{RF5.\theRF:}}}. Listar usuarios: Permite a un usuario ver los usuarios con los que puede tener mensajes (con los que es amigo recíprocamente), ordenados temporalmente 
 y por visualización (Primero aquellos con mensajes no visualizados después visualizados, cada uno ordenado temporalmente de más a menos reciente). Se puede solicitar ver los usuarios archivados como los que no, para poder 
 gestionar ambos grupos.\\[6pt]
 
@@ -127,11 +126,11 @@ Requisito de datos de salida: \textcolor{azul}{RDS5.\theRDS} \\[12pt]
 \textcolor{azul}{\textbf{RDE5.\theRDE:}} Grupo de usuarios que se quiere mostrar archivados/no archivados\\
 \hspace*{1cm} Bit elección (indica si se quiere ver el grupo de conversaciones archivadas o las no archivadas True/False): Booleano (1) \\[12pt]
 
-\textcolor{azul}{\textbf{RDR5.\theRDR:}} Lista de usuarios archivados o no archivados, con los que dispone de una conversación, ordenados según lo especificado, con el formato:\\
+\textcolor{azul}{\textbf{RDR5.\theRDR:}} Lista de usuarios archivados o no archivados, con los que puede tener una conversación, ordenados según lo especificado, con el formato:\\
 \hspace*{1cm} ID Usuario: Cadena de caracteres (40) \\
 \hspace*{1cm} Bit elección (indica si se quiere ver el grupo de conversaciones archivadas o las no archivadas True/False): Booleano (1) \\[12pt]
 
-\textcolor{azul}{\textbf{RDS5.\theRDS:}} Lista de usuarios archivados o no con los que dispone algún mensaje. \\
+\textcolor{azul}{\textbf{RDS5.\theRDS:}} Lista de usuarios archivados o no con los que puede tener una conversación. \\
 \hspace*{1cm} Nombre Usuario con ID usuario: Cadena de caracteres (20) [12pt]
 
 \setcounter{RS}{1}
@@ -179,9 +178,9 @@ Requisito de datos de salida: \textcolor{azul}{RDS5.\theRDS} \\[12pt]
 
 \setcounter{RS}{1}
 \textbf{\textcolor{verde}{Restricciones Semánticas:}} \\[6pt]
-\textbf{\textcolor{verde}{\underline{RS5.\theRF.\theRS:}}} Para visualizar los mensajes debe de existir al menos uno enviado o recibido entre ambos usuarios. \\
+\textbf{\textcolor{verde}{\underline{RS5.\theRF.\theRS:}}} Para visualizar los mensajes debe de existir el usuario que solicita y el solicitado. \\
 \textbf{RF:} RF5.\theRF. \textbf{RD(s):} RDE5.\theRDE, RDR5.\theRDR \\
-\hspace*{1cm} \textit{Descripción:} Si se desea ver mensajes, debe de haber al menos uno, de no ser así, se mostrará un error indicando que no existen mensajes con el usuario indicado, y no mostraremos nada. \\ [6pt]
+\hspace*{1cm} \textit{Descripción:} Si se desea ver mensajes, deben de existir ambos usuarios, si no, no mostramos nada. \\ [6pt]
 \stepcounter{RS}
 
 \stepcounter{RF}
@@ -224,9 +223,9 @@ Requisito de datos de salida: ninguno \\[12pt]
 \hspace*{1cm} \textit{Descripción:} Si se desea des/archivar una usuario, el usuario con el que se habla debe de existir, si no, se da un mensaje de error indicando que el usuario no existe y no modificando la base de datos. \\ [6pt]
 \stepcounter{RS}
 
-\textbf{\textcolor{verde}{\underline{RS5.\theRF.\theRS:}}} Para archivar un usuario, debe de existir algún mensaje entre ambos usuarios. \\
+\textbf{\textcolor{verde}{\underline{RS5.\theRF.\theRS:}}} Para archivar un usuario, deben ser amigos recíprocamente, es decir, capaces de tener una conversación. \\
 \textbf{RF:} RF5.\theRF. \textbf{RD(s):} RDE5.\theRDE, RDR5.\theRDR \\
-\hspace*{1cm} \textit{Descripción:} Si se desea des/archivar un usuario, tiene que haber algún mensaje por parte de alguno de los usuarios, de no ser así, se mostrará un error y se indicará que no existe dicha conversación, no modificando la base de datos. \\ [6pt]
+\hspace*{1cm} \textit{Descripción:} Si se desea des/archivar un usuario, tienen que ser amigos recíprocamente, de no ser así, se mostrará un error y se indicará que no se puede realizar dicha acción, no modificando la base de datos. \\ [6pt]
 \stepcounter{RS}
 
 \stepcounter{RF}
