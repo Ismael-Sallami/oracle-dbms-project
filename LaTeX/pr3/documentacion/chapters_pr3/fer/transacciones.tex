@@ -1,9 +1,54 @@
-\section{Transacciones del Subsistema de Usuarios (Fer)}
+\section{Transacciones del Subsistema de Usuarios (Fernando)}
 
+Las transacciones permiten agrupar varias operaciones SQL como una única unidad lógica de trabajo, garantizando las propiedades \textit{ACID}. En Oracle, una transacción se inicia de forma implícita al ejecutar la primera sentencia DML (\texttt{INSERT/UPDATE/DELETE}) y finaliza mediante \texttt{COMMIT} (confirmación) o \texttt{ROLLBACK} (deshacer). En el subsistema de usuarios, se han definido transacciones típicas para asegurar consistencia en procesos críticos.
 
-% Describir la secuencia de operaciones lógicas.
-% No es necesario poner todo el código SQL si es muy largo, pero sí la lógica:
-% 1. Inicio transacción
-% 2. Leer dato X
-% 3. Actualizar dato Y
-% 4. Commit/Rollback
+\subsection{Transacción: Alta de usuario}
+
+\textbf{Descripción:} Inserta un nuevo usuario en la tabla \texttt{USUARIO}. Si la inserción es válida se confirma con \texttt{COMMIT}. Ante un error (por ejemplo, duplicidad de email o nombre), se revierte la operación con \texttt{ROLLBACK}.
+
+\begin{lstlisting}[language=SQL, caption={Transacción de alta de usuario}]
+INSERT INTO USUARIO (NOMBREUSUARIO, EMAIL, CONTRASENIA, ESADMIN, BORRADO, FECHAMODIFICACION)
+VALUES ('FERNANDO', 'fernando@email.com', 'contrasenia_hasheada', 0, 'N', SYSDATE);
+
+COMMIT;
+\end{lstlisting}
+
+\subsection{Transacción: Creación de relación de amistad}
+
+\textbf{Descripción:} Inserta una nueva relación en \texttt{AMISTAD}. Si se produce un error, se revierte la operación.
+
+\begin{lstlisting}[language=SQL, caption={Transacción de creación de amistad}]
+INSERT INTO AMISTAD (IDUSUARIO1, IDUSUARIO2, FECHAAMISTAD)
+VALUES (10, 20, SYSDATE);
+
+COMMIT;
+\end{lstlisting}
+
+\subsection{Transacción: Bloqueo de usuario y eliminación de amistad previa}
+
+\textbf{Descripción:} Se ejecutan dos operaciones: eliminar posible amistad previa e insertar el bloqueo. Ambas deben realizarse dentro de la misma transacción. Solo se confirma si ambas se ejecutan sin errores.
+
+\begin{lstlisting}[language=SQL, caption={Transacción de bloqueo con consistencia relacional}]
+DELETE FROM AMISTAD
+WHERE (IDUSUARIO1 = 10 AND IDUSUARIO2 = 20)
+   OR (IDUSUARIO1 = 20 AND IDUSUARIO2 = 10);
+
+INSERT INTO BLOQUEO (IDUSUARIO1, IDUSUARIO2, FECHABLOQUEO)
+VALUES (10, 20, SYSDATE);
+
+COMMIT;
+\end{lstlisting}
+
+\subsection{Transacción: Baja lógica (borrado lógico) de usuario}
+
+\textbf{Descripción:} Se actualiza el campo \texttt{BORRADO} y la \texttt{FECHAELIMINACION}. La operación se confirma con \texttt{COMMIT}.
+
+\begin{lstlisting}[language=SQL, caption={Transacción de baja lógica de usuario}]
+UPDATE USUARIO
+SET BORRADO = 'Y',
+    FECHAELIMINACION = SYSDATE,
+    FECHAMODIFICACION = SYSDATE
+WHERE IDUSUARIO = 10;
+
+COMMIT;
+\end{lstlisting}
