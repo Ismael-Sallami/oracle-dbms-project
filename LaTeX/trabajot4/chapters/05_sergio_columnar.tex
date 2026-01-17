@@ -5,5 +5,208 @@
 \chapter{Modelo Columnar (Sergio)}
 \label{ch:sergio}
 
-% Contenido de Sergio aquí...
+En este capítulo se implementa el subsistema de \textbf{Mensajeria Privada} del sistema EKIS brevemente, junto con la tabla Usuarios del mismo, utilizando el modelo Objeto-Relacional de Cassandra (NoSQL).
+
+\section{Instalación y Configuración del Entorno}
+
+Para la realización de esta práctica, se ha optado por desplegar \textbf{Apache Cassandra} utilizando tecnología de contenedores Docker. La instalación se ha realizado en Linux/Ubuntu, pero para windows y mac se sigue un proceso similar. A diferencia de los modelos relacionales, Cassandra requiere una configuración específica de red y memoria debido a su arquitectura distribuida, por lo que no se puede usar con pocos recursos en el sistema.
+
+El proceso técnico para la instalación y despliegue es el siguiente:
+
+\begin{enumerate}
+    \item \textbf{Instalación del motor de contenedores:} En Linux, se instala el paquete \texttt{docker.io} asegurando la activación del servicio:
+    \begin{lstlisting}[language=bash]
+sudo apt install docker.io -y
+sudo systemctl start docker
+sudo systemctl enable docker
+    \end{lstlisting}
+    \item \textbf{Despliegue del nodo Cassandra:} Se descarga la imagen oficial y se crea el contenedor mapeando el puerto nativo \texttt{9042}:
+    \begin{lstlisting}[language=bash]
+sudo docker run --name mi-cassandra -p 9042:9042 -d cassandra:latest
+    \end{lstlisting}
+
+    \item \textbf{Verificación de salud (Health Check):} Se utiliza la herramienta \texttt{nodetool} para confirmar que el nodo se encuentra en estado \texttt{UN} (Up/Normal) y poder continuar con la ejecución:
+    \begin{lstlisting}[language=bash]
+sudo docker exec -it mi-cassandra nodetool status
+    \end{lstlisting}
+
+    \item \textbf{Acceso mediante CQLSH:} Una vez verificado el estado, se accede a la interfaz de comandos de Cassandra:
+    \begin{lstlisting}[language=bash]
+sudo docker exec -it mi-cassandra cqlsh
+    \end{lstlisting}
+
+    \item \textbf{Acceso de nuevo a cassandra:} Una vez realizado el proceso de instalación, si el contenedor se encuentra apagado, solo tenemos que usar el siguiente comando para reactivarlo:
+    \begin{lstlisting}[language=bash]
+sudo docker start mi-cassandra
+    \end{lstlisting}
+\end{enumerate}
+
+\section{Diseño Objeto-Relacional del Subsistema}
+
+A continuación indico las tablas que usaremos en el ejemplo:
+\begin{itemize}
+    \item \textbf{Usuario}: Tabla que contiene la información de un usuario (CP(IDUSUARIO), nombreusuario, CC(email), contraseña)
+    \item \textbf{Mensaje}: El eje central del ejemplo, una tabla que almacena datos de los mensajes entre dos usuarios (CP((idemisor, idreceptor),idmensaje, fecha), mensaje).
+    Podemos observar que en la implementación de sql, usamos una tabla conversa, pero en cassandra, si almacenamos según el (idemisor,idreceptor), todos los mensajes se encontrarán 
+    en el mismo lugar y será más eficiente la búsqueda, y junto con idmensaje, serán únicos, y los ordenaremos por fecha.
+\end{itemize}
+
+\section{Implementación DDL y DML}
+
+\subsection{Instrucciones DDL}
+
+En cassandra, lo primero que se debe de hacer es definir el \textbf{KEYSPACE}, que será donde se almacenen todas las tablas y lo que define la estrategia de replicación.
+La replicación se usa para tener los datos guardados en distintos nodos y tener control de errores (en nuestro caso solo será 1).
+
+\begin {minted}{sql}
+CREATE KEYSPACE chat_sistema 
+WITH replication = {
+  'class': 'SimpleStrategy', 
+  'replication_factor': 1
+};
+\end{minted}
+Tras crearlo, podemos usar: \textbf{USE} para movernos a ese KEYSPACE y ahorrarnos escribirlo al crear las tablas:
+\begin {minted}{sql}
+USE chat_sistema
+\end{minted}
+
+Posteriormente, para definir tablas, al igual que en sql, usaremos \textbf{CREATE TABLE} con una diferencia importante al crear una clave primaria,
+estando esta compuesta por la clave de particion (que determina en que nodo del clúster se almacenan los datos) y las columnas del clúster 
+(que determinan el orden de los datos dentro de la partición):
+
+Creamos la tabla usuario (con dummy y sin contraseña para luego alterarla):
+\begin {minted}{sql}
+CREATE TABLE Usuario(
+    idusuario uuid PRIMARY KEY,
+    nombreusuario text,
+    email text,
+    dummy int
+);
+\end{minted}
+
+Creamos la tabla mensaje, ordenando según la fecha (importante que fecha esté a la izquierda):
+\begin {minted}{sql}
+CREATE TABLE Mensaje(
+    idusuario1 uuid,
+    idusuario2 uuid,
+    idmensaje uuid,
+    mensaje text,
+    fecha timestamp,
+    PRIMARY KEY((idusuario1, idusuario2), fecha, idmensaje)
+)WITH CLUSTERING ORDER BY (fecha ASC);
+\end{minted}
+
+Creamos tabla dummy para luego borrar
+\begin {minted}{sql}
+CREATE TABLE dummy(
+    dummy uuid PRIMARY KEY
+);
+\end{minted}
+Para ver las tablas creadas, podemos usar:
+\begin {minted}{sql}
+DESCRIBE TABLES;
+\end{minted}
+
+Cabe destacar, que cassandra no dispone de valores NOT NULL ni FOREIGN KEY, tampoco DEFAUL, UNIQUE o CHECK, ya que trata de ser lo más rápido y eficiente posible
+y estas cláusulas ralentizarían su ejecución ya que habría que ir comprobando en el resto de nodos y discos del clúster.
+
+Para modificar una tabla, podemos usar \textbf{ALTER TABLE}, sin embargo, solo podremos modificar columnas que no formen parte de la clave primaria y
+no podremos modificar tipos de variables.
+
+Quitamos la variable dummy y añadimos la contraseña
+\begin {minted}{sql}
+ALTER TABLE usuario DROP dummy;
+ALTER TABLE usuario ADD contrasenia text;
+\end{minted}
+
+Para eliminar una tabla podemos usar \textbf{DROP} al igual que en sql, si deseamos borrar solo todos los datos, podemos usar \textbf{TRUNCATE}. Esta operación se considera DDL la que elimina todos los datos de la tabla sin excepción.
+\begin {minted}{sql}
+DROP TABLE dummy;
+\end{minted}
+
+\subsection{Manipulación de Datos (DML)}
+
+La inserción se realiza igual que en sql, usando \texttt{INSERT}:
+
+Creamos varios usuarios:
+\begin{minted}{sql}
+INSERT INTO usuario 
+    (idusuario, nombreusuario,email, contrasenia) 
+    VALUES (00000000-0000-0000-0000-000000000001, 'Sergio', 'sergio@gmail.com', 'finisterre');
+
+INSERT INTO usuario 
+    (idusuario, nombreusuario,email, contrasenia) 
+    VALUES (00000000-0000-0000-0000-000000000002, 'Javier', 'javier@gmail.com', 'finisterre');
+\end{minted}
+
+Creamos mensajes entre los usuarios (los ids se generan con uuid()):
+\begin{minted}{sql}
+    INSERT INTO mensaje 
+        (idusuario1, idusuario2, fecha, idmensaje, mensaje) 
+        VALUES (00000000-0000-0000-0000-000000000001, 00000000-0000-0000-0000-000000000002, toTimestamp(now()), uuid(), 'Hola');
+
+    INSERT INTO mensaje 
+        (idusuario1, idusuario2, fecha, idmensaje, mensaje) 
+        VALUES (00000000-0000-0000-0000-000000000001, 00000000-0000-0000-0000-000000000002, toTimestamp(now()), uuid(), 'Que tal');
+
+    INSERT INTO mensaje 
+        (idusuario1, idusuario2, fecha, idmensaje, mensaje) 
+        VALUES (00000000-0000-0000-0000-000000000002, 00000000-0000-0000-0000-000000000001, toTimestamp(now()), uuid(), 'Bien, ¿tú que tal?');
+\end{minted}
+
+Para la consulta, al igual que en sql usaremos \textbf{SELECT}, sin embargo, si usamos la cláusula where, solo podremos realizar 
+la consulta si incluimos la CP, ya que sabe donde está, sin embargo, si no se la incluimos, tendría que escanear todos los nodos y discos
+del clúster para poder encontrar los datos, lo que es bastante ineficiente y por ello está desactivado.
+
+Consulta de todos los mensajes, y de aquellos del usuario1 al usuario2
+\begin{minted}{sql}
+SELECT * FROM mensaje;
+SELECT * FROM mensaje
+    WHERE idusuario1 = 00000000-0000-0000-0000-000000000001
+    AND idusuario2 = 00000000-0000-0000-0000-000000000002;
+\end{minted}
+
+Para la modificación de datos, se usa \textbf{UPDATE}. Cabe destacar que la cláusula where es necesaria y debe incluir la clave primaria completa, además, si la fila que se desea 
+modificar no existe, se creará, con los valores que no se dan como nulos:
+\begin{minted}{sql}
+    UPDATE usuario 
+        SET contrasenia = 'erretsinif' 
+        WHERE idusuario = 00000000-0000-0000-0000-000000000001;
+
+    UPDATE usuario 
+        SET nombreusuario = 'Ruben' 
+        WHERE idusuario = 00000000-0000-0000-0000-000000000003;
+
+    SELECT idmensaje, mensaje, fecha FROM mensaje;
+
+    UPDATE mensaje
+        SET mensaje = 'Hola, soy Sergio'
+        WHERE idusuario1 = 00000000-0000-0000-0000-000000000001 AND
+        idusuario2 = 00000000-0000-0000-0000-000000000002 AND
+        fecha = '2026-01-17 22:44:14.093000+0000' AND
+        idmensaje = 6cd32e85-b978-4d52-bf85-db8d34a8f83e;
+\end{minted}
+
+Para eliminar filas, se usa \textbf{DELETE}, de nuevo, la cláusula where es obligatoria y debe incluir la clave primaria completa:
+\begin{minted}{sql}
+    DELETE FROM usuario
+        WHERE idusuario = 00000000-0000-0000-0000-000000000003;
+
+\end{minted}
+
+\subsection{Imágenes de la ejecución}
+\includegraphics[width=\linewidth]{figures/TU_CARPETA/imagen.png}
+
+
+\section{Adecuación al Sistema EKIS}
+
+La implementación del sistema EKIS en cassandra permite una \textbf{escalabilidad horizontal} que los modelos relacionales 
+difícilmente pueden alcanzar sin procesos complejos. Al haber diseñado la clave de partición de los mensajes como una tupla de usuarios 
+\texttt{(idusuario1, idusuario2)}, garantizamos que toda la conversación se almacene físicamente en el mismo nodo, permitiendo recuperaciones 
+de datos instantáneas, haciendo consultas muy eficientes para esta tabla que según su naturaleza está destinada a tener muchas filas que tienen
+la misma pareja (idusuario1,idusuario2).
+
+Sin embargo, la ausencia de restricciones de integridad (\textit{constraints}) traslada parte de la responsabilidad a la lógica de la aplicación, 
+por lo que el beneficio en términos de velocidad de escritura y disponibilidad justifica la elección de este modelo para sistemas con alta carga de datos 
+como el subsistema de Mensajería Privada de EKIS.
 
