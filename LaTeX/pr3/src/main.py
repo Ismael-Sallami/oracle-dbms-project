@@ -455,16 +455,19 @@ class App(ctk.CTk):
 
 
     def on_login_ok(self, id_usuario):
-
         self.id_usuario_activo = id_usuario
 
-        self.conn.id_usuario_actual = id_usuario
+        self.focus_set() 
+        
+        # Realizamos la comprobación de admin antes de tocar la UI
+        try:
+            self.es_admin = es_admin_bd(self.conn, id_usuario)
+        except Exception as e:
+            print(f"Error comprobando admin: {e}")
+            self.es_admin = False
 
-        self.es_admin = es_admin_bd(self.conn, id_usuario)
-
-        # Usamos after para dejar que el frame de login se destruya totalmente antes de crear el Dashboard
-
-        self.after(100, self.mostrar_dashboard)
+        # Damos un margen (200ms) para que el hilo de eventos se limpie
+        self.after(200, self.mostrar_dashboard)
 
 
 
@@ -472,7 +475,7 @@ class App(ctk.CTk):
 
         self.limpiar_root()
 
-        
+        self.update_idletasks()
 
         # Grid para el layout principal
 
@@ -493,7 +496,7 @@ class App(ctk.CTk):
         self.frame_contenido.grid(row=0, column=1, sticky="nsew", padx=20, pady=20)
 
 
-
+        self.update()
         self._crear_widgets_sidebar()
 
 
