@@ -282,7 +282,7 @@ class VentanaChat(ctk.CTkToplevel):
             diag = ctk.CTkInputDialog(text="Motivo:", title="Reportar")
             motivo = diag.get_input()
             if motivo:
-                if enviar_reporte(self.conn, id_m, 'MENSAJE', self.id_destino, motivo, txt):
+                if enviar_reporte(self.conn, self.id_origen, id_m, 'MENSAJE', self.id_destino, motivo, txt):
                     messagebox.showinfo("Éxito", "Reporte enviado.", parent=self)
                     self.toggle_modo_reporte()
 

@@ -1,9 +1,4 @@
-def enviar_reporte(conn, id_objetivo, tipo, id_denunciado, motivo, contenido_original=""):
-    # Seguridad: Verificar sesión activa
-    if not hasattr(conn, 'id_usuario_actual') or conn.id_usuario_actual is None:
-        print("Error: No se puede reportar sin una sesión activa.")
-        return False
-
+def enviar_reporte(conn, id_denunciante, id_objetivo, tipo, id_denunciado, motivo, contenido_original=""):
     contenido_para_prueba = contenido_original
 
     # Intentar descifrar solo si es un mensaje y parece estar cifrado
@@ -29,7 +24,7 @@ def enviar_reporte(conn, id_objetivo, tipo, id_denunciado, motivo, contenido_ori
     try:
         cursor = conn.cursor()
         cursor.execute(sql, (
-            conn.id_usuario_actual,
+            id_denunciante,
             id_denunciado, 
             id_pub, 
             id_mensaje, 

@@ -211,7 +211,7 @@ class VentanaPublicaciones(ctk.CTkFrame):
         
         if motivo:
             # id_p es el id_objetivo, id_a es el id_denunciado
-            if enviar_reporte(self.conn, id_p, "PUBLICACION", id_a, motivo):
+            if enviar_reporte(self.conn, self.id_usuario, id_p, "PUBLICACION", id_a, motivo):
                 messagebox.showinfo("Éxito", "Reporte enviado.")
             else:
                 messagebox.showerror("Error", "No se pudo enviar el reporte. Verifique su sesión.")
