@@ -168,7 +168,7 @@ def eliminar_usuario(conn, id_usuario, contrasena):
         cursor.close()
 
 # -------------------------------------------------------------------
-# RF4.4: Bloquear / Desbloquear usuario (toggle)
+# RF4.4: Bloquear / Desbloquear usuario 
 # -------------------------------------------------------------------
 def bloquear_desbloquear_usuario(conn, id_emisor, id_objetivo):
     """
@@ -186,7 +186,6 @@ def bloquear_desbloquear_usuario(conn, id_emisor, id_objetivo):
         if not cursor.fetchone():
             return "Usuario objetivo no existe o está eliminado"
 
-        # ¿Ya existe bloqueo emisor->objetivo?
         cursor.execute("""
             SELECT 1 FROM BLOQUEO
             WHERE IDUSUARIO1 = :1 AND IDUSUARIO2 = :2
@@ -269,5 +268,23 @@ def anadir_amigo(conn, id_emisor, id_objetivo):
 
     except Exception as e:
         return f"Error SQL: {e}"
+    finally:
+        cursor.close()
+
+        
+def listar_usuarios_bloqueados(conn, id_usuario):
+    """Devuelve [(IDUSUARIO, NOMBREUSUARIO), ...] de usuarios bloqueados por id_usuario"""
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT u.IDUSUARIO, u.NOMBREUSUARIO
+            FROM BLOQUEO b
+            JOIN USUARIO u ON u.IDUSUARIO = b.IDUSUARIO2
+            WHERE b.IDUSUARIO1 = :1
+              AND u.BORRADO = 'N'
+            ORDER BY u.IDUSUARIO
+        """, [id_usuario])
+
+        return cursor.fetchall()
     finally:
         cursor.close()
