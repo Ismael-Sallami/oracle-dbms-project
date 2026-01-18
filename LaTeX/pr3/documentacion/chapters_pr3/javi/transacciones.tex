@@ -1,6 +1,29 @@
 \section{Transacciones del Subsistema de Publicaciones (Javi)}
 Las operaciones críticas del subsistema se gestionan mediante transacciones explícitas para asegurar la consistencia de datos, especialmente en operaciones concurrentes como la gestión de "likes".
 
+\subsection{Transacción: Alta de Nueva Publicación}
+Esta transacción implementa el requisito funcional \textbf{RF1.1}. Permite persistir una nueva publicación generada por el usuario en el sistema.
+
+\begin{enumerate}
+    \item \textbf{Inicio de Transacción.}
+    \item \textbf{Validación de Datos (Previa):} Antes de la sentencia SQL, la capa de aplicación (\texttt{menu.py}) verifica que el título no esté vacío y que las longitudes de texto no excedan los límites definidos (`MAX\_TITLE`, `MAX\_DESC`).
+    \item \textbf{Operación DML (INSERT):} Se ejecuta la inserción en la tabla \texttt{PUBLICACION}. Se delega en la base de datos la generación automática del \texttt{IDPUBLICACION} (IDENTITY) y de la \texttt{FECHAPUBLICACION} (DEFAULT SYSDATE).
+    \item \textbf{Gestión de Errores:} Se incluye un bloque de manejo de excepciones para capturar posibles errores de integridad o conexión.
+    \item \textbf{Confirmación (COMMIT):} Si la inserción es exitosa, se confirman los cambios para hacer visible la publicación en el feed global inmediatamente.
+\end{enumerate}
+
+\subsection{Transacción: Modificación de Contenido}
+Correspondiente al \textbf{RF1.2}. Permite al autor editar los datos de una publicación existente (título, descripción, imagen o categoría), pero nunca la fecha de creación ni el autor.
+
+\begin{enumerate}
+    \item \textbf{Inicio de Transacción.}
+    \item \textbf{Operación DML (UPDATE):} Se actualizan los campos modificables de la tupla identificada por \texttt{IDPUBLICACION}.
+    \item \textbf{Control de Acceso:} La cláusula \texttt{WHERE} incluye obligatoriamente la condición \texttt{IDUSUARIO = :usuario\_actual}. Esto garantiza que un usuario no pueda modificar publicaciones de otros, incluso si manipula la interfaz, asegurando la integridad a nivel de fila.
+    \item \textbf{Auditoría Automática (Trigger):} Al ejecutarse el \texttt{UPDATE}, se dispara automáticamente el trigger \texttt{TRG\_PUB\_FECHA\_MOD}, que actualiza el campo \texttt{FECHAMODIFICACION} al instante actual (SYSDATE).
+    \item \textbf{Verificación:} Se comprueba el número de filas afectadas. Si es 0, implica que la publicación no existe o el usuario no es el propietario legítimo.
+    \item \textbf{Confirmación (COMMIT):} Se persisten los cambios.
+\end{enumerate}
+
 \subsection{Transacción: Alternar "Me Gusta" (Toggle Like)}
 Esta transacción corresponde al requisito funcional \textbf{RF1.4}. Gestiona la creación o eliminación de un "like" de forma atómica para evitar duplicados o estados inconsistentes.
 

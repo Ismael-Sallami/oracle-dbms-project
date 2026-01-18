@@ -3,7 +3,8 @@ from .functions import (
     modificar_usuario,
     eliminar_usuario,
     bloquear_desbloquear_usuario,
-    anadir_amigo
+    anadir_amigo,
+    listar_usuarios_bloqueados
 )
 import customtkinter as ctk
 '''
@@ -137,6 +138,24 @@ class VentanaUsuario(ctk.CTkFrame):
         btn_friend = ctk.CTkButton(box2, text="Añadir amigo", command=self._anadir_amigo)
         btn_friend.grid(row=3, column=0, padx=10, pady=6, sticky="ew")
 
+        ctk.CTkLabel(box2, text="Usuarios bloqueados", font=ctk.CTkFont(weight="bold")).grid(
+            row=4, column=0, pady=(14, 6)
+        )
+
+        self._map_bloqueados = {}  
+        self.var_bloqueados = ctk.StringVar(value="(cargando...)")
+
+        self.cmb_bloqueados = ctk.CTkOptionMenu(
+            box2,
+            variable=self.var_bloqueados,
+            values=["(cargando...)"],
+            command=self._on_bloqueado_select
+        )
+        self.cmb_bloqueados.grid(row=5, column=0, padx=10, pady=6, sticky="ew")
+
+        btn_refresh = ctk.CTkButton(box2, text="Actualizar lista", command=self._cargar_bloqueados)
+        btn_refresh.grid(row=6, column=0, padx=10, pady=(6, 12), sticky="ew")
+
         # ---------------------------
         # SECCIÓN: ELIMINAR MI USUARIO (borrado lógico)
         # ---------------------------
@@ -153,6 +172,9 @@ class VentanaUsuario(ctk.CTkFrame):
         btn_del = ctk.CTkButton(box3, text="Eliminar (borrado lógico)", fg_color="red", command=self._eliminar_mi_usuario)
         btn_del.grid(row=1, column=1, padx=10, pady=(0, 10))
 
+        self._cargar_bloqueados()
+
+
     # ======================================================
     # Helpers UI
     # ======================================================
@@ -165,6 +187,48 @@ class VentanaUsuario(ctk.CTkFrame):
     def _get_optional(self, entry: ctk.CTkEntry):
         v = entry.get().strip()
         return v if v else None
+
+
+    def _cargar_bloqueados(self):
+        """Rellena el desplegable con los usuarios bloqueados por el usuario activo."""
+        try:
+            rows = listar_usuarios_bloqueados(self.conn, self.id_usuario_activo)
+
+            if not rows:
+                self._map_bloqueados = {}
+                self.cmb_bloqueados.configure(values=["(ninguno)"], state="disabled")
+                self.var_bloqueados.set("(ninguno)")
+                return
+
+            self.cmb_bloqueados.configure(state="normal")
+
+            values = []
+            self._map_bloqueados = {}
+
+            for uid, nombre in rows:
+                label = f"{uid} - {nombre}"
+                values.append(label)
+                self._map_bloqueados[label] = uid
+
+            self.cmb_bloqueados.configure(values=values)
+
+            # Mantiene selección si sigue existiendo, si no, pone el primero
+            current = self.var_bloqueados.get()
+            if current not in self._map_bloqueados:
+                self.var_bloqueados.set(values[0])
+
+        except Exception as e:
+            self._set_msg_err(f"Error cargando bloqueados: {e}")
+
+    def _on_bloqueado_select(self, selected_value: str):
+        """Al seleccionar un bloqueado, copia su ID al Entry de acciones."""
+        uid = self._map_bloqueados.get(selected_value)
+        if uid is None:
+            return
+
+        self.ent_id_otro.delete(0, "end")
+        self.ent_id_otro.insert(0, str(uid))
+
 
     # ======================================================
     # Acciones
@@ -194,6 +258,9 @@ class VentanaUsuario(ctk.CTkFrame):
             self._set_msg_err(msg)
         else:
             self._set_msg_ok(msg)
+
+        self._cargar_bloqueados()
+
 
     def _anadir_amigo(self):
         raw = self.ent_id_otro.get().strip()
@@ -230,7 +297,7 @@ class VentanaUsuario(ctk.CTkFrame):
 
         self._set_msg_ok(msg)
 
-        # Si se borra, lo normal es cerrar sesión
+        # Si se borra cerrar sesión
         if callable(self.on_user_deleted):
             self.on_user_deleted()
         
