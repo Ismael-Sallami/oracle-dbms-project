@@ -3,9 +3,9 @@
 Se han implementado disparadores para automatizar la auditoría de modificaciones y gestionar la integridad referencial lógica en cascada.
 
 \subsection{Trigger: Auditoría de Modificaciones}
-\textbf{Motivación:} Es necesario mantener un registro fiable de cuándo fue la última vez que una publicación sufrió cambios (ya sea de contenido o de estado), independiente de la fecha de creación original.
+\textbf{Descripción:} Es necesario mantener un registro fiable de cuándo fue la última vez que una publicación sufrió cambios (ya sea de contenido o de estado), independiente de la fecha de creación original.
 
-\textbf{Descripción:} Se ejecuta antes de cualquier actualización (\texttt{BEFORE UPDATE}) en la tabla \texttt{PUBLICACION}.
+\textbf{Funcionamiento:} Se ejecuta antes de cualquier actualización (\texttt{BEFORE UPDATE}) en la tabla \texttt{PUBLICACION}.
 
 \begin{lstlisting}[language=SQL, caption={Trigger TRG\_PUB\_FECHA\_MOD}]
 CREATE OR REPLACE TRIGGER TRG_PUB_FECHA_MOD
@@ -19,9 +19,9 @@ END;
 \end{lstlisting}
 
 \subsection{Trigger: Cascada de Borrado Lógico}
-\textbf{Motivación:} Cuando un usuario es marcado como "Borrado" (baja lógica del sistema), todas sus publicaciones deben reflejar este estado para dejar de ser visibles en el feed global, manteniendo la coherencia del sistema sin perder datos.
+\textbf{Descripción:} Cuando un usuario es marcado como "Borrado" (baja lógica del sistema), todas sus publicaciones deben reflejar este estado para dejar de ser visibles en el feed global, manteniendo la coherencia del sistema sin perder datos.
 
-\textbf{Descripción:} Este trigger monitorea la tabla \texttt{USUARIO} y propaga el estado de borrado a las publicaciones asociadas.
+\textbf{Funcionamiento:} Este trigger monitorea la tabla \texttt{USUARIO} y propaga el estado de borrado a las publicaciones asociadas.
 
 \begin{lstlisting}[language=SQL, caption={Trigger TRG\_PUB\_CASCADE\_LOGIC}]
 CREATE OR REPLACE TRIGGER TRG_PUB_CASCADE_LOGIC
