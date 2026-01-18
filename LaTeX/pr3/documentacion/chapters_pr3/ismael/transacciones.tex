@@ -1,6 +1,6 @@
 \section{Transacciones del Subsistema de Publicidad (Ismael)}
 
-Las operaciones de negocio del subsistema de Publicidad se han encapsulado en transacciones atómicas para garantizar que la base de datos nunca quede en un estado inconsistente.
+Las operaciones de negocio del subsistema de Publicidad se han encapsulado en transacciones atómicas para garantizar que la base de datos nunca quede en un estado inconsistente. 
 
 A continuación se describen las secuencias lógicas de las principales transacciones implementadas en la capa de aplicación (Python) y su interacción con el SGBD.
 
@@ -12,7 +12,7 @@ Esta transacción corresponde al requisito funcional \textbf{RF3.1}. Su objetivo
     \item \textbf{Validación de Datos (Aplicación):} Se verifica que la fecha de fin sea posterior a la fecha actual y que el coste sea un valor positivo.
     \item \textbf{Operación DML (INSERT):} Se ejecuta la sentencia \texttt{INSERT INTO ANUNCIO...} con los datos proporcionados por el formulario.
     \item \textbf{Confirmación (COMMIT):} Si la inserción es exitosa, se confirman los cambios permanentemente en el SGBD.
-    \item \textbf{Gestión de Errores (ROLLBACK):} En caso de error (ej. violación de la restricción \texttt{CHK\_FECHAS\_VALIDAS} o fallo de conexión), se deshacen los cambios y se notifica al usuario sin dejar registros parciales.
+    \item \textbf{Gestión de Errores (ROLLBACK):} En caso de error (ej. violación de la restricción de fechas válidas o fallo de conexión), se deshacen los cambios y se notifica al usuario sin dejar registros parciales.
 \end{enumerate}
 
 \subsection{Transacción: Baja de Anuncio}
@@ -22,7 +22,7 @@ Correspondiente al \textbf{RF3.3}. Permite retirar un anuncio antes de su vencim
     \item \textbf{Inicio de Transacción.}
     \item \textbf{Lectura de Bloqueo (SELECT ... FOR UPDATE):} (Opcional) Se verifica que el anuncio exista y no esté siendo modificado por otro administrador concurrentemente.
     \item \textbf{Operación DML (DELETE):} Se elimina el registro de la tabla \texttt{ANUNCIO}.
-    \item \textbf{Disparo de Integridad (Cascada):} El SGBD elimina automáticamente las filas dependientes en la tabla \texttt{CARACTERISTICA} (gracias a la FK definida), asegurando que no queden metadatos huérfanos.
+    \item \textbf{Disparo de Integridad (Cascada):} El SGBD elimina automáticamente las filas dependientes en la tabla \texttt{CARACTERISTICA}, asegurando que no queden metadatos huérfanos.
     \item \textbf{Confirmación (COMMIT):} Se hacen efectivos los cambios.
 \end{enumerate}
 
@@ -32,6 +32,34 @@ Permite extender o recortar la duración de una campaña (\textbf{RF3.4}).
 \begin{enumerate}
     \item \textbf{Inicio de Transacción.}
     \item \textbf{Operación DML (UPDATE):} Se actualiza el campo \texttt{FECHA\_FIN} del anuncio seleccionado.
-    \item \textbf{Auditoría (Trigger):} Esta operación dispara automáticamente el trigger \texttt{TRG\_AUDIT\_FECHAS} (descrito en el siguiente capítulo) que registra el cambio histórico.
+    \item \textbf{Auditoría (Trigger):} Esta operación dispara automáticamente el trigger \texttt{TRG\_AUDITAR\_CAMBIO\_FECHA} (descrito en el siguiente capítulo) que registra el cambio histórico.
     \item \textbf{Confirmación (COMMIT).}
+\end{enumerate}
+
+\subsection{Transacción: Añadir Características}
+Esta transacción cubre el requisito \textbf{RF3.2} y permite asociar metadatos (público objetivo, ubicación, etiquetas) a un anuncio existente. Dado que las características son entidades débiles o dependientes, su gestión requiere asegurar la integridad referencial.
+
+\begin{enumerate}
+    \item \textbf{Inicio de Transacción.}
+    \item \textbf{Verificación de Existencia:} Se valida que el \texttt{ID\_ANUNCIO} proporcionado corresponda a una campaña activa.
+    \item \textbf{Operación DML (INSERT/UPDATE):} 
+    \begin{itemize}
+        \item Si se añade una nueva característica, se ejecuta un \texttt{INSERT INTO CARACTERISTICA}.
+        \item Si se modifica una existente (ej. cambiando el valor de segmentación), se ejecuta un \texttt{UPDATE}.
+    \end{itemize}
+    \item \textbf{Validación de Restricciones:} El SGBD verifica que los valores insertados cumplan con los tipos de datos definidos (ej. \texttt{VARCHAR} no nulo), gracias al trigger \texttt{TRG\_VALIDAR\_COHERENCIA}.
+    \item \textbf{Confirmación (COMMIT):} Se persisten los cambios en la base de datos.
+\end{enumerate}
+
+\subsection{Transacción: Listado de Anuncios Activos}
+Correspondiente al \textbf{RF3.5}. Aunque es una operación de lectura, se trata como una transacción de solo lectura (\textit{Read-Only}) para garantizar la consistencia de los datos mostrados al administrador.
+
+\begin{enumerate}
+    \item \textbf{Establecimiento de Conexión:} Se instancia el cursor de base de datos desde la capa de aplicación.
+    \item \textbf{Consulta (SELECT):} Se ejecuta una consulta con filtrado lógico, seleccionando aquellos anuncios cuya \texttt{FECHAFIN} sea mayor o igual a la fecha del sistema (\texttt{SYSDATE} o \texttt{CURRENT\_DATE}).
+    \begin{quote}
+        \texttt{SELECT * FROM ANUNCIO WHERE FECHAFIN >= CURRENT\_DATE}
+    \end{quote}
+    \item \textbf{Recuperación (FETCH):} Se iteran los resultados mediante el cursor (\texttt{fetchall()}) para poblar la interfaz gráfica (Treeview o Lista).
+    \item \textbf{Cierre de Recursos:} Se cierra el cursor para liberar la memoria del SGBD, finalizando la operación de lectura.
 \end{enumerate}

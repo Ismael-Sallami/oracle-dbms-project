@@ -86,7 +86,7 @@ class VentanaPublicidad(ctk.CTkFrame):
         self.frame_botones = ctk.CTkFrame(self.frame_gestion, fg_color="transparent")
         self.frame_botones.pack(pady=10)
 
-        self.btn_extender = ctk.CTkButton(self.frame_botones, text="Extender Fecha", command=self.accion_extender, fg_color="#D35400", width=120)
+        self.btn_extender = ctk.CTkButton(self.frame_botones, text="Cambiar Fecha", command=self.accion_extender, fg_color="#D35400", width=120)
         self.btn_extender.pack(side="left", padx=5)
 
         self.btn_eliminar = ctk.CTkButton(self.frame_botones, text="Eliminar", command=self.accion_eliminar, fg_color="#C0392B", width=120)

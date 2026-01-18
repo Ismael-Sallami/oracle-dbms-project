@@ -66,3 +66,5 @@ CREATE TABLE ARCHIVADO (
 \begin{itemize}
     \item \textbf{Unicidad de Preferencia:} La clave primaria compuesta asegura que un usuario no pueda archivar varias veces al mismo interlocutor. Al ser una tabla independiente de \texttt{CONVERSA}, permite una gestión flexible y desacoplada de la interfaz de usuario.
     \item \textbf{Integridad Referencial (ON DELETE CASCADE):} No es necesario, por el borrado lógico de usuarios, no se elimina.
+    
+\end{itemize}

@@ -123,7 +123,7 @@ def eliminar_anuncio_bd(conn, id_anuncio):
         cursor.close()
 
 # ==============================================================================
-# 5. UTILIDADES (ROL) ES DE FER
+# 5. UTILIDADES (ROL)
 # ==============================================================================
 def es_admin_bd(conn, id_usuario):
     """

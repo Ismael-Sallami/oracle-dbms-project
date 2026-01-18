@@ -3,9 +3,9 @@
 Para garantizar la integridad de los datos y cumplir con los requisitos de auditoría, se han implementado tres disparadores (triggers) en el SGBD. Estos mecanismos permiten automatizar validaciones de negocio complejas y mantener un histórico de modificaciones críticas.
 
 \subsection{Trigger: Validación de Coherencia Temporal}
-\textbf{Motivación:} Este disparador implementa una regla de negocio fundamental: un anuncio no puede tener una fecha de finalización anterior a la fecha actual. Esto evita errores humanos al programar campañas o cerrar anuncios erróneamente en el pasado.
+\textbf{Descripción:} Este disparador implementa una regla de negocio fundamental: un anuncio no puede tener una fecha de finalización anterior a la fecha actual. Esto evita errores humanos al programar campañas o cerrar anuncios erróneamente en el pasado.
 
-\textbf{Descripción:} Se ejecuta antes de insertar o actualizar (\texttt{BEFORE INSERT OR UPDATE}) en la tabla \texttt{ANUNCIO}. Compara la nueva fecha de fin con la fecha del sistema truncada (sin hora).
+\textbf{Funcionamiento:} Se ejecuta antes de insertar o actualizar (\texttt{BEFORE INSERT OR UPDATE}) en la tabla \texttt{ANUNCIO}. Compara la nueva fecha de fin con la fecha del sistema truncada (sin hora).
 
 \begin{lstlisting}[language=SQL, caption={Trigger TRG\_PUB\_VALIDAR\_FECHAS}]
 CREATE OR REPLACE TRIGGER TRG_PUB_VALIDAR_FECHAS
@@ -23,9 +23,9 @@ END;
 \end{lstlisting}
 
 \subsection{Trigger: Auditoría de Cambios en Vigencia}
-\textbf{Motivación:} La modificación de la fecha de finalización de un anuncio tiene implicaciones contractuales y económicas. Por ello, es obligatorio registrar cualquier cambio en este campo para futuras auditorías o reclamaciones. Además, puede servir en cierto modo para analizar tendencias en la gestión de anuncios.
+\textbf{Descripción:} La modificación de la fecha de finalización de un anuncio tiene implicaciones contractuales y económicas. Por ello, es obligatorio registrar cualquier cambio en este campo para futuras auditorías o reclamaciones. Además, puede servir en cierto modo para analizar tendencias en la gestión de anuncios.
 
-\textbf{Descripción:} Este disparador salta únicamente cuando se actualiza la columna \texttt{FECHAFIN}. Guarda automáticamente el estado anterior y el nuevo en la tabla histórica \texttt{HISTORIAL\_CAMBIOS\_FECHA}.
+\textbf{Funcionamiento:} Este disparador salta únicamente cuando se actualiza la columna \texttt{FECHAFIN}. Guarda automáticamente el estado anterior y el nuevo en la tabla histórica \texttt{HISTORIAL\_CAMBIOS\_FECHA}.
 
 \begin{lstlisting}[language=SQL, caption={Trigger TRG\_AUDITAR\_CAMBIO\_FECHA}]
 CREATE OR REPLACE TRIGGER TRG_AUDITAR_CAMBIO_FECHA
@@ -39,9 +39,9 @@ END;
 \end{lstlisting}
 
 \subsection{Trigger: Validación Semántica de Características}
-\textbf{Motivación:} La tabla \texttt{CARACTERISTICA} permite una flexibilidad clave-valor, pero esto conlleva el riesgo de datos sucios (ej. "Rojo", "rojo ", "Color Rojo"). Este disparador normaliza los datos y restringe los valores permitidos según el tipo de característica.
+\textbf{Descripción:} La tabla \texttt{CARACTERISTICA} permite una flexibilidad clave-valor, pero esto conlleva el riesgo de datos sucios (ej. "Rojo", "rojo ", "Color Rojo"). Este disparador normaliza los datos y restringe los valores permitidos según el tipo de característica.
 
-\textbf{Descripción:} Realiza dos funciones:
+\textbf{Funcionamiento:} Realiza dos funciones:
 \begin{enumerate}
     \item \textbf{Normalización:} Convierte claves y valores a mayúsculas y elimina espacios en blanco.
     \item \textbf{Validación Lógica:} Utiliza una estructura \texttt{CASE} para aplicar listas blancas de valores permitidos según la etiqueta (Colores válidos, Tamaños válidos, Prioridades).
