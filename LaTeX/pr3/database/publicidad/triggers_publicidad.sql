@@ -29,6 +29,8 @@ BEGIN
 END;
 /
 
+-- Puede servir para analizar tendencias, ya que si vemos que se suele extender anuncios de x tipo, podemos pensar que es por que es una tendencia.
+
 /* =========================================================
 TRIGGER 3: Comprobar característica
 ========================================================= */

@@ -108,8 +108,7 @@ def extender_campania_bd(conn, id_anuncio, nueva_fecha):
 def eliminar_anuncio_bd(conn, id_anuncio):
     cursor = conn.cursor()
     try:
-        # Nota: Usamos DELETE físico. Si prefieres borrado lógico usa:
-        # UPDATE ANUNCIO SET ESTADO = 'ELIMINADO' WHERE ...
+        # Nota: Usamos DELETE físico.
         sql = "DELETE FROM ANUNCIO WHERE IDANUNCIO = :1"
         cursor.execute(sql, [id_anuncio])
         conn.commit()
