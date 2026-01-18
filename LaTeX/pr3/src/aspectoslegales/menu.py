@@ -152,8 +152,12 @@ class VentanaReportes(ctk.CTkFrame):
             command=lambda: self.sancionar_usuario_interfaz(denun_nombre, id_denunciado_num)
         ).pack(side="left", padx=20, expand=True)
 
-    def sancionar_usuario_interfaz(self, nombre_usuario):
-        messagebox.showinfo("Moderación", f"Funcionalidad de sanción para el usuario '{nombre_usuario}' no implementada.")
+    def sancionar_usuario_interfaz(self, nombre_usuario, id_usuario):
+        messagebox.showinfo(
+            "Módulo de Moderación", 
+            f"La funcionalidad para sancionar o bloquear al usuario '{nombre_usuario}' (ID: {id_usuario}) aún no está implementada.\n\nPróximamente podrá aplicar baneos temporales o permanentes.",
+            parent=self
+        )
 
     def confirmar_eliminar_publicacion(self, id_p, id_u_num, id_r):
         if messagebox.askyesno("Confirmar Acción", "¿Está seguro de eliminar esta publicación permanentemente?"):
