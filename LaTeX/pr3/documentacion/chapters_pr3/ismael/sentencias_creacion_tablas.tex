@@ -29,7 +29,7 @@ CREATE TABLE ANUNCIO (
     \item \textbf{Integridad Referencial (ON DELETE CASCADE):} Se ha decidido que, si un cliente se da de baja del sistema, sus anuncios asociados sean eliminados automáticamente para evitar registros huérfanos.
 \end{itemize}
 
-\subsection{Tabla auxiliar: CARACTERISTICA (Segmentación)}
+\subsection{Tabla auxiliar: CARACTERISTICA}
 Tabla destinada a almacenar los tags o características para segmentar el público objetivo del anuncio.
 
 \begin{lstlisting}[language=SQL, caption={Creación de la tabla CARACTERISTICA}]

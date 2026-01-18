@@ -3,7 +3,7 @@
 Para garantizar la integridad de los datos y cumplir con los requisitos de auditoría, se han implementado tres disparadores (triggers) en el SGBD. Estos mecanismos permiten automatizar validaciones de negocio complejas y mantener un histórico de modificaciones críticas.
 
 \subsection{Trigger: Validación de Coherencia Temporal}
-\textbf{Motivación:} Este disparador implementa una regla de negocio fundamental (\textit{Business Rule}): un anuncio no puede tener una fecha de finalización anterior a la fecha actual. Esto evita errores humanos al programar campañas o cerrar anuncios erróneamente en el pasado.
+\textbf{Motivación:} Este disparador implementa una regla de negocio fundamental: un anuncio no puede tener una fecha de finalización anterior a la fecha actual. Esto evita errores humanos al programar campañas o cerrar anuncios erróneamente en el pasado.
 
 \textbf{Descripción:} Se ejecuta antes de insertar o actualizar (\texttt{BEFORE INSERT OR UPDATE}) en la tabla \texttt{ANUNCIO}. Compara la nueva fecha de fin con la fecha del sistema truncada (sin hora).
 
@@ -23,7 +23,7 @@ END;
 \end{lstlisting}
 
 \subsection{Trigger: Auditoría de Cambios en Vigencia}
-\textbf{Motivación:} La modificación de la fecha de finalización de un anuncio tiene implicaciones contractuales y económicas. Por ello, es obligatorio registrar cualquier cambio en este campo para futuras auditorías o reclamaciones.
+\textbf{Motivación:} La modificación de la fecha de finalización de un anuncio tiene implicaciones contractuales y económicas. Por ello, es obligatorio registrar cualquier cambio en este campo para futuras auditorías o reclamaciones. Además, puede servir en cierto modo para analizar tendencias en la gestión de anuncios.
 
 \textbf{Descripción:} Este disparador salta únicamente cuando se actualiza la columna \texttt{FECHAFIN}. Guarda automáticamente el estado anterior y el nuevo en la tabla histórica \texttt{HISTORIAL\_CAMBIOS\_FECHA}.
 
@@ -39,7 +39,7 @@ END;
 \end{lstlisting}
 
 \subsection{Trigger: Validación Semántica de Características}
-\textbf{Motivación:} La tabla \texttt{CARACTERISTICA} permite una flexibilidad clave-valor (Entity-Attribute-Value), pero esto conlleva el riesgo de datos sucios (ej. "Rojo", "rojo ", "Color Rojo"). Este disparador normaliza los datos y restringe los valores permitidos según el tipo de característica.
+\textbf{Motivación:} La tabla \texttt{CARACTERISTICA} permite una flexibilidad clave-valor, pero esto conlleva el riesgo de datos sucios (ej. "Rojo", "rojo ", "Color Rojo"). Este disparador normaliza los datos y restringe los valores permitidos según el tipo de característica.
 
 \textbf{Descripción:} Realiza dos funciones:
 \begin{enumerate}
