@@ -1,11 +1,10 @@
 \section{Disparadores del Subsistema de Usuarios (Fernando)}
 
-Para garantizar la integridad de los datos y evitar relaciones incoherentes entre usuarios dentro del sistema, se ha implementado un disparador (trigger) en el SGBD. Este mecanismo permite automatizar una validación de negocio esencial, impidiendo inserciones o actualizaciones inválidas en la información de relaciones entre usuarios.
 
 \subsection{Trigger: Prevención de Auto-Relación entre Usuarios}
-\textbf{Motivación:} Este disparador aplica una regla de negocio fundamental (\textit{Business Rule}): un usuario no puede establecer una relación consigo mismo. Esta validación previene inconsistencias lógicas en el modelo y evita que se registren relaciones no válidas que podrían distorsionar el funcionamiento del subsistema de usuarios.
+\textbf{Descripción:} Este disparador aplica una regla fundamental (\textit{Business Rule}): un usuario no puede establecer una relación consigo mismo. Esta validación previene inconsistencias lógicas en el modelo y evita que se registren relaciones inválidas que podrían perjudicar el funcionamiento del sistema.
 
-\textbf{Descripción:} Se ejecuta antes de insertar o actualizar (\texttt{BEFORE INSERT OR UPDATE}) sobre la tabla \texttt{AMISTAD}. Comprueba que los identificadores de ambos usuarios son distintos. Si se detecta igualdad, el disparador bloquea la operación y lanza una excepción mediante \texttt{RAISE\_APPLICATION\_ERROR}.
+\textbf{funcionamiento:} Se ejecuta antes de insertar o actualizar (\texttt{BEFORE INSERT OR UPDATE}) sobre la tabla \texttt{AMISTAD}. Comprueba que los identificadores de ambos usuarios son distintos. Si se detecta igualdad, el disparador bloquea la operación y lanza una excepción mediante \texttt{RAISE\_APPLICATION\_ERROR}.
 
 \begin{lstlisting}[language=SQL, caption={Trigger TRG\_AMISTAD\_NO\_AUTO}]
 CREATE OR REPLACE TRIGGER TRG_AMISTAD_NO_AUTO
