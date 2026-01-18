@@ -15,13 +15,76 @@ El proceso técnico seguido fue el siguiente:
     \item \textbf{Creación de usuario:} Se creó un usuario específico para la práctica (\texttt{c\#\#ismael}) siguiendo la nomenclatura de usuarios comunes de la arquitectura \textit{multitenant} de Oracle (prefijo \texttt{c\#\#}), otorgándole permisos de conexión y recursos ilimitados.
 \end{enumerate}
 
-La siguiente figura muestra la secuencia de comandos utilizada en la terminal para verificar la instalación, conectar al sistema y preparar el usuario de trabajo:
+La secuencia de comandos que se usaron para la instalación y desplegar el contenedor de Oracle es la siguiente:
+\begin{minted}{bash}
+# Limpieza profunda: elimina versiones previas y posibles conflictos de Docker
+sudo apt-get remove docker docker-engine docker.io containerd runc containerd.io
+
+# Reparación de dependencias y limpieza de paquetes huérfanos
+sudo apt-get install -f
+sudo apt-get autoremove -y
+
+# Instalación de Docker desde los repositorios oficiales de Ubuntu
+sudo apt install docker.io -y
+
+# Arranque y habilitación del servicio Docker para que se inicie automáticamente
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# Despliegue del contenedor Oracle Database XE, 
+# exponiendo el puerto 1521 y estableciendo la contraseña
+sudo docker run -d -p 1521:1521 -e ORACLE_PASSWORD=ddsi --name oracle-ddsi gvenzl/oracle-xe
+
+\end{minted}
+
+A continuación, una vez desplegado el contenedorse incluyen las imágenes de todo lo relacionado con el arranque del docker, ya que hay que esperar unos minutos a que el SGBD esté operativo, y la creación del usuario de trabajo:
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.0\textwidth]{figures/ismael/instalacion_oracle.png}
-    \caption{Secuencia de arranque del contenedor, conexión vía SQL*Plus y creación del usuario c\#\#ismael.}
-    \label{fig:oracle_install}
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/ismael/arrancamos_docker.png}
+        \caption{Arranque del contenedor Oracle XE.}
+        \label{fig:docker_pull}
+    \end{minipage}\hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/ismael/verificar_docker_arrancado.png}
+        \caption{Verificamos activación y conexión al contenedor Oracle XE, usando el comando \texttt{sudo docker logs -f oracle-ddsi}.}
+        \label{fig:docker_run}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/ismael/conexion_docker.png}
+        \caption{Conexión al contenedor Oracle XE mediante SQL*Plus.}
+        \label{fig:conexion_docker}
+    \end{minipage}\hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/ismael/creacion_usuario.png}
+        \caption{Creación del usuario de trabajo en Oracle XE.}
+        \label{fig:creacion_usuario}
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/ismael/damos_permisos_basicos.png}
+        \caption{Otorgando permisos básicos al usuario.}
+        \label{fig:permisos_basicos}
+    \end{minipage}\hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/ismael/permisos_espacio_ilimitado.png}
+        \caption{Otorgando permisos de espacio ilimitado al usuario.}
+        \label{fig:permisos_ilimitados}
+    \end{minipage}
 \end{figure}
 
 \section{Diseño Objeto-Relacional del Subsistema}
@@ -101,10 +164,22 @@ END;
 /
 \end{minted}
 
+Para la ejecución del script sql, la serie de comandos han sido:
+\begin{minted}{bash}
+# Partimos de que está arrancado, si no, debemos de ejecutarlo con el comando siguiente:
+sudo docker start oracle-ddsi
+
+# Copiamos el script sql al contenedor
+sudo docker cp practica.sql oracle-ddsi:/tmp/practica.sql
+
+# Ejecutamos el script usando el comando completo:
+sudo docker exec -it oracle-ddsi sqlplus c##ismael/ddsi @/tmp/practica.sql
+\end{minted}
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/ismael/consulta_oracle.png}
-    \caption{Ejecución de métodos sobre objetos Anuncio y recorrido de tablas anidadas en la terminal.}
+    \caption{Ejecución de métodos sobre objetos Anuncio y recorrido de tablas anidadas en la terminal. La insercción de datos, creación de tabla de objetos y demás no se ha incluido en las capturas.}
     \label{fig:oracle_query}
 \end{figure}
 
