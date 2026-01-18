@@ -1,4 +1,3 @@
-import pyodbc
 
 def crear_o_mencionar_hashtag(cursor, hashtag, id_publicacion):
     if not hashtag.startswith("#"):
