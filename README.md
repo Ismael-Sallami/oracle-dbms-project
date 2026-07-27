@@ -118,8 +118,9 @@ up as an invalid object, which is what a typo in a column name produces. That is
   - **The delivered code had university Oracle credentials written in four files**, mine and
     two teammates', with the password equal to the username. They are gone from the tree and
     from the history, and the connection now reads `ORACLE_USER`, `ORACLE_PASSWORD` and
-    `ORACLE_DSN` from the environment. This is the only change to what was handed in:
-    publishing someone else's credentials is not a defect to document, it is one to remove.
+    `ORACLE_DSN` from the environment. **The credentials that were published no longer work.**
+    This is the only change to what was handed in: publishing credentials is not a defect to
+    document, it is one to remove.
   - **Two PL/SQL blocks never compiled.** `database/publicaciones/triggers_publicaciones.sql`
     catches the "index already exists" error with `IF SQL_CODE != -955`, and PL/SQL has
     `SQLCODE`, not `SQL_CODE`. Oracle raises PLS-00201 and the two indexes on `ME_GUSTA` are
