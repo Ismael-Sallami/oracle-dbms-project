@@ -93,13 +93,15 @@ What the CI prints on every push, against a real Oracle:
 ```
 database/00_init_tablas.sql: 45 statements
 database/mensajeria/triggers_mensajeria.sql: 1 statements
-database/publicaciones/triggers_publicaciones.sql: 3 statements
+  known failure in database/publicaciones/triggers_publicaciones.sql: ORA-06550
+database/publicaciones/triggers_publicaciones.sql: 2 statements, 2 known failures
 ...
-15 tables and 9 triggers created, all valid
+15 tables and 8 triggers created, all valid
 ```
 
 The check is not that the SQL parses: it is that Oracle accepts it and that no trigger ends
-up as an invalid object, which is what a typo in a column name produces.
+up as an invalid object, which is what a typo in a column name produces. That is how the
+`SQL_CODE` bug below was found, after the code had been handed in and marked.
 
 ## What I learned
 
@@ -113,6 +115,11 @@ up as an invalid object, which is what a typo in a column name produces.
     from the history, and the connection now reads `ORACLE_USER`, `ORACLE_PASSWORD` and
     `ORACLE_DSN` from the environment. This is the only change to what was handed in:
     publishing someone else's credentials is not a defect to document, it is one to remove.
+  - **Two PL/SQL blocks never compiled.** `database/publicaciones/triggers_publicaciones.sql`
+    catches the "index already exists" error with `IF SQL_CODE != -955`, and PL/SQL has
+    `SQLCODE`, not `SQL_CODE`. Oracle raises PLS-00201 and the two indexes on `ME_GUSTA` are
+    never created. Running the SQL against a real database is what surfaced it; parsing it
+    would not have. Listed in `tools/known-sql-failures.txt` and asserted, not patched.
   - `src/publicaciones/menu_TUI.py` **does not compile**. A triple-quoted block opened to
     comment out an old terminal prototype is never closed, and it swallows the rest of the
     file. `tools/check-python.sh` asserts that failure instead of skipping it. Not patched.

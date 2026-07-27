@@ -1,0 +1,10 @@
+# Statements that Oracle refuses, exactly as they were handed in. One entry per
+# line: the file, a tab, and a fragment that identifies the statement inside it.
+#
+# tools/run-against-oracle.py expects them to fail. If one of them starts working,
+# the run fails, so this list cannot go stale without anyone noticing. They are not
+# patched: a deliverable rewritten to make a check pass is no longer the deliverable.
+
+# PL/SQL has SQLCODE, not SQL_CODE, so both anonymous blocks that create the
+# indexes raise PLS-00201 and the index is never created. ORA-06550.
+database/publicaciones/triggers_publicaciones.sql	SQL_CODE

@@ -29,6 +29,7 @@ PASSWORD = os.environ.get("ORACLE_PASSWORD", "test")
 
 SCHEMA = pathlib.Path("database/00_init_tablas.sql")
 DATABASE = pathlib.Path("database")
+KNOWN_FAILURES = pathlib.Path("tools/known-sql-failures.txt")
 
 LINE_COMMENT = re.compile(r"--[^\n]*")
 
@@ -59,19 +60,44 @@ def statements(path: pathlib.Path) -> list[str]:
     return out
 
 
-def run_script(cursor, path: pathlib.Path, *, tolerate_missing: bool = False) -> int:
-    done = 0
+def known_failures() -> dict[str, list[str]]:
+    """Fragments that identify the statements Oracle is expected to refuse."""
+    out: dict[str, list[str]] = {}
+    if not KNOWN_FAILURES.exists():
+        return out
+    for line in KNOWN_FAILURES.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        path, _, fragment = line.partition("\t")
+        out.setdefault(path.strip(), []).append(fragment.strip())
+    return out
+
+
+def run_script(cursor, path: pathlib.Path, expected: list[str], *,
+               tolerate_missing: bool = False) -> tuple[int, int, int]:
+    """Returns statements run, known failures seen, and known failures that passed."""
+    done = known = stale = 0
     for statement in statements(path):
+        is_known = any(fragment in statement for fragment in expected)
         try:
             cursor.execute(statement)
-            done += 1
         except oracledb.DatabaseError as error:
             (info,) = error.args
             if tolerate_missing and info.code in MISSING_OBJECT:
                 continue
+            if is_known:
+                print(f"  known failure in {path}: ORA-{info.code:05d}")
+                known += 1
+                continue
             print(f"\nFAIL in {path}:\n{statement[:400]}\n  ORA-{info.code:05d}: {info.message}")
             raise
-    return done
+        else:
+            if is_known:
+                print(f"  STALE: a statement listed as a known failure now works, in {path}")
+                stale += 1
+            done += 1
+    return done, known, stale
 
 
 def invalid_objects(cursor) -> list[tuple[str, str]]:
@@ -84,16 +110,27 @@ def invalid_objects(cursor) -> list[tuple[str, str]]:
 
 
 def main() -> int:
+    expected = known_failures()
+    stale_total = 0
+
     with oracledb.connect(user=USER, password=PASSWORD, dsn=DSN) as connection:
         with connection.cursor() as cursor:
-            count = run_script(cursor, SCHEMA, tolerate_missing=True)
+            count, _, stale = run_script(cursor, SCHEMA, expected.get(str(SCHEMA), []),
+                                         tolerate_missing=True)
+            stale_total += stale
             print(f"{SCHEMA}: {count} statements")
 
             for path in sorted(DATABASE.rglob("*.sql")):
                 if path == SCHEMA or path.name.endswith("_vAnterior.sql"):
                     continue
-                count = run_script(cursor, path)
-                print(f"{path}: {count} statements")
+                count, known, stale = run_script(cursor, path, expected.get(str(path), []))
+                stale_total += stale
+                suffix = f", {known} known failures" if known else ""
+                print(f"{path}: {count} statements{suffix}")
+
+            if stale_total:
+                print("\ntools/known-sql-failures.txt is out of date")
+                return 1
 
             broken = invalid_objects(cursor)
             if broken:
