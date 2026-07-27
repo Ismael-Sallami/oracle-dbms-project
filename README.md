@@ -91,12 +91,17 @@ bash tools/check-python.sh
 What the CI prints on every push, against a real Oracle:
 
 ```
-database/00_init_tablas.sql: 45 statements
+database/00_init_tablas.sql: 16 statements
 database/mensajeria/triggers_mensajeria.sql: 1 statements
   known failure in database/publicaciones/triggers_publicaciones.sql: ORA-06550
+  known failure in database/publicaciones/triggers_publicaciones.sql: ORA-06550
 database/publicaciones/triggers_publicaciones.sql: 2 statements, 2 known failures
-...
-15 tables and 8 triggers created, all valid
+database/publicidad/procedures_publicidad.sql: 1 statements
+database/publicidad/triggers_publicidad.sql: 3 statements
+database/tendencias/triggers_tendencias.sql: 1 statements
+database/usuarios/triggers_usuarios.sql: 1 statements
+
+45 tables and 8 triggers created, all valid
 ```
 
 The check is not that the SQL parses: it is that Oracle accepts it and that no trigger ends
