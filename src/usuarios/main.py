@@ -1,3 +1,5 @@
+import os
+
 import oracledb
 from auth import login
 from functions import crear_usuario
@@ -8,9 +10,9 @@ from getpass import getpass
 def main():
     try:
         conexion = oracledb.connect(
-            user="ORACLE_USER",
-            password="ORACLE_USER",
-            dsn="oracle0.ugr.es:1521/practbd"
+            user=os.environ.get("ORACLE_USER", ""),
+            password=os.environ.get("ORACLE_PASSWORD", ""),
+            dsn=os.environ.get("ORACLE_DSN", "oracle0.ugr.es:1521/practbd")
         )
     except Exception as e:
         print(f"Error de conexión: {e}")

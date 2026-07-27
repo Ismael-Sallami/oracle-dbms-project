@@ -1,62 +1,20 @@
-# Archivos generados por LaTeX que no sean .pdf ni .tex
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
 
-# Archivos auxiliares
+# LaTeX
 *.aux
 *.log
 *.out
 *.toc
-*.lof
-*.lot
 *.fls
 *.fdb_latexmk
-
-# Archivos temporales
-*.tmp
-*.nav
-*.snm
-
-# Archivos de compilación
-*.dvi
+*.synctex.gz
 *.bbl
 *.blg
-*.brf
-*.synctex.gz
-
-# Archivos de configuración
-*.acn
-*.acr
-*.alg
-*.glg
-*.glo
-*.gls
-*.ist
-
-# Archivos relacionados con figuras
-*.eps-converted-to.pdf
-
-# ----------práctica 3-------------
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-venv/
-.env
-
-# IDEs
-.vscode/
-.idea/
-
-# Logs y SO
-*.log
-.DS_Store
-Thumbs.db
-
-arbol.txt
-test.sql
-00_init_tablas_vAnterior.sql
-init_structure.sh
-init_structure.py
-trabajot4.pdf
-agents.md
-pr3.pdf
+_minted*/
+*.pygtex
+*.pygstyle

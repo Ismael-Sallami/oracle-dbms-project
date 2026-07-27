@@ -1,10 +1,14 @@
+import os
+
 import oracledb
 
 class DBConnection:
     def __init__(self):
-        self.username = "ORACLE_USER"   
-        self.password = "ORACLE_USER"  # CAMBIAR
-        self.dsn = "oracle0.ugr.es:1521/practbd"
+        # Credentials come from the environment. The delivered version had the
+        # university account written in the file; see the README.
+        self.username = os.environ.get("ORACLE_USER", "")
+        self.password = os.environ.get("ORACLE_PASSWORD", "")
+        self.dsn = os.environ.get("ORACLE_DSN", "oracle0.ugr.es:1521/practbd")
         self.connection = None 
 
     def connect(self):

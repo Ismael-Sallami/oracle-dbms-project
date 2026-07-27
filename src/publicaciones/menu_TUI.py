@@ -192,11 +192,13 @@ def mostrar_menu_publicaciones(conexion, id_usuario):
 """
 PRUEBA BÁSICA DE TERMINAL, NO INCLUIR CUANDO SE TRANSFORME A 
 GUI
+import os
+
 import oracledb
 connection = oracledb.connect(
-        user="ORACLE_USER",
-        password="ORACLE_USER",
-        dsn="oracle0.ugr.es:1521/practbd"
+        user=os.environ.get("ORACLE_USER", ""),
+        password=os.environ.get("ORACLE_PASSWORD", ""),
+        dsn=os.environ.get("ORACLE_DSN", "oracle0.ugr.es:1521/practbd")
         )
 
 id_usuario=conversion_a_int_seguro(input("qué usuario eres? "))

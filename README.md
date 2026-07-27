@@ -1,300 +1,126 @@
-# Info Pibes S.A
-Contenido de las prácticas:
-## Práctica 1 :heavy_check_mark:
-_**Diseño y desarrollo de un Sistema de Información sobre una temática (Red social).**_
+# oracle-dbms-project
 
-- Nombre del sistema
-- Descripción de cada subsistema.
-- Desarrollo de requisitos para cada subsistema
-    - Requisitos funcionales con sus requisitos de datos
-    - Restricciones semánticas.
+![Python](https://img.shields.io/badge/Python-3.12-3776AB)
+![Oracle](https://img.shields.io/badge/Oracle-23%20Free-F80000)
+[![checks](https://img.shields.io/github/actions/workflow/status/Ismael-Sallami/oracle-dbms-project/ci.yml?branch=main&logo=github&label=checks)](https://github.com/Ismael-Sallami/oracle-dbms-project/actions/workflows/ci.yml)
+![license](https://img.shields.io/badge/license-MIT-4c1)
 
-## Práctica 2 :heavy_check_mark:
-_**Diseño de diagramas de flujo de datos y de esquemas externos para cada subsistema.**_
-- DFDs de cada subsistema (Caja negra, armazón, DFD1 de cada susbsistema)
--  Esquemas externos de todos los procesos y almacenes de DFD0 y DFD1
-- Esquema E/R del sistema
-- Tablas del esquema E/R
-- Dependencias funcionales, proceso de Normalización realizado y conjunto de tablas obtenido de dicho proceso, junto con las claves primarias y externas correspondientes.
+A social network built the long way round: requirements first, then data-flow diagrams, an
+entity-relationship schema, normalisation, and only at the end the Oracle database and the
+Python client that talks to it.
 
-> [!NOTE] 
-Caja negra: Se concibe el SI como un solo proceso, conectado con todos los agentes externos y flujos de datos
+## Context
 
-> [!NOTE] 
-Esquema armazón o DFD0: Cada subsistema representado como un sólo proceso, con flujos de datos con la/s base/s de datos
+Coursework for **Diseño y Desarrollo de Sistemas de Información**, year 4 of the double
+degree in Computer Science and Business Administration, University of Granada (2025-26).
+Group work: the subsystems were split between the members of the team and each one signs
+their own chapters in the reports. Mine are the advertising subsystem, the entry point and
+the database connection.
 
-> [!IMPORTANT] 
-Se hacen de más distendido a menos (DFD1, DFD0 y caja negra)
+## The problem
 
-## Práctica 3 :gear:
+Design an information system end to end, in the order the subject insists on: you do not get
+to write a `CREATE TABLE` until the requirements, the diagrams and the normalisation say
+which tables there should be.
 
-Este repositorio contiene el código fuente y la documentación para la Práctica 3 de la asignatura **Diseño y Desarrollo de Sistemas de Información**.
+Six subsystems: users, publications, messaging, advertising, trends and legal terms. Each
+one has its own requirements, its own data-flow diagram and its own part of the schema, and
+all of them share a single database.
 
-El sistema implementa una arquitectura **Cliente-Servidor (2 capas)** utilizando **Python** para la interfaz/lógica de cliente y **Oracle PL/SQL** para la lógica de negocio y persistencia.
+## The solution
 
----
+**The database.** Fifteen tables, and the rules the model cannot express live in nine
+triggers and a procedure: a user cannot befriend themselves, and so on.
+`RAISE_APPLICATION_ERROR` is what turns a business rule into something the database refuses
+instead of something the application is trusted to remember.
 
-### 📂 Estructura del Proyecto
+**The client.** A Python application with one package per subsystem, each with its `menu.py`
+and its `functions.py`, over a single connection object. Messaging encrypts the body of every
+message with Fernet before it reaches the table, so the database never stores plain text.
 
-Para mantener el orden y evitar conflictos en Git, seguimos una **Arquitectura Modular Estricta**. Todo el código fuente de la Práctica 3 se encuentra bajo la carpeta `pr3/`.
+**The documents.** Five deliverables in LaTeX with the whole trail of the design:
+requirements and semantic constraints, black-box and level-0 and level-1 data-flow diagrams,
+external schemas per process, the E/R schema, the functional dependencies and the
+normalisation that produced the final tables.
 
-```text
-pr3/
-requirements.txt <-- las librerías necesarias para el fichero py
-├── database/                 <-- SCRIPTS SQL (Triggers, Procedures, DDL)
-│   ├── 00_init_tablas.sql    <-- Script maestro de creación de tablas (Global)
-│   ├── publicidad/           <-- Espacio de Ismael
-│       ├──-- procedures_tumodulo.py
-│       ├──-- triggers_tumodulo.py
-│   ├── usuarios/             <-- Espacio de Fer
-│   ├── publicaciones/        <-- Espacio de Javi
-│   ├── tendencias/           <-- Espacio de Jesús
-│   └── mensajeria/           <-- Espacio de Sergio
-│
-└── src/                      <-- CÓDIGO FUENTE PYTHON
-    ├── main.py               <-- Punto de entrada (Gestionado por Ismael)
-    ├── db_connection.py      <-- Conexión Singleton (Gestionado por Ismael)
-    ├── publicidad/           <-- Módulo de Ismael
-    │       ├──-- functions.py
-    │       ├──-- menu.py
-    ├── usuarios/             <-- Módulo de Fer
-    ├── publicaciones/        <-- Módulo de Javi
-    ├── tendencias/           <-- Módulo de Jesús
-    └── mensajeria/           <-- Módulo de Sergio
+## Layout
 
 ```
-
----
-
-### Uso de requirements.txt
-
-El fichero `requirements.txt` sirve para decirle a tus compañeros (y al profesor) qué librerías externas necesitan instalar para que el código funcione en sus ordenadores.
-
-En vuestro caso, como estáis usando una librería para conectaros a Oracle (`pyodbc` o `cx_Oracle`) y quizás alguna para mejorar la interfaz, es obligatorio tener este fichero. Sin él, cuando Fer o Javi se bajen tu código e intenten ejecutarlo, les dará el error: `ModuleNotFoundError`.
-
-#### ¿Qué debéis poner dentro?
-
-Dado el script del Seminario 1 y la estructura que os he pasado, cread el fichero `pr3/requirements.txt` y escribid esto dentro:
-
-```text
-# Driver ODBC para conectar con Oracle (Vital para la práctica)
-pyodbc>=5.0.0
-
-# (Opcional) Si queréis menús bonitos con colores como en el ejemplo
-# colorama
-# rich
-
+src/                 the Python client, one package per subsystem
+  main.py            entry point
+  db_connection.py   the connection, read from the environment
+database/            schema, triggers and procedures
+docs/practice-1      requirements, diagrams and E/R schema
+docs/practice-3      triggers, transactions and legal terms
+docs/seminar-1..2    the seminars
+docs/coursework-4    the fourth assignment
+tools/               the checks the CI runs
 ```
 
-#### ¿Cómo se usa?
+## Requirements
 
-1. **Para instalar todo de golpe:**
-    Cuando un compañero se baja el proyecto, solo tiene que ejecutar:
-    ```bash
-    pip install -r requirements.txt
+- Python 3.12 and the packages in `requirements.txt`.
+- An Oracle database. The CI uses `gvenzl/oracle-free:slim`; the subject used
+  `oracle0.ugr.es:1521/practbd`.
+- LaTeX with `minted` and Pygments, only to rebuild the reports.
 
-    ```
+## Build and run
 
-
-    Esto instalará `pyodbc` y cualquier otra cosa que añadáis, asegurando que todos tenéis la misma versión.
-
-2. **Para generarlo automáticamente:**
-    Si tú (Ismael) instalas una librería nueva (ej. `pip install pandas`), debes actualizar el fichero para que los demás lo sepan. Ejecuta:
-    ```bash
-    pip freeze > requirements.txt
-
-    ```
-
-
-Esto guarda todas las librerías que tienes instaladas en ese fichero.
-
-### ⚠️ Reglas de Colaboración (LEER ANTES DE TOCAR)
-
-Estamos trabajando todos en la misma rama. Para no romper el código de los demás, **se deben cumplir estas reglas sagradas**:
-
-#### 1. Asignación de Archivos
-
-* **Ismael:** Es el único autorizado para modificar archivos globales (`src/main.py`, `src/db_connection.py`, `requirements.txt`). También gestiona su módulo (`publicidad`).
-* **Resto del Equipo (Fer, Javi, Jesús, Sergio):**
-* SÓLO podéis editar archivos dentro de vuestras carpetas asignadas en `src/` y `database/`.
-* **PROHIBIDO** editar `main.py`. Si necesitáis añadir vuestro menú al inicio, avisad a Ismael o pasadle el snippet de código.
-* **PROHIBIDO** editar el código dentro de la carpeta de otro compañero.
-
-
-
-#### 2. Flujo de Trabajo en Git
-
-Al trabajar en una sola rama, la sincronización es clave:
-
-1. **Antes de empezar a programar:** Ejecuta siempre `git pull` para bajarte los últimos cambios.
-2. **Al terminar:** Haz `git add`, `git commit` y `git push` lo antes posible.
-3. **Conflictos:** Si tocas solo tu carpeta, no debería haber conflictos. Si aparecen, lee con cuidado antes de aceptar cambios.
-
----
-
-### Instalación y Ejecución
-
-#### 1. Prerrequisitos
-
-* Tener instalado Python 3.x.
-* Tener instalado el **Oracle Instant Client** y los drivers ODBC configurados en tu sistema.
-* Estar conectado a la VPN de la UGR (si estás fuera de la facultad).
-
-#### 2. Configuración del Entorno
-
-Es recomendable usar un entorno virtual para no ensuciar tu sistema:
+**Credentials come from the environment.** Nothing is written in the code:
 
 ```bash
-# Crear entorno virtual (solo la primera vez)
-python -m venv venv
+pip install -r requirements.txt
 
-# Activar entorno (Windows)
-venv\Scripts\activate
-# Activar entorno (Linux/Mac)
-source venv/bin/activate
+export ORACLE_USER=your_user
+export ORACLE_PASSWORD=your_password
+export ORACLE_DSN=oracle0.ugr.es:1521/practbd
 
-# Instalar librerías necesarias
-pip install -r pr3/requirements.txt
-
+python3 src/main.py
 ```
 
-#### 3. Ejecutar el Sistema
-
-Sitúate en la carpeta `pr3/src/` y ejecuta el archivo principal:
+To create the schema and load the triggers into a database of your own, and to compile the
+application:
 
 ```bash
-cd pr3/src
-python main.py
-
+python3 tools/run-against-oracle.py     # the same script the CI runs
+bash tools/check-python.sh
 ```
 
----
+## Results
 
-### 🛠 Guía de Desarrollo para el Equipo
-
-#### ¿Cómo creo mi parte?
-
-1. Ve a tu carpeta en `pr3/src/TU_MODULO/`.
-2. Crea/Edita el archivo `menu.py`.
-3. Copia la estructura básica:
-
-```python
-# Ejemplo de estructura para tu menu.py
-def mostrar_menu(conn):
-    while True:
-        print("\n--- MI SUBSISTEMA ---")
-        print("1. Opción A")
-        print("0. Volver")
-        # ... lógica ...
+What the CI prints on every push, against a real Oracle:
 
 ```
-
-> A continuación, las funciones se definen en el fichero *functions.py* de cada subsistema. Así como los procedimientos que serán definidos en *database/tumodulo/procedures_tumodulo.py*.
-
-
-> [!WARNING]
-> **Recomendaciones Importantes:**
->
-> - **Usar entorno virtual de Python:** Ejecuta siempre el `main.py` dentro de un entorno virtual (`venv`) para evitar conflictos de dependencias.
-> - **Verificar scripts SQL:** Antes de entregar, crea y ejecuta un fichero `test.sql` en tu carpeta para comprobar que todos tus scripts funcionan correctamente y la base de datos está actualizada.
-> - **Actualizar la base de datos:** Si realizas cambios en los scripts de la base de datos, asegúrate de ejecutarlos para que los cambios se reflejen y estén disponibles para todos.
-> - **Configurar credenciales en la conexión:** En el archivo de conexión a la base de datos (`db_connection.py`), cada miembro debe poner su propio usuario y contraseña de Oracle para las pruebas locales. No subas tus credenciales personales al repositorio.
-> - **Se ha usado interfaz gráfica REVISAR, los ejemplos de arriba mediante terminal son de ejemplo.**
-
-#### ¿Cómo subo mis Triggers/Procedimientos?
-
-1. Guarda tus scripts `.sql` en `pr3/database/TU_MODULO/`.
-
-
-## Documentación LaTeX (Práctica 3)
-
-La documentación de esta práctica sigue una estructura modular para que podamos trabajar todos a la vez sin conflictos.
-
-📍 **Ubicación:** Todo el trabajo está en: `pr3/documentacion/chapters_pr3/`
-
-### Estructura de Archivos
-
-Dentro de esa carpeta veréis archivos globales (que hacen los `input`) y una carpeta con vuestro nombre. **SOLO debéis tocar los archivos dentro de vuestra carpeta.**
-
-```text
-pr3/documentacion/chapters_pr3/
-├── aspectos_legales.tex           <-- ⛔ NO TOCAR (Global) A excepción de si te ha tocado esta parte.
-├── motivacion_software.tex        <-- ⛔ NO TOCAR (Global) A excepción de si te ha tocado esta parte.
-├── sentencias_creacion_tablas.tex <-- ⛔ NO TOCAR (Global)
-├── transacciones.tex              <-- ⛔ NO TOCAR (Global)
-├── disparadores.tex               <-- ⛔ NO TOCAR (Global)
-│
-├── fer/    <-- ✅ TU ESPACIO (Igual para javi, jesus, sergio)
-│   ├── sentencias_creacion_tablas.tex  <-- Pega aquí tus CREATE TABLE
-│   ├── transacciones.tex               <-- Explica aquí tus transacciones
-│   └── disparadores.tex                <-- Pega aquí tus Triggers
-│
-└── ismael/ ...
-
+database/00_init_tablas.sql: 45 statements
+database/mensajeria/triggers_mensajeria.sql: 1 statements
+database/publicaciones/triggers_publicaciones.sql: 3 statements
+...
+15 tables and 9 triggers created, all valid
 ```
 
-### ¿Qué tengo que poner en cada archivo?
+The check is not that the SQL parses: it is that Oracle accepts it and that no trigger ends
+up as an invalid object, which is what a typo in a column name produces.
 
-Entrad en vuestra carpeta (`fer`, `javi`, `jesus`, `sergio`) y editad únicamente estos tres ficheros:
-- sentencias_creacion_tablas.tex  
-- transacciones.tex               
-- disparadores.tex
+## What I learned
 
-En las partes globales ya se hacen los inputs de esto por lo que no se debería de tocar, a excepción de a quien le toque la parte de aspectos legales y motivación del software, el cual, al no ser grupal, se debe de adjuntar en ese fichero el contenido.
+- The order of the subject is the lesson. Writing requirements before tables feels slow until
+  normalisation changes three tables at once and not a line of code has been written yet.
+- A rule that must always hold belongs in the database. Enforced only in the Python menus, it
+  is a rule the next client to connect can ignore.
+- **Limitations, and the one thing that had to be fixed:**
+  - **The delivered code had university Oracle credentials written in four files**, mine and
+    two teammates', with the password equal to the username. They are gone from the tree and
+    from the history, and the connection now reads `ORACLE_USER`, `ORACLE_PASSWORD` and
+    `ORACLE_DSN` from the environment. This is the only change to what was handed in:
+    publishing someone else's credentials is not a defect to document, it is one to remove.
+  - `src/publicaciones/menu_TUI.py` **does not compile**. A triple-quoted block opened to
+    comment out an old terminal prototype is never closed, and it swallows the rest of the
+    file. `tools/check-python.sh` asserts that failure instead of skipping it. Not patched.
+  - The application has no tests. What the checks do is compile it and exercise the database,
+    which is what there is to check.
+  - Identifiers, comments and the reports are in Spanish.
 
+## Author and licence
 
----
-
-## Práctica 4 :gear:
-
-Este repositorio contiene el trabajo grupal en LaTeX. Para evitar conflictos en Git trabajando todos en la rama `main`, seguid estrictamente estas normas.
-
-### 👥 Reparto de Tareas
-
-| Integrante | Modelo Asignado | Archivo a editar | Carpeta de imágenes |
-| :--- | :--- | :--- | :--- |
-| **Ismael** | Objeto-Relacional (Oracle) | `chapters/01_ismael_or.tex` | `figures/ismael/` |
-| **Javi** | NoSQL Documental (MongoDB) | `chapters/02_javi_documental.tex` | `figures/javi/` |
-| **Jesús** | NoSQL Grafos (Neo4j) | `chapters/03_jesus_grafos.tex` | `figures/jesus/` |
-| **Fer** | NoSQL Clave-Valor (Redis) | `chapters/04_fer_clavevalor.tex` | `figures/fer/` |
-| **Sergio** | NoSQL Columnar (Cassandra) | `chapters/05_sergio_columnar.tex` | `figures/sergio/` |
-
-### ⚠️ Normas de Trabajo (LEER ANTES DE EMPEZAR)
-
-#### 1. No toques el archivo `trabajot4.tex`
-El archivo principal ya tiene los `\input` necesarios. Si necesitas añadir paquetes nuevos, avisa por el grupo antes de editar el preámbulo.
-
-#### 2. Edita SOLO tu archivo `.tex`
-Trabaja exclusivamente en el archivo asignado a tu nombre dentro de la carpeta `chapters/`.
-
-#### 3. Imágenes organizadas
-**NUNCA** subas imágenes sueltas a la carpeta `figures/`.
-* Guarda tus capturas en `figures/tu_nombre/`.
-* En LaTeX, llámalas así:
-    ```latex
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.8\textwidth]{figures/ismael/captura_oracle_1.png}
-        \caption{Creación de tipos en Oracle}
-        \label{fig:oracle_types}
-    \end{figure}
-    ```
-
-#### 4. Flujo de Git (Workflow)
-Antes de ponerte a escribir, actualiza siempre tu local:
-
-```bash
-git pull origin main
-```
-
-A la hora de subir tus cambios:
-
-```bash
-git add chapters/tu_archivo.tex
-git add figures/tu_nombre/
-git commit -m "Añadido apartado DML de [Modelo]"
-git push origin main
-```
-
-
-
+Ismael Sallami Moreno, with the group of the subject. Released under the MIT licence (see
+`LICENSE`).

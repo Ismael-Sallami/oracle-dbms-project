@@ -58,12 +58,14 @@ def mostrar_menu_usuarios(conexion, id_usuario_activo):
         else:
             print("Opción no válida.")
 
+import os
+
 import oracledb
 try:
     connection = oracledb.connect(
-            user="ORACLE_USER",
-            password="ORACLE_USER",
-            dsn="oracle0.ugr.es:1521/practbd"
+            user=os.environ.get("ORACLE_USER", ""),
+            password=os.environ.get("ORACLE_PASSWORD", ""),
+            dsn=os.environ.get("ORACLE_DSN", "oracle0.ugr.es:1521/practbd")
             )
     mostrar_menu_usuarios(connection)
 except Exception as e:
