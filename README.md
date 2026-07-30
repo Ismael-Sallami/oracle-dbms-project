@@ -13,9 +13,11 @@ Python client that talks to it.
 
 Coursework for **Diseño y Desarrollo de Sistemas de Información**, year 4 of the double
 degree in Computer Science and Business Administration, University of Granada (2025-26).
-Group work: the subsystems were split between the members of the team and each one signs
-their own chapters in the reports. Mine are the advertising subsystem, the entry point and
-the database connection.
+Team work with **Jesús Rodríguez González**, **Fernando José Gracia Choin**, **Sergio Calvo
+González** and **Javier Niño Sánchez**. The subsystems were split between us and each one
+signs their own chapters in the reports: publications and the final write-up went to Javier,
+trends to Jesús, users to Fernando, private messaging to Sergio, and advertising, the entry
+point and the database connection to me.
 
 ## The problem
 
@@ -133,7 +135,7 @@ up as an invalid object, which is what a typo in a column name produces. That is
     which is what there is to check.
   - Identifiers, comments and the reports are in Spanish.
 
-## Author and licence
+## Authors and licence
 
-Ismael Sallami Moreno, with the group of the subject. Released under the MIT licence (see
-`LICENSE`).
+Ismael Sallami Moreno, Jesús Rodríguez González, Fernando José Gracia Choin, Sergio Calvo
+González and Javier Niño Sánchez. Released under the MIT licence (see `LICENSE`).
