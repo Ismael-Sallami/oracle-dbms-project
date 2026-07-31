@@ -110,7 +110,7 @@ The check is not that the SQL parses: it is that Oracle accepts it and that no t
 up as an invalid object, which is what a typo in a column name produces. That is how the
 `SQL_CODE` bug below was found, after the code had been handed in and marked.
 
-## What I learned
+## What we learned
 
 - The order of the subject is the lesson. Writing requirements before tables feels slow until
   normalisation changes three tables at once and not a line of code has been written yet.
