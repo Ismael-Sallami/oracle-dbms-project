@@ -11,8 +11,8 @@ Python client that talks to it.
 
 ## Context
 
-Coursework for **Diseño y Desarrollo de Sistemas de Información**, year 4 of the double
-degree in Computer Science and Business Administration, University of Granada (2025-26).
+Coursework for **Information Systems Design and Development**, year 4 of the double degree
+in Computer Science and Business Administration, University of Granada (2025-26).
 Team work with **Jesús Rodríguez González**, **Fernando José Gracia Choin**, **Sergio Calvo
 González** and **Javier Niño Sánchez**. The subsystems were split between us and each one
 signs their own chapters in the reports: publications and the final write-up went to Javier,
